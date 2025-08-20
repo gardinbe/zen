@@ -1,6 +1,7 @@
 @layer components {
   .zen-pre {
     margin: 0;
+    white-space: pre-line;
     text-shadow: var(--text-shadow);
   }
 }

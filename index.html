@@ -35,8 +35,11 @@
       >
         <form class="zen-dialog js-start-dialog">
           <div class="zen-dialog-inner">
-            <div class="zen-dialog-heading">Launch application?</div>
-            <div class="zen-dialog-body">This will start the boot sequence.</div>
+            <div class="zen-dialog-heading">Zen</div>
+            <div class="zen-dialog-body">
+              <p>Zen OS v1.7.13</p>
+              <small>Zen systems (c) 1984.</small>
+            </div>
             <div class="zen-dialog-actions">
               <button class="zen-dialog-button u-btn js-start-dialog-close">Start</button>
             </div>
@@ -63,10 +66,9 @@
                     
 [[delay:1000]][[insert:Intel (c) Pentium-S CPU at 75MHz]][[delay:250]]
 
-[[delay:300]] [[delay:300]] [[delay:300]] [[delay:300]] [[delay:300]] [[delay:300]] [[delay:300]][[remove:6]]Memory test: [[delay:500]][[insert:32768K]] [[delay: 150]]OK[[delay:1250]]
+Memory test: [[delay:500]].[[delay:500]].[[delay:500]].[[delay:500]][[remove:3]][[insert:32768K]] [[delay: 150]]OK[[delay:1250]]
 
 [[insert:Intialized drive C:]][[delay:250]][[delay:1000]]
-
 
 
 
@@ -81,16 +83,18 @@ Press ENTER to continue</pre
         <div class="zen-terminal js-terminal">
           <pre class="zen-terminal-output zen-pre js-terminal-output"></pre>
           <form class="zen-terminal-prompt js-terminal-prompt">
-            <span class="zen-terminal-prefix js-terminal-prefix">root ></span>
-            <input
-              class="zen-terminal-input js-terminal-input"
-              id="zen-terminal-input"
-              type="text"
-              autocomplete="off"
-              spellcheck="false"
-              autocorrect="off"
-              autocapitalize="off"
-            />
+            <span class="zen-terminal-prefix js-terminal-prefix">></span>
+            <span class="zen-terminal-input-container">
+              <input
+                class="zen-terminal-input js-terminal-input"
+                name="zen-terminal-input"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                autocorrect="off"
+                autocapitalize="off"
+              />
+            </span>
           </form>
         </div>
       </div>

@@ -4,8 +4,25 @@ export type DialogElements = {
 };
 
 export type Dialog = {
+  /**
+   * Opens the dialog.
+   */
   open: () => void;
+
+  /**
+   * Closes the dialog.
+   */
   close: () => void;
+
+  /**
+   * Starts listening for events.
+   */
+  listen: () => void;
+
+  /**
+   * Stops listening for events.
+   */
+  ignore: () => void;
 };
 
 export type DialogOptions = {
@@ -13,6 +30,8 @@ export type DialogOptions = {
 };
 
 export const createDialog = (els: DialogElements, options?: Partial<DialogOptions>): Dialog => {
+  let ctrl = false;
+
   const open = () => {
     els.main.hidden = false;
   };
@@ -22,33 +41,43 @@ export const createDialog = (els: DialogElements, options?: Partial<DialogOption
     options?.onClose?.(alt);
   };
 
-  let ctrl = false;
+  const listeners = {
+    keydown: (ev: KeyboardEvent) => {
+      ctrl = ev.ctrlKey;
+      removeEventListener('keydown', listeners.keydown);
+      addEventListener('keyup', listeners.keyup);
+    },
 
-  const keydown = (ev: KeyboardEvent) => {
-    ctrl = ev.ctrlKey;
-    removeEventListener('keydown', keydown);
-    addEventListener('keyup', keyup);
+    keyup: () => {
+      ctrl = false;
+      removeEventListener('keyup', listeners.keyup);
+      addEventListener('keydown', listeners.keydown);
+    },
+
+    submit: (ev: SubmitEvent) => {
+      ev.preventDefault();
+      close(ctrl);
+    },
   };
 
-  const keyup = () => {
-    ctrl = false;
-    removeEventListener('keyup', keyup);
-    addEventListener('keydown', keydown);
+  const listen = () => {
+    addEventListener('keydown', listeners.keydown);
+    els.main.addEventListener('submit', listeners.submit);
   };
 
-  addEventListener('keydown', keydown);
+  const ignore = () => {
+    removeEventListener('keydown', listeners.keydown);
+    removeEventListener('keyup', listeners.keyup);
+    els.main.removeEventListener('submit', listeners.submit);
+  };
 
-  els.main.addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    close(ctrl);
-  });
-
-  requestAnimationFrame(() => {
-    els.closeBtn.focus();
-  });
+  requestAnimationFrame(() => els.closeBtn.focus());
+  listen();
 
   return {
     open,
     close,
+    listen,
+    ignore,
   };
 };

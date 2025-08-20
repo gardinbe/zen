@@ -13,8 +13,9 @@ export type Typer = {
 
 export const createTyper = (els: TyperElements): Typer => {
   const { nodes, effects } = parse(els);
-
   let currentNode: Text | null = null;
+
+  const cursor = createCursor();
 
   const setCurrentNode = (node: Text | null) => {
     currentNode = node;
@@ -25,8 +26,6 @@ export const createTyper = (els: TyperElements): Typer => {
 
     cursor.attach(node);
   };
-
-  const cursor = createCursor();
 
   const run = async () => {
     for (const effect of effects) {
@@ -106,7 +105,7 @@ const createEffectBuilder = (node: Text): EffectBuilder => {
   return {
     type: (text) => async (ctx) => {
       ctx.setCurrentNode(node);
-      ctx.cursor.set('static');
+      ctx.cursor.setState('static');
 
       let prevChar: string | null = null;
       let i = 0;
@@ -130,7 +129,7 @@ const createEffectBuilder = (node: Text): EffectBuilder => {
         await randomDelay(5, 30);
       }
 
-      ctx.cursor.set('blink');
+      ctx.cursor.setState('blink');
     },
 
     insert: (text) => (ctx) => {
@@ -145,7 +144,7 @@ const createEffectBuilder = (node: Text): EffectBuilder => {
 
     undo: (quantity) => async (ctx) => {
       ctx.setCurrentNode(node);
-      ctx.cursor.set('static');
+      ctx.cursor.setState('static');
 
       let prevChar: string | null = null;
       let i = 0;
@@ -176,7 +175,7 @@ const createEffectBuilder = (node: Text): EffectBuilder => {
         await randomDelay(5, 30);
       }
 
-      ctx.cursor.set('blink');
+      ctx.cursor.setState('blink');
     },
 
     remove: (quantity) => (ctx) => {
@@ -202,7 +201,7 @@ const createEffectBuilder = (node: Text): EffectBuilder => {
 
     delay: (ms) => async (ctx) => {
       ctx.setCurrentNode(node);
-      ctx.cursor.set('blink');
+      ctx.cursor.setState('blink');
       await delay(ms);
     },
   };

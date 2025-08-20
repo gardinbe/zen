@@ -1,4 +1,5 @@
-import { createCursor } from './cursor';
+import { Aliases, Commands } from '../commands';
+import { createCursor, type Cursor } from './cursor';
 
 export type TerminalElements = {
   main: HTMLElement;
@@ -8,69 +9,225 @@ export type TerminalElements = {
   input: HTMLInputElement;
 };
 
-export const createTerminal = (els: TerminalElements) => {
-  const cursor = createCursor();
-  cursor.attach(els.input);
-  cursor.hide();
+export type Terminal = {
+  /**
+   * Cursor instance.
+   */
+  cursor: Cursor;
 
-  const logger = createLogger(els);
+  /**
+   * Logger instance.
+   */
+  logger: Logger;
 
-  const setValue = (value: string) => {
+  /**
+   * History instance.
+   */
+  history: History;
+
+  /**
+   * Executes the current input value.
+   */
+  send: () => void;
+
+  /**
+   * Executes a command.
+   * @param value Command to execute.
+   */
+  exec: ExecFunction;
+
+  /**
+   * Starts listening for events.
+   */
+  listen: () => void;
+
+  /**
+   * Stops listening for events.
+   */
+  ignore: () => void;
+};
+
+type ExecFunction = (value: string) => void | Promise<void>;
+
+export const createTerminal = (els: TerminalElements): Terminal => {
+  const setInput = (value: string) => {
     els.input.value = value;
-    resize();
+    resizeInput();
   };
 
-  const resize = () => {
+  const cursor = createCursor();
+  const logger = createLogger(els);
+  const history = createHistory(els, setInput);
+
+  const resizeInput = () => {
     els.input.style.width = `${els.input.value.length}ch`;
   };
 
-  const history = createHistory(els, setValue);
+  const send = () => {
+    const value = els.input.value;
+    setInput('');
+    return exec(value);
+  };
 
-  els.input.addEventListener('focus', () => {
-    cursor.show();
-  });
-
-  els.input.addEventListener('blur', () => {
-    cursor.hide();
-  });
-
-  els.input.addEventListener('input', () => {
-    resize();
-    cursor.set('static');
-    requestAnimationFrame(() => cursor.set('blink'));
-  });
-
-  els.main.addEventListener('click', () => {
-    if (getSelection()?.toString()) {
+  const exec = (value: string) => {
+    if (!value) {
       return;
     }
 
-    els.input.focus();
-  });
+    history.add(value);
 
-  requestAnimationFrame(() => {
-    els.input.focus();
-  });
+    const [name, ...args] = value.trim().split(' ');
 
-  els.prompt.addEventListener('submit', (ev) => {
-    ev.preventDefault();
+    if (!name) {
+      return;
+    }
 
-    const command = els.input.value.trim();
-    setValue('');
+    logger.write({
+      stdin: value,
+    });
+
+    const command = parse(name);
 
     if (!command) {
+      logger.write({
+        stderr: `Unknown command: ${name}`,
+      });
       return;
     }
 
-    history.add(command);
-    const log = parse(els, command);
-    logger.write(log);
-  });
+    const ctx: CommandContext = {
+      cursor,
+      logger,
+      history,
+    };
 
-  resize();
+    return command.fn(ctx, args);
+  };
+
+  const repositionCursor = () =>
+    cursor.setPosition(els.input.value.length - (els.input.selectionEnd ?? 0));
+
+  const listeners = {
+    input: () => {
+      resizeInput();
+      cursor.setState('static');
+      requestAnimationFrame(() => cursor.setState('blink'));
+    },
+
+    keydown: (ev: KeyboardEvent) => {
+      if (ev.key === 'Delete') {
+        requestAnimationFrame(repositionCursor);
+        return;
+      }
+
+      if (ev.ctrlKey && ev.key === 'c') {
+        ev.preventDefault();
+        logger.write({
+          stdout: els.input.value + '^C',
+        });
+        setInput('');
+        return;
+      }
+    },
+
+    selectionchange: () => {
+      if (getSelection()?.toString()) {
+        return;
+      }
+
+      repositionCursor();
+    },
+
+    click: () => {
+      if (getSelection()?.toString()) {
+        return;
+      }
+
+      els.input.focus();
+    },
+
+    submit: async (ev: SubmitEvent) => {
+      ev.preventDefault();
+      repositionCursor();
+      history.reset();
+      await send();
+    },
+  };
+
+  const listen = () => {
+    els.input.addEventListener('focus', cursor.show);
+    els.input.addEventListener('blur', cursor.hide);
+    els.input.addEventListener('input', listeners.input);
+    els.input.addEventListener('keydown', listeners.keydown);
+    els.input.addEventListener('selectionchange', listeners.selectionchange);
+    els.main.addEventListener('click', listeners.click);
+    els.prompt.addEventListener('submit', listeners.submit);
+  };
+
+  const ignore = () => {
+    els.input.removeEventListener('focus', cursor.show);
+    els.input.removeEventListener('blur', cursor.hide);
+    els.input.removeEventListener('input', listeners.input);
+    els.input.removeEventListener('selectionchange', listeners.selectionchange);
+    els.main.removeEventListener('click', listeners.click);
+    els.prompt.removeEventListener('submit', listeners.submit);
+  };
+
+  cursor.attach(els.input);
+  cursor.hide();
+  requestAnimationFrame(() => els.input.focus());
+  resizeInput();
+  listen();
+
+  return {
+    cursor,
+    logger,
+    history,
+    send,
+    exec,
+    listen,
+    ignore,
+  };
 };
 
+export type CommandContext = Readonly<{
+  /**
+   * Cursor instance.
+   */
+  cursor: Cursor;
+
+  /**
+   * Logger instance.
+   */
+  logger: Logger;
+
+  /**
+   * History instance.
+   */
+  history: History;
+}>;
+
+export type Command = {
+  name: string;
+  description: string;
+  fn: (ctx: CommandContext, args: string[]) => void | Promise<void>;
+};
+
+const parse = (value: string): Command | null =>
+  Object.entries(Aliases).find(
+    ([name]) => name.toLocaleUpperCase() === value.toLocaleUpperCase(),
+  )?.[1] ??
+  Object.values(Commands).find(
+    (command) => command.name.toLocaleUpperCase() === value.toLocaleUpperCase(),
+  ) ??
+  null;
+
 type History = {
+  /**
+   * History items.
+   */
+  readonly items: string[];
+
   /**
    * Scrolls up in the history.
    */
@@ -84,7 +241,7 @@ type History = {
   /**
    * Adds a command to the history.
    */
-  add: (command: string) => void;
+  add: (value: string) => void;
 
   /**
    * Clears the history.
@@ -107,7 +264,7 @@ type History = {
   ignore: () => void;
 };
 
-const createHistory = (els: TerminalElements, setValue: (value: string) => void): History => {
+const createHistory = (els: TerminalElements, setInput: (value: string) => void): History => {
   const items: string[] = [];
   let position = -1;
   let lastValue = '';
@@ -118,18 +275,18 @@ const createHistory = (els: TerminalElements, setValue: (value: string) => void)
     }
 
     position = Math.min(position + 1, items.length - 1);
-    const command = items[items.length - 1 - position] ?? items[0] ?? '';
-    setValue(command);
+    const value = items[items.length - 1 - position] ?? items[0] ?? '';
+    setInput(value);
   };
 
   const down = () => {
     position = Math.max(position - 1, -1);
-    const command = items[items.length - 1 - position] ?? lastValue ?? '';
-    setValue(command);
+    const value = items[items.length - 1 - position] ?? lastValue ?? '';
+    setInput(value);
   };
 
-  const add = (command: string) => {
-    items.push(command);
+  const add = (value: string) => {
+    items.push(value);
 
     if (!~position) {
       return;
@@ -148,33 +305,36 @@ const createHistory = (els: TerminalElements, setValue: (value: string) => void)
     lastValue = '';
   };
 
-  const keydown = (ev: KeyboardEvent) => {
-    if (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown') {
-      return;
-    }
+  const listeners = {
+    keydown: (ev: KeyboardEvent) => {
+      if (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown') {
+        return;
+      }
 
-    ev.preventDefault();
+      ev.preventDefault();
 
-    if (ev.key === 'ArrowUp') {
-      up();
-    } else {
-      down();
-    }
+      if (ev.key === 'ArrowUp') {
+        up();
+      } else {
+        down();
+      }
+    },
   };
 
   const listen = () => {
-    els.input.addEventListener('keydown', keydown);
+    els.input.addEventListener('keydown', listeners.keydown);
     els.input.addEventListener('input', reset);
   };
 
   const ignore = () => {
-    els.input.removeEventListener('keydown', keydown);
+    els.input.removeEventListener('keydown', listeners.keydown);
     els.input.removeEventListener('input', reset);
   };
 
   listen();
 
   return {
+    items,
     up,
     down,
     add,
@@ -185,43 +345,56 @@ const createHistory = (els: TerminalElements, setValue: (value: string) => void)
   };
 };
 
-const parse = (els: TerminalElements, command: string): Log => {
-  switch (command) {
-    case 'help': {
-      return {
-        stdout: 'Here are the available commands' + '\n- help',
-      };
-    }
-    case 'clear':
-    case 'cls': {
-      els.output.innerHTML = '';
-      return {};
-    }
-    default: {
-      return {
-        stderr: 'Command not found',
-      };
-    }
-  }
-};
-
 type Log = {
+  stdin?: string;
   stdout?: string;
   stderr?: string;
 };
 
-const createLogger = (els: TerminalElements) => {
+type Logger = {
+  /**
+   * Writes a log to the terminal output.
+   * @param log Log.
+   */
+  write: (log: Log) => void;
+
+  /**
+   * Clears the terminal output.
+   */
+  clear: () => void;
+};
+
+const createLogger = (els: TerminalElements): Logger => {
   const write = (log: Log) => {
+    let msg = '';
+
+    if (log.stdin) {
+      msg += `$: ${log.stdin}\n`;
+    }
+
     if (log.stdout) {
-      els.output.innerHTML += (els.output.innerHTML ? '\n' : '') + log.stdout;
+      msg += `${log.stdout}\n`;
     }
 
     if (log.stderr) {
-      els.output.innerHTML += (els.output.innerHTML ? '\n' : '') + 'ERROR: ' + log.stderr;
+      msg += `ERROR: ${log.stderr}\n`;
     }
+
+    els.output.innerHTML += msg;
+
+    requestAnimationFrame(() =>
+      els.main.scrollTo({
+        top: els.main.scrollHeight,
+      }),
+    );
+  };
+
+  const clear = () => {
+    els.output.innerHTML = '';
   };
 
   return {
     write,
+    clear,
   };
 };

@@ -5,13 +5,15 @@
 
     /* colors */
     --color-primary: #77ea7b;
-    --color-primary-rgb: 119, 234, 123;
+    --color-primary-rgb: 119 234 123;
+    --color-secondary: #5b735c;
+    --color-secondary-rgb: 91 115 92;
     --color-background: #000;
-    --color-background-rgb: 0, 0, 0;
+    --color-background-rgb: 0 0 0;
 
     /* borders and shadows */
-    --border: 1px dotted rgba(var(--color-primary-rgb), 0.3);
-    --shadow: 0 0 16px 0 rgba(var(--color-primary-rgb), 0.04);
-    --text-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.5);
+    --border: 1px dotted rgb(var(--color-primary-rgb) / 0.3);
+    --shadow: 0 0 16px 0 rgb(var(--color-primary-rgb) / 0.04);
+    --text-shadow: 0 0 8px rgb(var(--color-primary-rgb) / 0.5);
   }
 }

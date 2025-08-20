@@ -9,7 +9,15 @@ export type Cursor = {
    * Sets the state of the cursor.
    * @param state Cursor state.
    */
-  set: (state: 'static' | 'blink') => void;
+  setState: (state: 'static' | 'blink') => void;
+
+  /**
+   * Sets the position offset of the cursor.
+   *
+   * Offset 0 is the end of the string. Positive values move the cursor backward.
+   * @param offset Position offset.
+   */
+  setPosition: (offset: number) => void;
 
   /**
    * Shows the cursor.
@@ -67,15 +75,17 @@ export const createCursor = (): Cursor => {
   el.textContent = Caret;
 
   const attach = (node: Node) => {
-    const parent = node.parentElement!;
+    const parent = node.parentElement;
 
-    if (node.nextSibling !== el) {
-      parent.insertBefore(el, node);
-      parent.insertBefore(node, el);
+    if (!parent || node.nextSibling === el) {
+      return;
     }
+
+    parent.insertBefore(el, node);
+    parent.insertBefore(node, el);
   };
 
-  const set = (value: 'blink' | 'static') => {
+  const setState = (value: 'blink' | 'static') => {
     el.dataset.typerState = value;
   };
 
@@ -87,11 +97,22 @@ export const createCursor = (): Cursor => {
     el.hidden = true;
   };
 
-  set('blink');
+  const setPosition = (offset: number) => {
+    const parent = el.parentElement;
+
+    if (!parent) {
+      return;
+    }
+
+    el.style.translate = offset ? `-${offset}ch` : '';
+  };
+
+  setState('blink');
 
   return {
     attach,
-    set,
+    setState,
+    setPosition,
     show,
     hide,
   };

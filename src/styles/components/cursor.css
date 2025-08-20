@@ -6,10 +6,18 @@
 
   .zen-cursor {
     position: absolute;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 1ch;
+    height: 1lh;
+    mix-blend-mode: difference;
     user-select: none;
+    pointer-events: none;
 
     &[data-typer-state='blink'] {
-      @keyframes Blink {
+      @keyframes blink {
         0% {
           opacity: 1;
         }
@@ -27,7 +35,7 @@
         }
       }
 
-      animation: Blink 500ms 500ms linear infinite;
+      animation: blink 500ms 500ms linear infinite;
     }
   }
 }

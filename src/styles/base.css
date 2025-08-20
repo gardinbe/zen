@@ -9,17 +9,95 @@
   }
 
   body {
+    position: relative;
     display: flex;
     flex-direction: column;
-    width: 100dvw;
     height: 100dvh;
-    background: var(--color-background);
+    background: linear-gradient(to top, #000, #000, #222, #222) 0 0 / 100% 2px;
     color: var(--color-primary);
     font: normal normal 20px / normal var(--font-base);
-    padding: 10vw;
-    box-shadow: inset 0 0 5vw 3dvw rgba(var(--color-primary-rgb), 0.2);
+    padding: 10%;
+    box-shadow: inset 0 0 100px -10px var(--color-secondary);
     scrollbar-color: var(--color-primary) var(--color-background);
     scrollbar-width: thin;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      display: flex;
+
+      background: rgb(18 16 16 / 0.1);
+      opacity: 0;
+      pointer-events: none;
+      animation: flicker 0.15s infinite;
+
+      @keyframes flicker {
+        0% {
+          opacity: 0.27861;
+        }
+        5% {
+          opacity: 0.34769;
+        }
+        10% {
+          opacity: 0.23604;
+        }
+        15% {
+          opacity: 0.90626;
+        }
+        20% {
+          opacity: 0.18128;
+        }
+        25% {
+          opacity: 0.83891;
+        }
+        30% {
+          opacity: 0.65583;
+        }
+        35% {
+          opacity: 0.67807;
+        }
+        40% {
+          opacity: 0.26559;
+        }
+        45% {
+          opacity: 0.84693;
+        }
+        50% {
+          opacity: 0.96019;
+        }
+        55% {
+          opacity: 0.08594;
+        }
+        60% {
+          opacity: 0.20313;
+        }
+        65% {
+          opacity: 0.71988;
+        }
+        70% {
+          opacity: 0.53455;
+        }
+        75% {
+          opacity: 0.37288;
+        }
+        80% {
+          opacity: 0.71428;
+        }
+        85% {
+          opacity: 0.70419;
+        }
+        90% {
+          opacity: 0.7003;
+        }
+        95% {
+          opacity: 0.36108;
+        }
+        100% {
+          opacity: 0.24387;
+        }
+      }
+    }
   }
 
   a,
