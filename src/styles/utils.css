@@ -1,0 +1,18 @@
+@layer utils {
+  .u-btn {
+    outline: none;
+    border: none;
+    border-bottom: 1px solid var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.05);
+    color: var(--color-primary);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+
+    &:hover,
+    &:active,
+    &:focus-visible {
+      background: var(--color-primary);
+      color: var(--color-background);
+    }
+  }
+}

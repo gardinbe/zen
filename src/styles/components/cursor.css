@@ -1,0 +1,33 @@
+@layer components {
+  *:has(> .zen-cursor) {
+    min-height: 1lh;
+    caret-color: transparent;
+  }
+
+  .zen-cursor {
+    position: absolute;
+    user-select: none;
+
+    &[data-typer-state='blink'] {
+      @keyframes Blink {
+        0% {
+          opacity: 1;
+        }
+        40% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 0;
+        }
+        60% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      animation: Blink 500ms 500ms linear infinite;
+    }
+  }
+}

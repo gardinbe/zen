@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/vite.svg"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Zen</title>
+    <link
+      href="/src/styles/main.css"
+      rel="stylesheet"
+    />
+    <script
+      type="module"
+      src="/src/scripts/main.ts"
+    ></script>
+  </head>
+  <body>
+    <audio
+      class="js-background-audio"
+      src="/audio/background.mp3"
+      loop
+      hidden
+    ></audio>
+    <div class="zen-container">
+      <div
+        class="zen-view js-start-view"
+        hidden
+      >
+        <form class="zen-dialog js-start-dialog">
+          <div class="zen-dialog-inner">
+            <div class="zen-dialog-heading">Launch application?</div>
+            <div class="zen-dialog-body">This will start the boot sequence.</div>
+            <div class="zen-dialog-actions">
+              <button class="zen-dialog-button u-btn js-start-dialog-close">Start</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div
+        class="zen-view js-boot-sequence-view"
+        hidden
+      >
+        <pre class="zen-pre js-boot-sequence-typer">
+[[delay: 1500]]Starting OS[[delay:500]].[[delay:500]].[[delay:500]].[[delay:500]]
+                    
+                    
+[[insert:      /`·.¸
+     /¸...¸`:·
+ ¸.·´  ¸   `·.¸.·´)
+: © ):´;      ¸  {     Zen Systems (c) 1984. All rights reserved.
+ `·.¸ `·  ¸.·´\`·¸)
+     `\\´´\¸.·´
+]]
+                    
+                    
+[[delay:1000]][[insert:Intel (c) Pentium-S CPU at 75MHz]][[delay:250]]
+
+[[delay:300]] [[delay:300]] [[delay:300]] [[delay:300]] [[delay:300]] [[delay:300]] [[delay:300]][[remove:6]]Memory test: [[delay:500]][[insert:32768K]] [[delay: 150]]OK[[delay:1250]]
+
+[[insert:Intialized drive C:]][[delay:250]][[delay:1000]]
+
+
+
+
+Press ENTER to continue</pre
+        >
+      </div>
+
+      <div
+        class="zen-view js-terminal-view"
+        hidden
+      >
+        <div class="zen-terminal js-terminal">
+          <pre class="zen-terminal-output zen-pre js-terminal-output"></pre>
+          <form class="zen-terminal-prompt js-terminal-prompt">
+            <span class="zen-terminal-prefix js-terminal-prefix">root ></span>
+            <input
+              class="zen-terminal-input js-terminal-input"
+              id="zen-terminal-input"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              autocorrect="off"
+              autocapitalize="off"
+            />
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

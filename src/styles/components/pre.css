@@ -1,0 +1,6 @@
+@layer components {
+  .zen-pre {
+    margin: 0;
+    text-shadow: var(--text-shadow);
+  }
+}

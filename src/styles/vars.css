@@ -1,0 +1,17 @@
+@layer vars {
+  :root {
+    /* fonts */
+    --font-base: monospace;
+
+    /* colors */
+    --color-primary: #77ea7b;
+    --color-primary-rgb: 119, 234, 123;
+    --color-background: #000;
+    --color-background-rgb: 0, 0, 0;
+
+    /* borders and shadows */
+    --border: 1px dotted rgba(var(--color-primary-rgb), 0.3);
+    --shadow: 0 0 16px 0 rgba(var(--color-primary-rgb), 0.04);
+    --text-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.5);
+  }
+}

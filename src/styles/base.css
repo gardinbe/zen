@@ -1,0 +1,170 @@
+@layer base {
+  [hidden] {
+    display: none !important;
+  }
+
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-background);
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    width: 100dvw;
+    height: 100dvh;
+    background: var(--color-background);
+    color: var(--color-primary);
+    font: normal normal 20px / normal var(--font-base);
+    padding: 10vw;
+    box-shadow: inset 0 0 10dvw 0 rgba(var(--color-primary-rgb), 0.02);
+    scrollbar-color: var(--color-primary) var(--color-background);
+    scrollbar-width: thin;
+  }
+
+  a,
+  .link {
+    text-underline-offset: 2px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  p,
+  ul,
+  ol,
+  blockquote,
+  pre,
+  table,
+  details,
+  .std-codeblock {
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul,
+  ol {
+    margin-right: 24px;
+
+    > li {
+      margin-bottom: 8px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-bottom: 2rem;
+    font-weight: 700;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  h1 {
+    font-size: 3rem;
+    margin-top: 3rem;
+
+    @media (width < 992) {
+      font-size: 2rem;
+    }
+
+    @media (width < 768) {
+      font-size: 1.1rem;
+    }
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin-top: 2rem;
+
+    @media (width < 992) {
+      font-size: 1.8rem;
+    }
+
+    @media (width < 768) {
+      font-size: 1.1rem;
+    }
+  }
+
+  h3 {
+    font-size: 1.75rem;
+    margin-top: 1.75rem;
+
+    @media (width < 992) {
+      font-size: 1.6rem;
+    }
+
+    @media (width < 768) {
+      font-size: 1.1rem;
+    }
+  }
+
+  h4 {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+
+    @media (width < 992) {
+      font-size: 1.4rem;
+    }
+
+    @media (width < 768) {
+      font-size: 1.1rem;
+    }
+  }
+
+  h5 {
+    font-size: 1.25rem;
+    margin-top: 1.25rem;
+
+    @media (width < 992) {
+      font-size: 1.2rem;
+    }
+
+    @media (width < 768) {
+      font-size: 1.1rem;
+    }
+  }
+
+  h6 {
+    margin-top: 1.2rem;
+  }
+
+  code {
+    background: var(--color-background);
+  }
+}
