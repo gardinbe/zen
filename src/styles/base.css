@@ -17,7 +17,7 @@
     color: var(--color-primary);
     font: normal normal 20px / normal var(--font-base);
     padding: 10vw;
-    box-shadow: inset 0 0 10dvw 0 rgba(var(--color-primary-rgb), 0.02);
+    box-shadow: inset 0 0 5vw 3dvw rgba(var(--color-primary-rgb), 0.2);
     scrollbar-color: var(--color-primary) var(--color-background);
     scrollbar-width: thin;
   }
