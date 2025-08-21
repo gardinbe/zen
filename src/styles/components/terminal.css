@@ -2,9 +2,12 @@
   .zen-terminal {
     display: flex;
     flex-flow: column;
-    overflow-y: auto;
     flex: 1 0;
     text-shadow: var(--text-shadow);
+
+    &-output {
+      overflow-y: auto;
+    }
 
     &-input-container {
       position: relative;

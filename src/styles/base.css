@@ -13,11 +13,11 @@
     display: flex;
     flex-direction: column;
     height: 100dvh;
-    background: linear-gradient(to top, #000, #000, #222, #222) 0 0 / 100% 2px;
+    background: linear-gradient(to top, #000, #000, #111, #111) 0 0 / 100% 2px;
     color: var(--color-primary);
     font: normal normal 20px / normal var(--font-base);
     padding: 10%;
-    box-shadow: inset 0 0 100px -10px var(--color-secondary);
+    box-shadow: inset 0 0 7vw -2vw var(--color-secondary);
     scrollbar-color: var(--color-primary) var(--color-background);
     scrollbar-width: thin;
 

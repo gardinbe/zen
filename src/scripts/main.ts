@@ -42,7 +42,7 @@ const showBoot = async () => {
   });
 
   view.hidden = false;
-  await bootSequenceTyper.run();
+  await bootSequenceTyper.start();
 
   addEventListener(
     'keydown',

@@ -6,10 +6,14 @@ export type Cursor = {
   attach: (node: Node) => void;
 
   /**
-   * Sets the state of the cursor.
-   * @param state Cursor state.
+   * Blinks the cursor.
    */
-  setState: (state: 'static' | 'blink') => void;
+  blink: () => void;
+
+  /**
+   * Stops blinking the cursor.
+   */
+  freeze: () => void;
 
   /**
    * Sets the position offset of the cursor.
@@ -85,8 +89,12 @@ export const createCursor = (): Cursor => {
     parent.insertBefore(node, el);
   };
 
-  const setState = (value: 'blink' | 'static') => {
-    el.dataset.typerState = value;
+  const blink = () => {
+    el.dataset.typerState = 'blink';
+  };
+
+  const freeze = () => {
+    el.dataset.typerState = 'static';
   };
 
   const show = () => {
@@ -107,11 +115,12 @@ export const createCursor = (): Cursor => {
     el.style.translate = offset ? `-${offset}ch` : '';
   };
 
-  setState('blink');
+  blink();
 
   return {
     attach,
-    setState,
+    blink,
+    freeze,
     setPosition,
     show,
     hide,

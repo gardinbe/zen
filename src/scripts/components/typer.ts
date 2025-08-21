@@ -6,66 +6,163 @@ export type TyperElements = {
 
 export type Typer = {
   /**
+   * Cursor instance.
+   */
+  cursor: Cursor;
+
+  /**
+   * Appends HTML to the main element and types it.
+   * @param html HTML string.
+   */
+  type: (html: string) => void;
+
+  /**
    * Starts the typer.
    */
-  run: () => Promise<void>;
+  start: () => void;
+
+  /**
+   * Clears the main element.
+   */
+  clear: () => void;
 };
 
 export const createTyper = (els: TyperElements): Typer => {
-  const { nodes, effects } = parse(els);
-  let currentNode: Text | null = null;
-
   const cursor = createCursor();
+  const queue = createEffectQueue();
 
-  const setCurrentNode = (node: Text | null) => {
-    currentNode = node;
+  const createState = (..._nodes: Node[]): TyperState => {
+    const nodes = getTextNodes(..._nodes).filter(
+      (n) => n.parentElement instanceof HTMLPreElement || n.textContent!.trim(),
+    );
+    const effects = nodes.flatMap(parseEffects);
 
-    if (!node) {
-      return;
+    return {
+      nodes,
+      effects,
+    };
+  };
+
+  const createEffectRunners = (state: TyperState): EffectRunner[] => {
+    let currentNode: Text | null = null;
+
+    const setCurrentNode = (node: Text | null) => {
+      currentNode = node;
+
+      if (!node) {
+        return;
+      }
+
+      cursor.attach(node);
+    };
+
+    return state.effects.map(
+      (effect) => () =>
+        effect({
+          nodes: state.nodes,
+          get currentNode() {
+            return currentNode;
+          },
+          setCurrentNode,
+          cursor,
+        }),
+    );
+  };
+
+  const start = () => {
+    const state = createState(els.main);
+    const runners = createEffectRunners(state);
+    queue.push(...runners);
+  };
+
+  const type = (html: string) => {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = html;
+    const nodes = [...tpl.content.childNodes];
+    els.main.append(...nodes);
+
+    const state = createState(...nodes);
+    const runners = createEffectRunners(state);
+    queue.push(...runners);
+  };
+
+  const clear = async () => {
+    await queue.clear();
+    els.main.innerHTML = '';
+  };
+
+  return {
+    cursor,
+    type,
+    start,
+    clear,
+  };
+};
+
+type TyperQueue = {
+  /**
+   * Pushes items to the queue.
+   * @param runners Items to push.
+   */
+  push: (...runners: EffectRunner[]) => void;
+
+  /**
+   * Clears the queue.
+   */
+  clear: () => Promise<void>;
+};
+
+const createEffectQueue = (): TyperQueue => {
+  let running = false;
+  let active: Promise<void> | null = null;
+  const runners: EffectRunner[] = [];
+
+  const push = (..._runners: EffectRunner[]) => {
+    runners.push(..._runners);
+    active = run();
+    active.then(() => {
+      active = null;
+    });
+  };
+
+  const clear = async () => {
+    runners.length = 0;
+
+    if (active) {
+      await active;
     }
 
-    cursor.attach(node);
+    runners.length = 0;
   };
 
   const run = async () => {
-    for (const effect of effects) {
-      const ctx: EffectContext = {
-        nodes,
-        get currentNode() {
-          return currentNode;
-        },
-        setCurrentNode,
-        cursor,
-      };
-
-      await effect(ctx);
+    if (running) {
+      return;
     }
+    running = true;
+
+    while (runners.length) {
+      await runners.shift()!();
+    }
+
+    running = false;
   };
 
   return {
-    run,
+    push,
+    clear,
   };
 };
 
-const parse = (
-  els: TyperElements,
-): {
+type TyperState = {
   nodes: Text[];
   effects: Effect[];
-} => {
-  const nodes = getTextNodes(els.main).filter(
-    (node) => node.parentElement instanceof HTMLPreElement || node.textContent!.trim(),
-  );
-  const effects = nodes.flatMap(parseEffects);
-
-  return {
-    nodes,
-    effects,
-  };
 };
 
-const getTextNodes = (node: Node): Text[] =>
-  node.nodeType === Node.TEXT_NODE ? [node as Text] : [...node.childNodes].flatMap(getTextNodes);
+const getTextNodes = (...nodes: Node[]): Text[] =>
+  nodes.flatMap((node) =>
+    node.nodeType === Node.TEXT_NODE ? [node as Text] : getTextNodes(...node.childNodes),
+  );
 
 type EffectContext = Readonly<{
   /**
@@ -91,21 +188,30 @@ type EffectContext = Readonly<{
 
 type Effect = (ctx: EffectContext) => void | Promise<void>;
 
-type EffectBuilder = {
-  type: (text: string) => Effect;
-  insert: (text: string) => Effect;
-  undo: (quantity: number) => Effect;
-  remove: (quantity: number) => Effect;
-  delay: (ms: number) => Effect;
+type EffectRunner = () => ReturnType<Effect>;
+
+type EffectBuilder<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TArgs extends any[],
+> = (...args: TArgs) => Effect;
+
+type EffectsBuilder = {
+  type: EffectBuilder<[text: string]>;
+  insert: EffectBuilder<[text: string]>;
+  undo: EffectBuilder<[quantity: number]>;
+  remove: EffectBuilder<[quantity: number]>;
+  delay: EffectBuilder<[ms: number]>;
 };
+
+type EffectName = keyof EffectsBuilder;
 
 const WhitespaceRegex = /\s/;
 
-const createEffectBuilder = (node: Text): EffectBuilder => {
+const createEffectsBuilder = (node: Text): EffectsBuilder => {
   return {
     type: (text) => async (ctx) => {
       ctx.setCurrentNode(node);
-      ctx.cursor.setState('static');
+      ctx.cursor.freeze();
 
       let prevChar: string | null = null;
       let i = 0;
@@ -129,7 +235,7 @@ const createEffectBuilder = (node: Text): EffectBuilder => {
         await randomDelay(5, 30);
       }
 
-      ctx.cursor.setState('blink');
+      ctx.cursor.blink();
     },
 
     insert: (text) => (ctx) => {
@@ -144,7 +250,7 @@ const createEffectBuilder = (node: Text): EffectBuilder => {
 
     undo: (quantity) => async (ctx) => {
       ctx.setCurrentNode(node);
-      ctx.cursor.setState('static');
+      ctx.cursor.freeze();
 
       let prevChar: string | null = null;
       let i = 0;
@@ -175,7 +281,7 @@ const createEffectBuilder = (node: Text): EffectBuilder => {
         await randomDelay(5, 30);
       }
 
-      ctx.cursor.setState('blink');
+      ctx.cursor.blink();
     },
 
     remove: (quantity) => (ctx) => {
@@ -201,7 +307,7 @@ const createEffectBuilder = (node: Text): EffectBuilder => {
 
     delay: (ms) => async (ctx) => {
       ctx.setCurrentNode(node);
-      ctx.cursor.setState('blink');
+      ctx.cursor.blink();
       await delay(ms);
     },
   };
@@ -226,7 +332,7 @@ const parseEffects = (node: Text): Effect[] => {
 
   node.textContent = '';
 
-  const builder = createEffectBuilder(node);
+  const builder = createEffectsBuilder(node);
 
   let last = 0;
 
@@ -250,7 +356,7 @@ const parseEffects = (node: Text): Effect[] => {
     if (key && value) {
       const end = match.index;
 
-      switch (key) {
+      switch (key as EffectName) {
         case 'type': {
           return {
             effect: builder.type(value),

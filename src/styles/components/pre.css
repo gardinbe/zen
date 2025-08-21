@@ -1,7 +1,8 @@
 @layer components {
   .zen-pre {
     margin: 0;
-    white-space: pre-line;
+    white-space: pre-wrap;
     text-shadow: var(--text-shadow);
+    tab-size: 2;
   }
 }

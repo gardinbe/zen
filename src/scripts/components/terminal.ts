@@ -1,5 +1,6 @@
 import { Aliases, Commands } from '../commands';
 import { createCursor, type Cursor } from './cursor';
+import { createTyper, type Typer } from './typer';
 
 export type TerminalElements = {
   main: HTMLElement;
@@ -11,7 +12,12 @@ export type TerminalElements = {
 
 export type Terminal = {
   /**
-   * Cursor instance.
+   * Output typer instance.
+   */
+  typer: Typer;
+
+  /**
+   * Cursor instance for the user input.
    */
   cursor: Cursor;
 
@@ -34,7 +40,7 @@ export type Terminal = {
    * Executes a command.
    * @param value Command to execute.
    */
-  exec: ExecFunction;
+  exec: (value: string) => void | Promise<void>;
 
   /**
    * Starts listening for events.
@@ -47,16 +53,17 @@ export type Terminal = {
   ignore: () => void;
 };
 
-type ExecFunction = (value: string) => void | Promise<void>;
-
 export const createTerminal = (els: TerminalElements): Terminal => {
   const setInput = (value: string) => {
     els.input.value = value;
     resizeInput();
   };
 
+  const typer = createTyper({
+    main: els.output,
+  });
   const cursor = createCursor();
-  const logger = createLogger(els);
+  const logger = createLogger(els, typer);
   const history = createHistory(els, setInput);
 
   const resizeInput = () => {
@@ -75,33 +82,32 @@ export const createTerminal = (els: TerminalElements): Terminal => {
     }
 
     history.add(value);
+    logger.stdin(value);
 
-    const [name, ...args] = value.trim().split(' ');
-
-    if (!name) {
+    if (!value) {
       return;
     }
 
-    logger.write({
-      stdin: value,
-    });
+    const parsed = parse(value);
 
-    const command = parse(name);
+    if (!parsed) {
+      logger.stderr(`Error parsing command: ${value}`);
+      return;
+    }
+
+    const command = getCommand(parsed.name);
 
     if (!command) {
-      logger.write({
-        stderr: `Unknown command: ${name}`,
-      });
+      logger.stderr(`Unknown command: ${parsed.name}`);
       return;
     }
 
     const ctx: CommandContext = {
-      cursor,
       logger,
       history,
     };
 
-    return command.fn(ctx, args);
+    return command.fn(ctx, parsed.args);
   };
 
   const repositionCursor = () =>
@@ -110,8 +116,8 @@ export const createTerminal = (els: TerminalElements): Terminal => {
   const listeners = {
     input: () => {
       resizeInput();
-      cursor.setState('static');
-      requestAnimationFrame(() => cursor.setState('blink'));
+      cursor.freeze();
+      requestAnimationFrame(cursor.blink);
     },
 
     keydown: (ev: KeyboardEvent) => {
@@ -122,9 +128,7 @@ export const createTerminal = (els: TerminalElements): Terminal => {
 
       if (ev.ctrlKey && ev.key === 'c') {
         ev.preventDefault();
-        logger.write({
-          stdout: els.input.value + '^C',
-        });
+        logger.stdout(`${els.input.value}^C`);
         setInput('');
         return;
       }
@@ -148,7 +152,7 @@ export const createTerminal = (els: TerminalElements): Terminal => {
 
     submit: async (ev: SubmitEvent) => {
       ev.preventDefault();
-      repositionCursor();
+      requestAnimationFrame(repositionCursor);
       history.reset();
       await send();
     },
@@ -180,6 +184,7 @@ export const createTerminal = (els: TerminalElements): Terminal => {
   listen();
 
   return {
+    typer,
     cursor,
     logger,
     history,
@@ -191,11 +196,6 @@ export const createTerminal = (els: TerminalElements): Terminal => {
 };
 
 export type CommandContext = Readonly<{
-  /**
-   * Cursor instance.
-   */
-  cursor: Cursor;
-
   /**
    * Logger instance.
    */
@@ -213,12 +213,36 @@ export type Command = {
   fn: (ctx: CommandContext, args: string[]) => void | Promise<void>;
 };
 
-const parse = (value: string): Command | null =>
-  Object.entries(Aliases).find(
-    ([name]) => name.toLocaleUpperCase() === value.toLocaleUpperCase(),
-  )?.[1] ??
+const ExpressionRegex = /(\S+)(?:\s+(.*))?/s;
+const TokenRegex = /"([^"]+)"|'([^']+)'|`([^`]+)`|(\S+)/gs;
+
+type ParsedInput = {
+  name: string;
+  args: string[];
+};
+
+const parse = (str: string): ParsedInput | null => {
+  const match = str.match(ExpressionRegex);
+  const [, name, argsStr] = match || [];
+
+  if (!name) {
+    return null;
+  }
+
+  const args = argsStr
+    ? [...argsStr.matchAll(TokenRegex)].map((m) => (m[1] || m[2] || m[3] || m[4]) as string)
+    : [];
+
+  return {
+    name,
+    args,
+  };
+};
+
+const getCommand = (name: string): Command | null =>
+  Object.entries(Aliases).find(([n]) => n.toLocaleUpperCase() === name.toLocaleUpperCase())?.[1] ??
   Object.values(Commands).find(
-    (command) => command.name.toLocaleUpperCase() === value.toLocaleUpperCase(),
+    (command) => command.name.toLocaleUpperCase() === name.toLocaleUpperCase(),
   ) ??
   null;
 
@@ -266,33 +290,33 @@ type History = {
 
 const createHistory = (els: TerminalElements, setInput: (value: string) => void): History => {
   const items: string[] = [];
-  let position = -1;
+  let pos = -1;
   let lastValue = '';
 
   const up = () => {
-    if (!~position) {
+    if (!~pos) {
       lastValue = els.input.value;
     }
 
-    position = Math.min(position + 1, items.length - 1);
-    const value = items[items.length - 1 - position] ?? items[0] ?? '';
+    pos = Math.min(pos + 1, items.length - 1);
+    const value = items[items.length - 1 - pos] ?? items[0] ?? '';
     setInput(value);
   };
 
   const down = () => {
-    position = Math.max(position - 1, -1);
-    const value = items[items.length - 1 - position] ?? lastValue ?? '';
+    pos = Math.max(pos - 1, -1);
+    const value = items[items.length - 1 - pos] ?? lastValue ?? '';
     setInput(value);
   };
 
   const add = (value: string) => {
     items.push(value);
 
-    if (!~position) {
+    if (!~pos) {
       return;
     }
 
-    position++;
+    pos++;
   };
 
   const clear = () => {
@@ -301,7 +325,7 @@ const createHistory = (els: TerminalElements, setInput: (value: string) => void)
   };
 
   const reset = () => {
-    position = -1;
+    pos = -1;
     lastValue = '';
   };
 
@@ -345,18 +369,24 @@ const createHistory = (els: TerminalElements, setInput: (value: string) => void)
   };
 };
 
-type Log = {
-  stdin?: string;
-  stdout?: string;
-  stderr?: string;
-};
-
 type Logger = {
   /**
-   * Writes a log to the terminal output.
-   * @param log Log.
+   * Logs a standard input to the terminal.
+   * @param input Input to log.
    */
-  write: (log: Log) => void;
+  stdin: (input: string) => void;
+
+  /**
+   * Logs a standard output to the terminal.
+   * @param output Output to log.
+   */
+  stdout: (output: string) => void;
+
+  /**
+   * Logs a standard error to the terminal.
+   * @param error Error to log.
+   */
+  stderr: (error: unknown) => void;
 
   /**
    * Clears the terminal output.
@@ -364,37 +394,60 @@ type Logger = {
   clear: () => void;
 };
 
-const createLogger = (els: TerminalElements): Logger => {
-  const write = (log: Log) => {
-    let msg = '';
+const createLogger = (els: TerminalElements, typer: Typer): Logger => {
+  const write = (text: string) => {
+    let finished = false;
+    let lastScrollPos = els.main.scrollTop;
+    let scrolled = false;
 
-    if (log.stdin) {
-      msg += `$: ${log.stdin}\n`;
-    }
+    const onscroll = () => {
+      scrolled = true;
+    };
 
-    if (log.stdout) {
-      msg += `${log.stdout}\n`;
-    }
+    els.output.addEventListener('scroll', onscroll, {
+      passive: true,
+      once: true,
+    });
 
-    if (log.stderr) {
-      msg += `ERROR: ${log.stderr}\n`;
-    }
+    const check = () => {
+      if (finished || scrolled) {
+        return;
+      }
 
-    els.output.innerHTML += msg;
+      if (els.main.scrollTop <= lastScrollPos) {
+        requestAnimationFrame(check);
+        return;
+      }
 
-    requestAnimationFrame(() =>
       els.main.scrollTo({
         top: els.main.scrollHeight,
-      }),
-    );
+      });
+
+      lastScrollPos = els.main.scrollTop;
+      requestAnimationFrame(check);
+    };
+
+    requestAnimationFrame(check);
+    typer.cursor.show();
+    // todo: async here
+    typer.type(`${text}\n`);
+    typer.cursor.hide();
+    finished = true;
+
+    els.main.removeEventListener('scroll', onscroll);
   };
 
-  const clear = () => {
-    els.output.innerHTML = '';
-  };
+  const stdin = (input: string) => write(`> ${input}`);
+  const stdout = (output: string) => write(output);
+  const stderr = (error: unknown) =>
+    write(`ERROR: ${error instanceof Error ? error.message : error}`);
+
+  const clear = typer.clear;
 
   return {
-    write,
+    stdin,
+    stdout,
+    stderr,
     clear,
   };
 };
