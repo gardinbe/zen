@@ -15,8 +15,8 @@
     height: 100dvh;
     background: linear-gradient(to top, #000, #000, #111, #111) 0 0 / 100% 2px;
     color: var(--color-primary);
-    font: normal normal 20px / normal var(--font-base);
-    padding: 10%;
+    font: normal normal var(--font-size-base) / normal var(--font-base);
+    padding: 8%;
     box-shadow: inset 0 0 7vw -2vw var(--color-secondary);
     scrollbar-color: var(--color-primary) var(--color-background);
     scrollbar-width: thin;
@@ -100,36 +100,54 @@
     }
   }
 
-  a,
-  .link {
-    text-underline-offset: 2px;
+  :is(a, .link) {
+    color: var(--color-link);
+    text-decoration: none;
 
-    &:hover {
+    &:focus-visible {
+      outline: unset;
+    }
+
+    &:hover,
+    &:active,
+    &:focus-visible {
+      color: #fff;
+      text-underline-offset: 2px;
       text-decoration: underline;
+    }
+
+    &::after {
+      content: '';
+      display: inline-flex;
+      height: 0.7lh;
+      aspect-ratio: 1 / 1;
+      margin-left: 6px;
+      vertical-align: middle;
+      mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 24 24"><path d="m13 3 3.293 3.293-7 7 1.414 1.414 7-7L21 11V3z"/><path d="M19 19H5V5h7l-2-2H3v18h18V13l-2-2v8z"/></svg>')
+        no-repeat center / cover;
+      background: currentcolor;
     }
   }
 
-  p,
-  ul,
-  ol,
-  blockquote,
-  pre,
-  table,
-  details,
-  .std-codeblock {
-    margin-bottom: 8px;
+  mark {
+    background: var(--color-link);
+    color: var(--color-background);
+  }
 
-    &:last-child {
+  :is(p, ul, ol, blockquote, pre, table, details, .std-codeblock) {
+    margin-bottom: 1.5rem;
+
+    &:not([hidden]):nth-last-child(1 of :not([hidden])) {
       margin-bottom: 0;
     }
   }
 
-  ul,
-  ol {
-    margin-right: 24px;
+  :is(ul, ol) {
+    list-style-position: inside;
+    margin-right: 1.5rem;
 
     > li {
-      margin-bottom: 8px;
+      margin-bottom: 0.75rem;
 
       &:last-child {
         margin-bottom: 0;
@@ -145,24 +163,14 @@
     list-style-type: decimal;
   }
 
-  p,
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  :is(p, h1, h2, h3, h4, h5, h6) {
     text-wrap: pretty;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin-bottom: 2rem;
-    font-weight: 700;
+  :is(h1, h2, h3, h4, h5, h6) {
+    margin-bottom: 1.5rem;
+    font-weight: 900;
+    font-style: normal;
 
     &:first-child {
       margin-top: 0;
@@ -174,8 +182,8 @@
   }
 
   h1 {
-    font-size: 3rem;
-    margin-top: 3rem;
+    font-size: 2rem;
+    margin-top: 4rem;
 
     @media (width < 992) {
       font-size: 2rem;
@@ -187,11 +195,11 @@
   }
 
   h2 {
-    font-size: 2rem;
-    margin-top: 2rem;
+    font-size: 1.8rem;
+    margin-top: 3.5rem;
 
     @media (width < 992) {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
     }
 
     @media (width < 768) {
@@ -200,11 +208,11 @@
   }
 
   h3 {
-    font-size: 1.75rem;
-    margin-top: 1.75rem;
+    font-size: 1.5rem;
+    margin-top: 3.1rem;
 
     @media (width < 992) {
-      font-size: 1.6rem;
+      font-size: 1.3rem;
     }
 
     @media (width < 768) {
@@ -213,21 +221,8 @@
   }
 
   h4 {
-    font-size: 1.5rem;
-    margin-top: 1.5rem;
-
-    @media (width < 992) {
-      font-size: 1.4rem;
-    }
-
-    @media (width < 768) {
-      font-size: 1.1rem;
-    }
-  }
-
-  h5 {
-    font-size: 1.25rem;
-    margin-top: 1.25rem;
+    font-size: 1.3rem;
+    margin-top: 2.9rem;
 
     @media (width < 992) {
       font-size: 1.2rem;
@@ -238,8 +233,22 @@
     }
   }
 
+  h5 {
+    font-size: 1.25rem;
+    margin-top: 2.7rem;
+
+    @media (width < 992) {
+      font-size: 1.15rem;
+    }
+
+    @media (width < 768) {
+      font-size: 1.1rem;
+    }
+  }
+
   h6 {
-    margin-top: 1.2rem;
+    margin-top: 2.5rem;
+    font-size: var(--font-size-base);
   }
 
   code {

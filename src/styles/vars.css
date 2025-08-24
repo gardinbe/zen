@@ -2,6 +2,7 @@
   :root {
     /* fonts */
     --font-base: monospace;
+    --font-size-base: 1.1rem;
 
     /* colors */
     --color-primary: #77ea7b;
@@ -10,6 +11,8 @@
     --color-secondary-rgb: 91 115 92;
     --color-background: #000;
     --color-background-rgb: 0 0 0;
+    --color-link: #c8ffca;
+    --color-link-rgb: 200 255 202;
 
     /* borders and shadows */
     --border: 1px dotted rgb(var(--color-primary-rgb) / 0.3);

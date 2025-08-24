@@ -38,10 +38,15 @@
             <div class="zen-dialog-heading">Zen</div>
             <div class="zen-dialog-body">
               <p>Zen OS v1.7.13</p>
-              <small>Zen systems (c) 1984.</small>
+              <small>Zen systems (C) 1991.</small>
             </div>
             <div class="zen-dialog-actions">
-              <button class="zen-dialog-button u-btn js-start-dialog-close">Start</button>
+              <button
+                class="zen-dialog-button u-btn js-start-dialog-close"
+                data-alt="Terminal"
+              >
+                Start
+              </button>
             </div>
           </div>
         </form>
@@ -51,29 +56,7 @@
         class="zen-view js-boot-sequence-view"
         hidden
       >
-        <pre class="zen-pre js-boot-sequence-typer">
-[[delay: 1500]]Starting OS[[delay:500]].[[delay:500]].[[delay:500]].[[delay:500]]
-                    
-                    
-[[insert:      /`·.¸
-     /¸...¸`:·
- ¸.·´  ¸   `·.¸.·´)
-: © ):´;      ¸  {     Zen Systems (c) 1984. All rights reserved.
- `·.¸ `·  ¸.·´\`·¸)
-     `\\´´\¸.·´
-]]
-                    
-                    
-[[delay:1000]][[insert:Intel (c) Pentium-S CPU at 75MHz]][[delay:250]]
-
-Memory test: [[delay:500]].[[delay:500]].[[delay:500]].[[delay:500]][[remove:3]][[insert:32768K]] [[delay: 150]]OK[[delay:1250]]
-
-[[insert:Intialized drive C:]][[delay:250]][[delay:1000]]
-
-
-
-Press ENTER to continue</pre
-        >
+        <pre class="zen-typer js-boot-sequence-typer"></pre>
       </div>
 
       <div
@@ -81,20 +64,21 @@ Press ENTER to continue</pre
         hidden
       >
         <div class="zen-terminal js-terminal">
-          <pre class="zen-terminal-output zen-pre js-terminal-output"></pre>
+          <pre class="zen-terminal-output zen-typer js-terminal-output"></pre>
           <form class="zen-terminal-prompt js-terminal-prompt">
-            <span class="zen-terminal-prefix js-terminal-prefix">></span>
-            <span class="zen-terminal-input-container">
-              <input
-                class="zen-terminal-input js-terminal-input"
+            <pre
+              class="zen-terminal-prompt-pre zen-typer"
+            ><span class="zen-terminal-prefix js-terminal-prefix">> </span
+            ><span class="zen-terminal-input-container"
+              ><input
+                class="zen-terminal-input zen-typer js-terminal-input"
                 name="zen-terminal-input"
                 type="text"
                 autocomplete="off"
                 spellcheck="false"
                 autocorrect="off"
                 autocapitalize="off"
-              />
-            </span>
+            /></span></pre>
           </form>
         </div>
       </div>

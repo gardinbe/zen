@@ -1,4 +1,22 @@
 @layer components {
   .zen-typer {
+    position: relative;
+    margin: 0;
+    font-size: 1.2rem;
+    white-space: pre-wrap;
+    text-shadow: var(--text-shadow);
+    tab-size: 2;
+
+    /* [data-typer-state='incomplete'] */
+
+    [data-typer-state='active'] {
+      &:is(a) {
+        &::after {
+          display: none;
+        }
+      }
+    }
+
+    /* [data-typer-state='complete'] {} */
   }
 }

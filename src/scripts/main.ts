@@ -3,6 +3,7 @@ import { createAudioPlayer } from './components/audio';
 import { createDialog } from './components/dialog';
 import { createTyper } from './components/typer';
 import { createTerminal } from './components/terminal';
+import { fetchDocument } from './utils/fetch';
 
 const backgroundAudio = createAudioPlayer({
   main: query<HTMLAudioElement>('.js-background-audio'),
@@ -41,23 +42,27 @@ const showBoot = async () => {
     main: query('.js-boot-sequence-typer'),
   });
 
+  const html = await fetchDocument('boot');
+
   view.hidden = false;
-  await bootSequenceTyper.start();
+  bootSequenceTyper.type(html, {
+    onEnd: () => {
+      addEventListener(
+        'keydown',
+        (ev) => {
+          if (ev.key !== 'Enter') {
+            return;
+          }
 
-  addEventListener(
-    'keydown',
-    (ev) => {
-      if (ev.key !== 'Enter') {
-        return;
-      }
-
-      view.hidden = true;
-      showTerminal();
+          view.hidden = true;
+          showTerminal();
+        },
+        {
+          once: true,
+        },
+      );
     },
-    {
-      once: true,
-    },
-  );
+  });
 };
 
 const showTerminal = () => {

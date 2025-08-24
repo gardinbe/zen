@@ -30,6 +30,7 @@ export type DialogOptions = {
 };
 
 export const createDialog = (els: DialogElements, options?: Partial<DialogOptions>): Dialog => {
+  const originalBtnText = els.closeBtn.textContent;
   let ctrl = false;
 
   const open = () => {
@@ -44,12 +45,14 @@ export const createDialog = (els: DialogElements, options?: Partial<DialogOption
   const listeners = {
     keydown: (ev: KeyboardEvent) => {
       ctrl = ev.ctrlKey;
+      els.closeBtn.textContent = (ctrl && els.closeBtn.dataset.alt) || originalBtnText;
       removeEventListener('keydown', listeners.keydown);
       addEventListener('keyup', listeners.keyup);
     },
 
     keyup: () => {
       ctrl = false;
+      els.closeBtn.textContent = originalBtnText;
       removeEventListener('keyup', listeners.keyup);
       addEventListener('keydown', listeners.keydown);
     },
@@ -71,7 +74,9 @@ export const createDialog = (els: DialogElements, options?: Partial<DialogOption
     els.main.removeEventListener('submit', listeners.submit);
   };
 
-  requestAnimationFrame(() => els.closeBtn.focus());
+  requestAnimationFrame(() => {
+    els.closeBtn.focus();
+  });
   listen();
 
   return {

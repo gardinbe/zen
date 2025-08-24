@@ -9,11 +9,11 @@
       overflow-y: auto;
     }
 
-    &-input-container {
-      position: relative;
-    }
-
     &-input {
+      &-container {
+        position: relative;
+      }
+
       background: none;
       outline: none;
       border: none;

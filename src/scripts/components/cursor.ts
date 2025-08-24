@@ -73,47 +73,52 @@ export type Cursor = {
 const Caret = '▮';
 
 export const createCursor = (): Cursor => {
-  const el = document.createElement('span');
-  el.classList.add('zen-cursor');
-  el.ariaHidden = 'true';
-  el.textContent = Caret;
-
   const attach = (node: Node) => {
     const parent = node.parentElement;
 
-    if (!parent || node.nextSibling === el) {
+    if (!parent || node.nextSibling === caret) {
       return;
     }
 
-    parent.insertBefore(el, node);
-    parent.insertBefore(node, el);
+    parent.insertBefore(cursor, node);
+    parent.insertBefore(node, cursor);
   };
 
   const blink = () => {
-    el.dataset.typerState = 'blink';
+    caret.dataset.cursorState = 'blink';
   };
 
   const freeze = () => {
-    el.dataset.typerState = 'static';
+    caret.dataset.cursorState = 'static';
   };
 
   const show = () => {
-    el.hidden = false;
+    cursor.hidden = false;
   };
 
   const hide = () => {
-    el.hidden = true;
+    cursor.hidden = true;
   };
 
   const setPosition = (offset: number) => {
-    const parent = el.parentElement;
+    const parent = cursor.parentElement;
 
     if (!parent) {
       return;
     }
 
-    el.style.translate = offset ? `-${offset}ch` : '';
+    caret.style.translate = offset ? `-${offset}ch` : '';
   };
+
+  const cursor = document.createElement('span');
+  cursor.classList.add('zen-cursor');
+  cursor.textContent = '\u200B';
+
+  const caret = document.createElement('span');
+  caret.classList.add('zen-cursor-caret');
+  caret.ariaHidden = 'true';
+  caret.textContent = Caret;
+  cursor.append(caret);
 
   blink();
 

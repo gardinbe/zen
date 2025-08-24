@@ -1,41 +1,44 @@
 @layer components {
-  *:has(> .zen-cursor) {
-    min-height: 1lh;
-    caret-color: transparent;
-  }
-
   .zen-cursor {
-    position: absolute;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    width: 1ch;
-    height: 1lh;
-    mix-blend-mode: difference;
-    user-select: none;
-    pointer-events: none;
+    *:has(> &) {
+      caret-color: transparent;
+    }
 
-    &[data-typer-state='blink'] {
-      @keyframes blink {
-        0% {
-          opacity: 1;
+    &-caret {
+      position: absolute;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      vertical-align: middle;
+      width: 1ch;
+      height: 1lh;
+      overflow: hidden;
+      mix-blend-mode: difference;
+      user-select: none;
+      pointer-events: none;
+
+      &[data-cursor-state='blink'] {
+        @keyframes blink {
+          0% {
+            opacity: 1;
+          }
+          40% {
+            opacity: 0.5;
+          }
+          50% {
+            opacity: 0;
+          }
+          60% {
+            opacity: 0.5;
+          }
+          100% {
+            opacity: 1;
+          }
         }
-        40% {
-          opacity: 0.5;
-        }
-        50% {
-          opacity: 0;
-        }
-        60% {
-          opacity: 0.5;
-        }
-        100% {
-          opacity: 1;
-        }
+
+        animation: blink 500ms 500ms linear infinite;
       }
-
-      animation: blink 500ms 500ms linear infinite;
     }
   }
 }
