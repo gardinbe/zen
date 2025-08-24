@@ -1,32 +1,39 @@
-import type { TerminalHistory } from './history';
-import type { TerminalLogger } from './logger';
-import { Clear } from './programs//clear';
-import { Eval } from './programs//eval';
-import { Help } from './programs//help';
-import { History } from './programs//history';
-import { Open } from './programs/open';
+import { type TerminalHistory } from './history';
+import { type TerminalLogger } from './logger';
+import { ClearProgram } from './programs//clear';
+import { EvalProgram } from './programs//eval';
+import { HelpProgram } from './programs//help';
+import { HistoryProgram } from './programs//history';
+import { ListProgram } from './programs/list';
+import { PrintProgram } from './programs/print';
+
 /**
  * Object of available terminal programs.
  */
-export const Programs = {
-  clear: Clear,
-  eval: Eval,
-  help: Help,
-  history: History,
-  open: Open,
-} as const satisfies Record<string, Program>;
+export const Programs: Program[] = [
+  ClearProgram,
+  EvalProgram,
+  HelpProgram,
+  HistoryProgram,
+  ListProgram,
+  PrintProgram,
+];
 
 /**
  * Object of aliases for terminal programs.
  */
-export const Aliases = {
-  cls: Programs.clear,
-} as const satisfies Record<string, Program>;
+export const Aliases: Record<string, Program> = {
+  cls: ClearProgram,
+};
 
 export type Program = {
   name: string;
   description: string;
-  run: (args: string[]) => ProgramFunction;
+  arguments?: {
+    name: string;
+    description: string;
+  }[];
+  exec: (args: string[]) => ProgramFunction;
 };
 
 export type ProgramFunction = (ctx: ProgramContext) => void | Promise<void>;
@@ -49,14 +56,48 @@ export type ProgramContext = Readonly<{
 }>;
 
 export const ArgumentError = {
-  unexpected: (pos: number, msg: string) => `Unexpected argument at position ${pos}: ${msg}`,
-  missing: (pos: number) => `Missing argument at position ${pos}`,
-  invalid: (pos: number, msg: string) => `Invalid argument at position ${pos}: ${msg}`,
+  /**
+   * Returns an error message for an unexpected argument.
+   * @param position Position of the argument.
+   * @param message Message to append.
+   * @returns Error message.
+   */
+  unexpected: (position: number, message: string) =>
+    `Unexpected argument at position ${position}: ${message}`,
+
+  /**
+   * Returns an error message for a missing argument.
+   * @param position Position of the argument.
+   * @returns Error message.
+   */
+  missing: (position: number) => `Missing argument at position ${position}`,
+
+  /**
+   * Returns an error message for an invalid argument.
+   * @param position Position of the argument.
+   * @param message Message to append.
+   * @returns Error message.
+   */
+  invalid: (position: number, message: string) =>
+    `Invalid argument at position ${position}: ${message}`,
 };
 
+/**
+ * Returns all available commands.
+ * @returns Array of commands.
+ */
+export const getCommands = (): string[] => [
+  ...Programs.map(({ name }) => name),
+  ...Object.entries(Aliases).map(([name]) => name),
+];
+
+/**
+ * Returns a program by name.
+ * @param name Name of the program.
+ */
 export const getProgram = (name: string): Program | null =>
-  Object.entries(Aliases).find(([n]) => n.toLocaleUpperCase() === name.toLocaleUpperCase())?.[1] ??
-  Object.values(Programs).find(
-    (program) => program.name.toLocaleUpperCase() === name.toLocaleUpperCase(),
-  ) ??
+  Object.entries(Aliases).find(
+    ([_name]) => _name.toLocaleUpperCase() === name.toLocaleUpperCase(),
+  )?.[1] ??
+  Programs.find((program) => program.name.toLocaleUpperCase() === name.toLocaleUpperCase()) ??
   null;

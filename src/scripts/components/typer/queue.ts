@@ -1,4 +1,4 @@
-import { type EffectFunction } from './effect';
+import { type Effect } from './effect';
 
 export type TyperQueue = {
   /**
@@ -7,8 +7,8 @@ export type TyperQueue = {
   signal: AbortSignal;
 
   /**
-   * Pushes items to the queue.
-   * @param runners Items to push.
+   * Pushes batches to the queue.
+   * @param batches Batches to push.
    */
   push: (...batches: EffectBatch[]) => void;
 
@@ -19,7 +19,7 @@ export type TyperQueue = {
 };
 
 export const createTyperQueue = (): TyperQueue => {
-  let active: ReturnType<typeof run> | null = null;
+  let active: ReturnType<typeof exec> | null = null;
   let controller = new AbortController();
   const batches: EffectBatch[] = [];
 
@@ -30,7 +30,7 @@ export const createTyperQueue = (): TyperQueue => {
       return;
     }
 
-    active = run(controller.signal);
+    active = exec(controller.signal);
     active.then(() => {
       active = null;
     });
@@ -43,40 +43,40 @@ export const createTyperQueue = (): TyperQueue => {
     batches.length = 0;
   };
 
-  const run = async (signal: AbortSignal) => {
+  const exec = async (signal: AbortSignal) => {
     // todo: maybe this can be tidier
 
     let batch;
 
     while ((batch = batches.shift())) {
       if (signal.aborted) {
-        batch.callbacks.onAbort();
-        batch.callbacks.onEnd();
+        batch.onAbort();
+        batch.onFinish();
         break;
       }
 
-      batch.callbacks.onStart();
+      batch.onStart();
 
-      let runner;
+      let executor;
 
-      while ((runner = batch.runners.shift())) {
+      while ((executor = batch.executors.shift())) {
         if (signal.aborted) {
-          batch.callbacks.onAbort();
-          batch.callbacks.onEnd();
+          batch.onAbort();
+          batch.onFinish();
           break;
         }
 
-        await runner();
+        await executor();
       }
 
       if (signal.aborted) {
-        batch.callbacks.onAbort();
-        batch.callbacks.onEnd();
+        batch.onAbort();
+        batch.onFinish();
         break;
       }
 
-      batch.callbacks.onComplete();
-      batch.callbacks.onEnd();
+      batch.onComplete();
+      batch.onFinish();
     }
   };
 
@@ -89,16 +89,36 @@ export const createTyperQueue = (): TyperQueue => {
   };
 };
 
-export type EffectRunner = () => ReturnType<EffectFunction>;
+export type EffectExecutor = () => ReturnType<Effect>;
 
 export type EffectBatchCallbacks = {
+  /**
+   * Invoked when the batch starts.
+   */
   onStart: () => void;
+
+  /**
+   * Invoked **if** the batch completes successfully.
+   *
+   * This is not invoked if the batch is aborted.
+   */
   onComplete: () => void;
+
+  /**
+   * Invoked **if** the batch is aborted.
+   *
+   * This is not invoked if the batch completes successfully.
+   */
   onAbort: () => void;
-  onEnd: () => void;
+
+  /**
+   * Invoked when the batch is finished.
+   *
+   * This occurs after the batch has completed or aborted.
+   */
+  onFinish: () => void;
 };
 
-export type EffectBatch = {
-  runners: EffectRunner[];
-  callbacks: EffectBatchCallbacks;
+export type EffectBatch = EffectBatchCallbacks & {
+  executors: EffectExecutor[];
 };

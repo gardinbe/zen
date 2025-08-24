@@ -1,63 +1,66 @@
-import { type Effect, WhitespaceRegex } from '../effect';
-import { randomDelay } from '../../../utils/delay';
+import { type EffectConstructor, WhitespaceRegex } from '../effect';
+import { randomTimeout } from '../../../utils/delay';
 
-export const Undo: Effect<number> = {
+// todo: this effect is a bit broken
+
+export const UndoEffect: EffectConstructor<number> = {
   name: 'undo',
   parse: (value) => parseInt(value),
-  run: (quantity) => async (ctx) => {
-    ctx.cursor.freeze();
+  create: (quantity) => async (ctx) => {
+    try {
+      ctx.cursor.freeze();
 
-    let prevChar: string | null = null;
-    let i = 0;
+      let prevChar: string | null = null;
+      let i = 0;
 
-    while (i < quantity && ctx.node) {
-      const char = ctx.node.textContent!.slice(-1);
+      while (i < quantity) {
+        const char = ctx.node.textContent!.slice(-1);
 
-      if (!char) {
-        const nextIndex = ctx.nodes.indexOf(ctx.node) + 1;
-        ctx.set(ctx.nodes[nextIndex] ?? null);
-        continue;
-      }
+        if (!char) {
+          const prevNode = ctx.nodes[ctx.nodes.indexOf(ctx.node) - 1];
 
-      ctx.setState('active');
-      ctx.node.textContent = ctx.node.textContent!.slice(0, -1);
+          if (prevNode) {
+            ctx.setNode(prevNode);
+          }
 
-      if (!ctx.node.textContent) {
-        ctx.setState('incomplete');
-      }
+          continue;
+        }
 
-      i++;
+        ctx.setNodeState(ctx.node, 'active');
+        ctx.node.textContent = ctx.node.textContent!.slice(0, -1);
 
-      if (
-        // todo: this is dodgy
-        !(ctx.node.parentElement instanceof HTMLPreElement) &&
-        WhitespaceRegex.test(char) &&
-        prevChar &&
-        WhitespaceRegex.test(prevChar)
-      ) {
-        continue;
-      }
+        if (!ctx.node.textContent) {
+          ctx.setNodeState(ctx.node, 'incomplete');
+        }
 
-      prevChar = char;
+        i++;
 
-      try {
-        await randomDelay(
+        if (
+          ctx.isPreformattedNode(ctx.node) &&
+          WhitespaceRegex.test(char) &&
+          prevChar &&
+          WhitespaceRegex.test(prevChar)
+        ) {
+          continue;
+        }
+
+        prevChar = char;
+
+        await randomTimeout(
           {
             min: 30,
             max: 60,
           },
           ctx.signal,
         );
-      } catch (err) {
-        if (!ctx.signal.aborted) {
-          throw err;
-        }
-
-        break;
       }
+    } catch (err) {
+      if (!ctx.signal.aborted) {
+        throw err;
+      }
+    } finally {
+      ctx.setNodeState(ctx.node, 'complete');
+      ctx.cursor.blink();
     }
-
-    ctx.setState('complete');
-    ctx.cursor.blink();
   },
 };

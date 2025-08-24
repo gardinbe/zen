@@ -1,14 +1,10 @@
-import { type Effect } from '../effect';
+import { type EffectConstructor } from '../effect';
 
-export const Insert: Effect<string> = {
+export const InsertEffect: EffectConstructor<string> = {
   name: 'insert',
   parse: (value) => value,
-  run: (text) => (ctx) => {
-    if (!ctx.node) {
-      return;
-    }
-
+  create: (text) => (ctx) => {
     ctx.node.textContent += text;
-    ctx.setState('complete');
+    ctx.setNodeState(ctx.node, 'complete');
   },
 };

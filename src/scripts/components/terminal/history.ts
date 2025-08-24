@@ -1,4 +1,4 @@
-import type { TerminalElements } from '.';
+import { type TerminalElements } from '.';
 
 export type TerminalHistory = {
   /**
@@ -43,8 +43,14 @@ export type TerminalHistory = {
 };
 
 export type TerminalHistoryOptions = {
-  setInput: (value: string) => void;
+  /**
+   * Invoked when the history is navigated.
+   * @param value Navigated value.
+   */
+  onNavigate: (value: string) => void;
 };
+
+// todo: refactor input element logic out, and into input
 
 export const createTerminalHistory = (
   els: TerminalElements,
@@ -52,22 +58,22 @@ export const createTerminalHistory = (
 ): TerminalHistory => {
   const items: string[] = [];
   let pos = -1;
-  let lastValue = '';
+  let prevValue = '';
 
   const up = () => {
     if (!~pos) {
-      lastValue = els.input.value;
+      prevValue = els.input.value;
     }
 
     pos = Math.min(pos + 1, items.length - 1);
     const value = items[items.length - 1 - pos] ?? items[0] ?? '';
-    options.setInput(value);
+    options.onNavigate(value);
   };
 
   const down = () => {
     pos = Math.max(pos - 1, -1);
-    const value = items[items.length - 1 - pos] ?? lastValue ?? '';
-    options.setInput(value);
+    const value = items[items.length - 1 - pos] ?? prevValue ?? '';
+    options.onNavigate(value);
   };
 
   const add = (value: string) => {
@@ -87,7 +93,7 @@ export const createTerminalHistory = (
 
   const reset = () => {
     pos = -1;
-    lastValue = '';
+    prevValue = '';
   };
 
   const listeners = {

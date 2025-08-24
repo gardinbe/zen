@@ -1,9 +1,9 @@
 import { type Cursor, createCursor } from '../cursor';
-import { type EffectNodeState, createEffects } from './effect';
+import { type EffectContext, type EffectNodeState, createEffects } from './effect';
 import {
   type EffectBatch,
   type EffectBatchCallbacks,
-  type EffectRunner,
+  type EffectExecutor,
   createTyperQueue,
 } from './queue';
 
@@ -19,9 +19,9 @@ export type Typer = {
 
   /**
    * Appends HTML to the main element and types it.
-   * @param html HTML string.
+   * @param text Text to type.
    */
-  type: (html: string, callbacks?: Partial<EffectBatchCallbacks>) => void;
+  type: (text: string, callbacks?: Partial<EffectBatchCallbacks>) => void;
 
   /**
    * Stops the typer.
@@ -34,10 +34,12 @@ export type Typer = {
   clear: () => void;
 };
 
+// todo: this needs a tidy
+
 export const createTyper = (els: TyperElements): Typer => {
   let currentNode: Text | null = null;
 
-  const set = (node: Text | null) => {
+  const setNode = (node: Text) => {
     currentNode = node;
 
     if (!node) {
@@ -47,14 +49,9 @@ export const createTyper = (els: TyperElements): Typer => {
     cursor.attach(node);
   };
 
-  const setState = (state: EffectNodeState) => {
-    if (!currentNode) {
-      return;
-    }
-
+  const setNodeState = (node: Node, state: EffectNodeState) => {
     const updateParent = (parent: HTMLElement) => {
-      // todo: a check like this needs to be in place for remove/undo to work
-      // need to address ALL the shitty parentElement hacks in place
+      // todo: a check like this needs to be in place for remove/undo to work properly
 
       // if (parent.firstChild !== child) {
       //   return;
@@ -70,59 +67,61 @@ export const createTyper = (els: TyperElements): Typer => {
       updateParent(parent.parentElement!);
     };
 
-    updateParent(currentNode.parentElement!);
+    updateParent(node.parentElement!);
   };
 
-  const createEffectRunners = (..._nodes: Node[]) => {
+  const createEffectExecutors = (..._nodes: Node[]): EffectExecutor[] => {
     const nodes = parseNodes(..._nodes);
 
-    const runners = nodes.flatMap((node) => {
+    const executors = nodes.flatMap((node) => {
       const text = node.textContent!;
       node.textContent = '';
 
-      return createEffects(text).map<EffectRunner>((fn) => () => {
-        set(node);
-        return fn({
+      return createEffects(text).map<EffectExecutor>((effect) => () => {
+        setNode(node);
+
+        const ctx: EffectContext = {
           signal: queue.signal,
           cursor,
           nodes,
           get node() {
-            return currentNode;
+            return currentNode!;
           },
-          set,
-          setState,
-        });
+          setNode,
+          setNodeState,
+          isPreformattedNode,
+        };
+
+        return effect(ctx);
       });
     });
 
-    return runners;
+    return executors;
   };
 
   const createBatch = (nodes: Node[], callbacks?: Partial<EffectBatchCallbacks>): EffectBatch => {
     return {
-      runners: createEffectRunners(...nodes),
-      callbacks: {
-        onStart: () => {
-          callbacks?.onStart?.();
-        },
-        onComplete: () => {
-          callbacks?.onComplete?.();
-        },
-        onAbort: () => {
-          callbacks?.onAbort?.();
-        },
-        onEnd: () => {
-          callbacks?.onEnd?.();
-        },
+      executors: createEffectExecutors(...nodes),
+      onStart: () => {
+        callbacks?.onStart?.();
+      },
+      onComplete: () => {
+        callbacks?.onComplete?.();
+      },
+      onAbort: () => {
+        callbacks?.onAbort?.();
+      },
+      onFinish: () => {
+        callbacks?.onFinish?.();
       },
     };
   };
 
   const stop = () => queue.clear();
 
-  const type = async (html: string, callbacks?: Partial<EffectBatchCallbacks>) => {
+  const type = async (text: string, callbacks?: Partial<EffectBatchCallbacks>) => {
     const tpl = document.createElement('template');
-    tpl.innerHTML = html;
+    tpl.innerHTML = text;
     const nodes = [...tpl.content.childNodes];
     els.main.append(...nodes);
 
@@ -150,7 +149,7 @@ const parseNodes = (...nodes: Node[]): Text[] =>
   nodes.flatMap((node) => {
     if (node.nodeType === Node.TEXT_NODE) {
       // todo: very dodgy
-      if (!node.textContent?.trim() && !(node.parentElement instanceof HTMLPreElement)) {
+      if (!node.textContent!.trim() && !isPreformattedNode(node)) {
         return [];
       }
 
@@ -164,3 +163,6 @@ const parseNodes = (...nodes: Node[]): Text[] =>
 
     return parseNodes(...node.childNodes);
   });
+
+const isPreformattedNode = (node: Node) =>
+  getComputedStyle(node.parentElement!).whiteSpace !== 'pre-wrap';

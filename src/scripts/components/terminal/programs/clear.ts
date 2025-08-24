@@ -1,9 +1,9 @@
 import { type Program, ArgumentError } from '../program';
 
-export const Clear: Program = {
+export const ClearProgram: Program = {
   name: 'clear',
   description: 'Clears the terminal output.',
-  run:
+  exec:
     ([arg]) =>
     (ctx) => {
       if (arg) {

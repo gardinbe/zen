@@ -26,10 +26,10 @@ export type Dialog = {
 };
 
 export type DialogOptions = {
-  onClose?: (alt: boolean) => void;
+  onClose: (alt: boolean) => void;
 };
 
-export const createDialog = (els: DialogElements, options?: Partial<DialogOptions>): Dialog => {
+export const createDialog = (els: DialogElements, options: DialogOptions): Dialog => {
   const originalBtnText = els.closeBtn.textContent;
   let ctrl = false;
 
@@ -39,7 +39,7 @@ export const createDialog = (els: DialogElements, options?: Partial<DialogOption
 
   const close = (alt = false) => {
     els.main.hidden = true;
-    options?.onClose?.(alt);
+    options.onClose(alt);
   };
 
   const listeners = {

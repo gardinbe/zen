@@ -1,26 +1,40 @@
 import { type Cursor } from '../cursor';
-import { Delay } from './effects/delay';
-import { Insert } from './effects/insert';
-import { Remove } from './effects/remove';
-import { Type } from './effects/type';
-import { Undo } from './effects/undo';
+import { DelayEffect } from './effects/delay';
+import { InsertEffect } from './effects/insert';
+import { RemoveEffect } from './effects/remove';
+import { TypeEffect } from './effects/type';
+import { UndoEffect } from './effects/undo';
 
-export const Effects = {
-  delay: Delay,
-  insert: Insert,
-  remove: Remove,
-  type: Type,
-  undo: Undo,
-} as const satisfies Record<string, Effect>;
+export const EffectConstructors: EffectConstructor[] = [
+  DelayEffect,
+  InsertEffect,
+  RemoveEffect,
+  TypeEffect,
+  UndoEffect,
+];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Effect<Arg = any> = {
+export type EffectConstructor<T = any> = {
+  /**
+   * Name of the effect.
+   */
   name: string;
-  parse: (value: string) => Arg;
-  run: (arg: Arg) => EffectFunction;
+
+  /**
+   * Parses the effect value.
+   * @param value Raw effect value.
+   * @returns Parsed effect value.
+   */
+  parse: (value: string) => T;
+
+  /**
+   * Creates and returns an effect.
+   * @param arg Parsed effect value.
+   */
+  create: (arg: T) => Effect;
 };
 
-export type EffectFunction = (ctx: EffectContext) => void | Promise<void>;
+export type Effect = (ctx: EffectContext) => void | Promise<void>;
 
 export type EffectContext = Readonly<{
   /**
@@ -41,66 +55,87 @@ export type EffectContext = Readonly<{
   /**
    * Current text node.
    */
-  node: Text | null;
+  node: Text;
 
   /**
    * Sets the current text node.
+   * @param node Target node.
    */
-  set: (node: Text | null) => void;
+  setNode: (node: Text) => void;
 
   /**
-   * Sets the state of the current node.
+   * Sets the state of the given node.
+   * @param node Target node.
+   * @param state State to set.
    */
-  setState: (state: EffectNodeState) => void;
+  setNodeState: (node: Text, state: EffectNodeState) => void;
+
+  /**
+   * Checks if the given node is preformatted.
+   * @param node Target node.
+   * @returns True if the node is preformatted.
+   */
+  isPreformattedNode: (node: Text) => boolean;
 }>;
 
 export type EffectNodeState = 'incomplete' | 'active' | 'complete';
 
 export const WhitespaceRegex = /\s/;
 
-const EffectRegex = /\[\[\s*(.*?)\s*:(.*?)\]\]/dgs;
+/**
+ * Parses and creates effects from a string.
+ * @returns Array of effects.
+ */
+export const createEffects = (text: string): Effect[] => {
+  let prevIndex = 0;
 
-const createEffect = (match: RegExpExecArray) => {
-  const [, key, value] = match;
+  const matches = [...text.matchAll(EffectRegex)];
 
-  if (!key || !value) {
-    throw new Error('Error parsing typer');
-  }
+  const effects = matches.flatMap((match) => {
+    const [full, key, value] = match;
 
-  const effect = Object.values<Effect>(Effects).find((effect) => effect.name === key);
+    if (!key || !value) {
+      throw new Error('Error parsing typer');
+    }
 
-  if (!effect) {
-    throw new Error('Unknown typer effect');
-  }
+    const effect = createEffect({
+      key,
+      value,
+    });
 
-  return {
-    effect: effect.run(effect.parse(value)),
-    end: match.index,
-  };
-};
-
-export const createEffects = (text: string): EffectFunction[] => {
-  let last = 0;
-
-  const effects = [...text.matchAll(EffectRegex)].flatMap<EffectFunction>((match) => {
-    const [full] = match;
-    const { effect, end } = createEffect(match);
-
-    const slice = text.slice(last, end);
-    last = match.index + full.length;
+    const slice = text.slice(prevIndex, match.index);
+    prevIndex = match.index + full.length;
 
     if (!slice) {
       return effect;
     }
 
-    return [Type.run(slice), effect];
+    return [TypeEffect.create(slice), effect];
   });
 
-  const slice = text.slice(last);
+  const slice = text.slice(prevIndex);
 
   if (slice) {
-    effects.push(Type.run(slice));
+    effects.push(TypeEffect.create(slice));
   }
 
   return effects;
+};
+
+const EffectRegex = /\[\[\s*(.*?)\s*:(.*?)\]\]/dgs;
+
+type EffectConstructorObject = {
+  key: string;
+  value: string;
+};
+
+const createEffect = (obj: EffectConstructorObject): Effect => {
+  const { key, value } = obj;
+  const effect = EffectConstructors.find((effect) => effect.name === key);
+
+  if (!effect) {
+    throw new Error('Unknown typer effect');
+  }
+
+  return effect.create(effect.parse(value));
 };

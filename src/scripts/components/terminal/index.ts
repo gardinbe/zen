@@ -1,8 +1,9 @@
-import { type ProgramContext, getProgram } from './program';
+import { type ProgramContext, getCommands, getProgram } from './program';
 import { type TerminalLogger, createTerminalLogger } from './logger';
 import { type TerminalProgramController, createTerminalProgramController } from './controller';
 import { type TerminalInput, createTerminalInput } from './input';
 import { type TerminalHistory, createTerminalHistory } from './history';
+import { Documents, getDocument } from '../../lib/documents';
 
 export type TerminalElements = {
   main: HTMLElement;
@@ -74,7 +75,19 @@ export const createTerminal = (els: TerminalElements): Terminal => {
       history,
     };
 
-    return program.run(parsed.args)(ctx);
+    return program.exec(parsed.args)(ctx);
+  };
+
+  const logStartMessage = async () => {
+    const [html, error] = await getDocument('misc/terminal-start-message.md', {
+      raw: true,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    logger.stdout(html);
   };
 
   const logger = createTerminalLogger(els);
@@ -87,10 +100,27 @@ export const createTerminal = (els: TerminalElements): Terminal => {
       logger.stdin('^C');
     },
     onSubmit: exec,
+    suggester: {
+      getSuggestions: (value) => {
+        const parsed = parse(value);
+
+        if (!parsed || !getProgram(parsed.name)) {
+          return getCommands().filter((name) => name.startsWith(value));
+        }
+
+        const arg = parsed.args.at(-1) || '';
+
+        return Documents.filter((name) => name.startsWith(arg)).map(
+          (name) => `${parsed.name} ${name}`,
+        );
+      },
+    },
   });
   const history = createTerminalHistory(els, {
-    setInput: input.set,
+    onNavigate: input.set,
   });
+
+  logStartMessage();
 
   return {
     logger,
@@ -100,9 +130,6 @@ export const createTerminal = (els: TerminalElements): Terminal => {
     exec,
   };
 };
-
-const ExpressionRegex = /(\S+)(?:\s+(.*))?/s;
-const TokenRegex = /"([^"]+)"|'([^']+)'|`([^`]+)`|(\S+)/gs;
 
 type ParsedInput = {
   name: string;
@@ -118,7 +145,9 @@ const parse = (str: string): ParsedInput | null => {
   }
 
   const args = argsStr
-    ? [...argsStr.matchAll(TokenRegex)].map((m) => (m[1] || m[2] || m[3] || m[4]) as string)
+    ? [...argsStr.matchAll(TokenRegex)].map(
+        (match) => (match[1] || match[2] || match[3] || match[4]) as string,
+      )
     : [];
 
   return {
@@ -126,3 +155,6 @@ const parse = (str: string): ParsedInput | null => {
     args,
   };
 };
+
+const ExpressionRegex = /(\S+)(?:\s+(.*))?/s;
+const TokenRegex = /"([^"]+)"|'([^']+)'|`([^`]+)`|(\S+)/gs;

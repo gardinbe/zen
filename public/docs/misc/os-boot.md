@@ -1,4 +1,4 @@
-<pre class="zen-typer">[[insert:      /`·.¸
+[[insert:      /`·.¸
      /¸...¸`:·
  ¸.·´  ¸   `·.¸.·´)
 : © ):´;      ¸  {
@@ -19,4 +19,4 @@ Award Plug and Play BIOS Extension v1.0A[[delay:500]]
 
 System Initialized[[delay:1000]]
 
-Press <strong>ENTER</strong> to continue</pre>
+Press <strong>ENTER</strong> to continue

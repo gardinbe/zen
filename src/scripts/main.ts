@@ -3,7 +3,7 @@ import { createAudioPlayer } from './components/audio';
 import { createDialog } from './components/dialog';
 import { createTyper } from './components/typer';
 import { createTerminal } from './components/terminal';
-import { fetchDocument } from './utils/fetch';
+import { getDocument } from './lib/documents';
 
 const backgroundAudio = createAudioPlayer({
   main: query<HTMLAudioElement>('.js-background-audio'),
@@ -36,17 +36,23 @@ const showLaunch = () => {
 };
 
 const showBoot = async () => {
-  const view = query('.js-boot-sequence-view');
+  const view = query('.js-os-boot-view');
 
   const bootSequenceTyper = createTyper({
-    main: query('.js-boot-sequence-typer'),
+    main: query('.js-os-boot-typer'),
   });
 
-  const html = await fetchDocument('boot');
+  const [html, error] = await getDocument('misc/os-boot.md', {
+    raw: true,
+  });
+
+  if (error) {
+    throw error;
+  }
 
   view.hidden = false;
   bootSequenceTyper.type(html, {
-    onEnd: () => {
+    onFinish: () => {
       addEventListener(
         'keydown',
         (ev) => {

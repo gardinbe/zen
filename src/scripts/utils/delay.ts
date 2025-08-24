@@ -1,9 +1,10 @@
 /**
- * Creates a promise that resolves after the specified duration.
+ * Creates a timeout with the given duration and returns a promise that resolves when the timeout
+ * completes.
  * @param ms Duration in milliseconds.
  * @returns Empty promise.
  */
-export const delay = (ms: number, signal?: AbortSignal) =>
+export const timeout = (ms = 0, signal?: AbortSignal) =>
   new Promise<void>((resolve, reject) => {
     if (!signal) {
       setTimeout(resolve, ms);
@@ -24,11 +25,12 @@ export const delay = (ms: number, signal?: AbortSignal) =>
   });
 
 /**
- * Creates a promise that resolves after a random duration.
- * @param options Minimum and maximum duration in milliseconds.
+ * Creates a timeout with a random duration and returns a promise that resolves when the timeout
+ * completes.
+ * @param durations Minimum and maximum duration in milliseconds.
  * @returns Empty promise.
  */
-export const randomDelay = (
+export const randomTimeout = (
   {
     min,
     max,
@@ -44,4 +46,4 @@ export const randomDelay = (
     max: number;
   },
   signal?: AbortSignal,
-) => delay(Math.random() * (max - min) + min, signal);
+) => timeout(Math.random() * (max - min) + min, signal);

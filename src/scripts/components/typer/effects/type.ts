@@ -1,52 +1,49 @@
-import { type Effect, WhitespaceRegex } from '../effect';
-import { randomDelay } from '../../../utils/delay';
+import { type EffectConstructor, WhitespaceRegex } from '../effect';
+import { randomTimeout } from '../../../utils/delay';
 
-export const Type: Effect<string> = {
+export const TypeEffect: EffectConstructor<string> = {
   name: 'type',
   parse: (value) => value,
-  run: (text) => async (ctx) => {
-    ctx.cursor.freeze();
+  create: (text) => async (ctx) => {
+    try {
+      ctx.cursor.freeze();
 
-    let prevChar: string | null = null;
-    let i = 0;
+      let prevChar: string | null = null;
+      let i = 0;
 
-    while (i < text.length && ctx.node) {
-      ctx.setState('active');
+      while (i < text.length) {
+        ctx.setNodeState(ctx.node, 'active');
 
-      const char = text[i]!;
-      ctx.node.textContent! += char;
-      i++;
+        const char = text[i]!;
+        ctx.node.textContent! += char;
+        i++;
 
-      if (
-        // todo: this is dodgy
-        !(ctx.node.parentElement instanceof HTMLPreElement) &&
-        WhitespaceRegex.test(char) &&
-        prevChar &&
-        WhitespaceRegex.test(prevChar)
-      ) {
-        continue;
-      }
+        if (
+          ctx.isPreformattedNode(ctx.node) &&
+          WhitespaceRegex.test(char) &&
+          prevChar &&
+          WhitespaceRegex.test(prevChar)
+        ) {
+          continue;
+        }
 
-      prevChar = char;
+        prevChar = char;
 
-      try {
-        await randomDelay(
+        await randomTimeout(
           {
             min: 2,
             max: 5,
           },
           ctx.signal,
         );
-      } catch (err) {
-        if (!ctx.signal.aborted) {
-          throw err;
-        }
-
-        break;
       }
+    } catch (err) {
+      if (!ctx.signal.aborted) {
+        throw err;
+      }
+    } finally {
+      ctx.setNodeState(ctx.node, 'complete');
+      ctx.cursor.blink();
     }
-
-    ctx.setState('complete');
-    ctx.cursor.blink();
   },
 };

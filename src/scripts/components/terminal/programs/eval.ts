@@ -1,11 +1,19 @@
+import { timeout } from '../../../utils/delay';
 import { type Program, ArgumentError } from '../program';
 
-export const Eval: Program = {
+export const EvalProgram: Program = {
   name: 'eval',
   description: 'Evaluates a JavaScript expression.',
-  run:
+  arguments: [
+    {
+      name: '[expression]',
+      description:
+        'The expression to evaluate. Must be surrounded in quotes if it contains spaces.',
+    },
+  ],
+  exec:
     ([expression, arg]) =>
-    (ctx) => {
+    async (ctx) => {
       if (arg) {
         ctx.logger.stderr(ArgumentError.unexpected(2, arg));
         return;
@@ -31,7 +39,9 @@ export const Eval: Program = {
         console.error = ctx.logger.stderr;
         console.clear = ctx.logger.clear;
 
-        const result = eval?.(`'use strict';${expression}`);
+        const result = eval?.(`void 'use strict';${expression}`);
+        await timeout();
+
         ctx.logger.stdout(result);
       } catch (err) {
         ctx.logger.stderr(err);

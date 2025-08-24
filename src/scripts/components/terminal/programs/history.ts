@@ -1,9 +1,19 @@
 import { type Program, ArgumentError } from '../program';
 
-export const History: Program = {
+export const HistoryProgram: Program = {
   name: 'history',
   description: 'Handles the command history.',
-  run:
+  arguments: [
+    {
+      name: '[blank] | all',
+      description: 'Prints the command history.',
+    },
+    {
+      name: 'clear',
+      description: 'Clears the command history.',
+    },
+  ],
+  exec:
     ([option = 'all', arg]) =>
     (ctx) => {
       if (arg) {

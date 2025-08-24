@@ -1,11 +1,21 @@
-import type { TerminalElements } from '.';
-import { createCursor, type Cursor } from '../cursor';
+import { type TerminalElements } from '../';
+import { type Cursor, createCursor } from '../../cursor';
+import {
+  type TerminalInputSuggester,
+  type TerminalInputSuggesterOptions,
+  createTerminalInputSuggester,
+} from './suggester';
 
 export type TerminalInput = {
   /**
    * Cursor instance.
    */
   cursor: Cursor;
+
+  /**
+   * Suggester instance.
+   */
+  suggester: TerminalInputSuggester;
 
   /**
    * Sets the input value.
@@ -41,6 +51,11 @@ export type TerminalInputOptions = {
    * @param value Input value.
    */
   onSubmit: (value: string) => void;
+
+  /**
+   * Suggester options.
+   */
+  suggester: TerminalInputSuggesterOptions;
 };
 
 export const createTerminalInput = (
@@ -65,6 +80,7 @@ export const createTerminalInput = (
 
   const listeners = {
     input: () => {
+      suggester.reset();
       resize();
       cursor.freeze();
       requestAnimationFrame(cursor.blink);
@@ -77,10 +93,30 @@ export const createTerminalInput = (
       }
 
       if (ev.ctrlKey && ev.key === 'c') {
+        const selection = getSelection();
+
+        if (
+          selection?.toString() &&
+          (selection.anchorNode?.contains(els.input) || selection.focusNode?.contains(els.input))
+        ) {
+          return;
+        }
+
         ev.preventDefault();
         clear();
-        options?.onCancel?.();
+        options.onCancel();
         return;
+      }
+
+      if (ev.key === 'Tab') {
+        ev.preventDefault();
+        const suggestion = suggester.get(els.input.value);
+
+        if (!suggestion) {
+          return;
+        }
+
+        set(suggestion);
       }
     },
 
@@ -104,8 +140,7 @@ export const createTerminalInput = (
       ev.preventDefault();
       const value = els.input.value;
       clear();
-      requestAnimationFrame(repositionCursor);
-      options?.onSubmit?.(value);
+      options.onSubmit(value);
     },
   };
 
@@ -129,9 +164,13 @@ export const createTerminalInput = (
   };
 
   const cursor = createCursor();
+  const suggester = createTerminalInputSuggester({
+    getSuggestions: options.suggester.getSuggestions,
+  });
 
   cursor.attach(els.input);
   cursor.hide();
+
   requestAnimationFrame(() => {
     els.input.focus();
   });
@@ -140,6 +179,7 @@ export const createTerminalInput = (
 
   return {
     cursor,
+    suggester,
     set,
     clear,
     listen,

@@ -1,4 +1,4 @@
-import type { TerminalElements } from '.';
+import { type TerminalElements } from '.';
 import { type Typer, createTyper } from '../typer';
 
 export type TerminalLogger = {
@@ -17,7 +17,7 @@ export type TerminalLogger = {
    * Logs a standard output to the terminal.
    * @param output Output to log.
    */
-  stdout: (output: string, options?: Partial<WriteOptions>) => void;
+  stdout: (output: string, options?: Partial<LoggerWriteOptions>) => void;
 
   /**
    * Logs a standard error to the terminal.
@@ -34,7 +34,7 @@ export type TerminalLogger = {
 export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   const write = async (text: string) => {
     let finished = false;
-    let lastScrollPos = els.main.scrollTop;
+    let prevScrollPos = els.main.scrollTop;
     let manuallyScrolled = false;
     let scrolled = false;
 
@@ -59,14 +59,14 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
         return;
       }
 
-      if (els.main.scrollTop <= lastScrollPos) {
+      if (els.main.scrollTop <= prevScrollPos) {
         requestAnimationFrame(check);
         return;
       }
 
       manuallyScrolled = true;
       els.main.scrollTop = els.main.scrollHeight;
-      lastScrollPos = els.main.scrollTop;
+      prevScrollPos = els.main.scrollTop;
       requestAnimationFrame(check);
     };
 
@@ -76,7 +76,7 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
       onStart: () => {
         typer.cursor.show();
       },
-      onEnd: () => {
+      onFinish: () => {
         typer.cursor.hide();
         els.main.removeEventListener('scroll', onscroll);
         finished = true;
@@ -89,8 +89,8 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   };
 
   const stdin = (input: string) => write(`[[insert:> ${input}\n]]`);
-  const stdout = (output: string, options?: Partial<WriteOptions>) =>
-    write(options?.noNewline ? output : `${output}[[insert:\n]]`);
+  const stdout = (output: string, options?: Partial<LoggerWriteOptions>) =>
+    write(options?.noNewlines ? output : `[[insert:\n]]${output}[[insert:\n\n]]`);
   const stderr = (error: unknown) =>
     write(`[[insert:ERROR: ${error instanceof Error ? error.message : error}\n]]`);
 
@@ -109,10 +109,10 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
 
 // todo: unsure if this is the best approach
 
-export type WriteOptions = {
+export type LoggerWriteOptions = {
   /**
-   * Whether to prevent adding a newline after the output.
+   * Whether to prevent adding a newlines before/after the output.
    * @default false
    */
-  noNewline?: boolean;
+  noNewlines?: boolean;
 };
