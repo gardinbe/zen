@@ -35,10 +35,9 @@
       >
         <form class="zen-dialog js-start-dialog">
           <div class="zen-dialog-inner">
-            <div class="zen-dialog-heading">Zen</div>
-            <div class="zen-dialog-body">
-              <p>Zen OS v1.7.13</p>
-              <small>Zen systems (C) 1991.</small>
+            <div class="zen-dialog-heading">
+              <h1>ZenOS</h1>
+              <p>v0.1</p>
             </div>
             <div class="zen-dialog-actions">
               <button
@@ -64,14 +63,16 @@
         hidden
       >
         <div class="zen-terminal js-terminal">
-          <pre class="zen-terminal-output zen-typer js-terminal-output"></pre>
+          <div class="zen-typer-container js-terminal-output-container">
+            <pre class="zen-typer js-terminal-output"></pre>
+          </div>
           <form class="zen-terminal-prompt js-terminal-prompt">
             <pre
               class="zen-terminal-prompt-pre zen-typer"
             ><span class="zen-terminal-prefix js-terminal-prefix">> </span
             ><span class="zen-terminal-input-container"
               ><input
-                class="zen-terminal-input zen-typer zen-typer--inline js-terminal-input"
+                class="zen-terminal-input zen-typer js-terminal-input"
                 name="zen-terminal-input"
                 type="text"
                 autocomplete="off"

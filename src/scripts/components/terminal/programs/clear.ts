@@ -1,6 +1,6 @@
-import { type Program, ArgumentError } from '../program';
+import { type ProgramConstructor, ArgumentError } from '../program';
 
-export const ClearProgram: Program = {
+export const ClearProgram: ProgramConstructor = {
   name: 'clear',
   description: 'Clears the terminal output.',
   exec:

@@ -20,6 +20,7 @@ export type Typer = {
   /**
    * Appends HTML to the main element and types it.
    * @param text Text to type.
+   * @param callbacks Callbacks.
    */
   type: (text: string, callbacks?: Partial<EffectBatchCallbacks>) => void;
 
@@ -99,6 +100,46 @@ export const createTyper = (els: TyperElements): Typer => {
     return executors;
   };
 
+  const parseNodes = (...nodes: Node[]): Text[] =>
+    nodes.flatMap((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (!isPreformattedNode(node) && !node.textContent!.trim()) {
+          return [];
+        }
+
+        return [node as Text];
+      }
+
+      if (node instanceof HTMLElement) {
+        // todo: reconsider this
+        // `hidden` applies to apply margin trimming based on base.css
+        node.hidden = true;
+        node.dataset.typerState = 'incomplete';
+      }
+
+      return parseNodes(...node.childNodes);
+    });
+
+  /**
+   * Checks if the node is a preformatted node.
+   *
+   * todo: there is a super annoying edge case that is not handled.
+   *
+   * although i think its an 'intended' behavior
+   *
+   * if there is a <pre> within the typer output, and there is an empty text node (newline), then
+   * the newline will not be hidden. this causes the cursor to flash onto the newline for an
+   * instant. this is expected, because whitespace must be respected in preformatted elements.
+   *
+   * however, marked.js and markdown-it both insert newlines at the end of a <code> block within a
+   * <pre>, so that fucks this up, causing a brief cursor flash at the end
+   *
+   * @param node Node to check.
+   * @returns True if the node is a preformatted node.
+   */
+  const isPreformattedNode = (node: Node): boolean =>
+    ['pre', 'pre-wrap', 'pre-line'].includes(getComputedStyle(node.parentElement!).whiteSpace);
+
   const createBatch = (nodes: Node[], callbacks?: Partial<EffectBatchCallbacks>): EffectBatch => {
     return {
       executors: createEffectExecutors(...nodes),
@@ -144,25 +185,3 @@ export const createTyper = (els: TyperElements): Typer => {
     clear,
   };
 };
-
-const parseNodes = (...nodes: Node[]): Text[] =>
-  nodes.flatMap((node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      // todo: very dodgy
-      if (!node.textContent!.trim() && !isPreformattedNode(node)) {
-        return [];
-      }
-
-      return [node as Text];
-    }
-
-    if (node instanceof HTMLElement) {
-      node.hidden = true;
-      node.dataset.typerState = 'incomplete';
-    }
-
-    return parseNodes(...node.childNodes);
-  });
-
-const isPreformattedNode = (node: Node) =>
-  getComputedStyle(node.parentElement!).whiteSpace !== 'pre-wrap';

@@ -22,7 +22,7 @@ export const RemoveEffect: EffectConstructor<number> = {
         break;
       }
 
-      const prevNode = ctx.nodes[ctx.nodes.indexOf(ctx.node) - 1];
+      const prevNode = ctx.nodes.at(ctx.nodes.indexOf(ctx.node) - 1);
 
       if (prevNode) {
         ctx.setNode(prevNode);

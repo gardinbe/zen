@@ -1,14 +1,14 @@
 import { getDocument } from '../../../lib/documents';
-import { HttpNotFoundError } from '../../../utils/fetch';
-import { type Program, ArgumentError } from '../program';
+import { HttpNotFoundError } from '../../../utils/result';
+import { type ProgramConstructor, ArgumentError } from '../program';
 
-export const PrintProgram: Program = {
+export const PrintProgram: ProgramConstructor = {
   name: 'print',
   description: 'Prints a document to the terminal.',
   arguments: [
     {
       name: '[filename]',
-      description: 'The name of the document to print. Use `ls` to list available documents.',
+      description: 'Name of the document to print. Use `ls` to list available documents.',
     },
   ],
   exec:
@@ -24,7 +24,7 @@ export const PrintProgram: Program = {
         return;
       }
 
-      const [html, error] = await getDocument(filename);
+      const [html, error] = await getDocument(filename, ctx.signal);
 
       if (error) {
         if (error instanceof HttpNotFoundError) {

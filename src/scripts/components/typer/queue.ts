@@ -2,9 +2,9 @@ import { type Effect } from './effect';
 
 export type TyperQueue = {
   /**
-   * Current queue abort signal.
+   * Returns the current queue abort signal.
    */
-  signal: AbortSignal;
+  readonly signal: AbortSignal;
 
   /**
    * Pushes batches to the queue.

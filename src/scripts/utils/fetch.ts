@@ -1,22 +1,33 @@
-import { type Result } from './result';
+import {
+  type FetchError,
+  type Result,
+  AbortError,
+  FetchFailedError,
+  HttpGenericError,
+  HttpNotFoundError,
+  ParseError,
+} from './result';
 
-export class HttpNotFoundError extends Error {}
-export class HttpGenericError extends Error {}
-export class FetchFailedError extends Error {}
-export class ParseError extends Error {}
-export type FetchError = HttpNotFoundError | HttpGenericError | FetchFailedError;
-
+/**
+ * Basic HTTP client.
+ */
 export const http = {
   /**
    * Fetches content from the given URL and returns the response.
    * @param url URL to fetch.
+   * @param signal Abort signal.
    * @returns Response.
    */
-  fetch: async (url: string): Promise<Result<Response, FetchError>> => {
+  fetch: async (
+    url: string,
+    signal: AbortSignal | null,
+  ): Promise<Result<Response, FetchError | AbortError>> => {
     let res;
 
     try {
-      res = await fetch(url);
+      res = await fetch(url, {
+        signal: signal ?? null,
+      });
 
       if (!res.ok) {
         if (res.status === 404) {
@@ -26,22 +37,60 @@ export const http = {
         return [null, new HttpGenericError()];
       }
     } catch {
+      if (signal?.aborted) {
+        return [null, new AbortError()];
+      }
+
       return [null, new FetchFailedError()];
     }
 
     return [res, null];
   },
   parse: {
-    text: (res: Response) => _parse(res, 'text'),
-    json: <T>(res: Response) => _parse(res, 'json') as T,
+    /**
+     * Parses the response body as text and returns the result.
+     * @param res Response to parse.
+     * @param signal Abort signal.
+     * @returns Parsed text.
+     */
+    text: (res: Response, signal: AbortSignal | null) => parse(res, 'text', signal),
+
+    /**
+     * Parses the response body as JSON and returns the result.
+     * @param res Response to parse.
+     * @param signal Abort signal.
+     * @returns Parsed JSON.
+     */
+    json: <T>(res: Response, signal: AbortSignal | null) => parse(res, 'json', signal) as T,
   },
 } as const;
 
-const _parse = async (res: Response, method: 'text' | 'json') => {
-  try {
-    const text = await res[method]();
-    return [text, null];
-  } catch {
-    return [null, new ParseError()];
-  }
-};
+const parse = async (
+  res: Response,
+  method: 'text' | 'json',
+  signal: AbortSignal | null,
+): Promise<Result<string, ParseError | AbortError>> =>
+  new Promise((resolve) => {
+    const onAbort = async () => {
+      await res.body?.cancel();
+      resolve([null, new AbortError()]);
+    };
+
+    signal?.addEventListener('abort', onAbort, { once: true });
+
+    (async () => {
+      try {
+        const text = await res[method]();
+        resolve([text, null]);
+      } catch (error) {
+        if (signal?.aborted) {
+          resolve([null, new ParseError()]);
+          return;
+        }
+
+        resolve([null, error as Error]);
+      } finally {
+        signal?.removeEventListener('abort', onAbort);
+      }
+    })();
+  });

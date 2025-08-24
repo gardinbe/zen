@@ -1,33 +1,32 @@
+import { AbortError } from './result';
+
 /**
  * Creates a timeout with the given duration and returns a promise that resolves when the timeout
  * completes.
  * @param ms Duration in milliseconds.
+ * @param signal Abort signal.
  * @returns Empty promise.
  */
-export const timeout = (ms = 0, signal?: AbortSignal) =>
-  new Promise<void>((resolve, reject) => {
-    if (!signal) {
-      setTimeout(resolve, ms);
-      return;
-    }
-
+export const timeout = (ms: number, signal: AbortSignal | null): Promise<AbortError | null> =>
+  new Promise((resolve) => {
     const timeout = setTimeout(() => {
-      signal.removeEventListener('abort', onAbort);
-      resolve();
+      signal?.removeEventListener('abort', onAbort);
+      resolve(null);
     }, ms);
 
     const onAbort = () => {
       clearTimeout(timeout);
-      reject();
+      resolve(new AbortError());
     };
 
-    signal.addEventListener('abort', onAbort, { once: true });
+    signal?.addEventListener('abort', onAbort, { once: true });
   });
 
 /**
  * Creates a timeout with a random duration and returns a promise that resolves when the timeout
  * completes.
  * @param durations Minimum and maximum duration in milliseconds.
+ * @param signal Abort signal.
  * @returns Empty promise.
  */
 export const randomTimeout = (
@@ -45,5 +44,5 @@ export const randomTimeout = (
      */
     max: number;
   },
-  signal?: AbortSignal,
-) => timeout(Math.random() * (max - min) + min, signal);
+  signal: AbortSignal | null,
+): Promise<AbortError | null> => timeout(Math.random() * (max - min) + min, signal);

@@ -2,9 +2,9 @@ import { type TerminalElements } from '.';
 
 export type TerminalHistory = {
   /**
-   * History items.
+   * History entries.
    */
-  readonly items: string[];
+  readonly entries: string[];
 
   /**
    * Scrolls up in the history.
@@ -56,28 +56,55 @@ export const createTerminalHistory = (
   els: TerminalElements,
   options: TerminalHistoryOptions,
 ): TerminalHistory => {
-  const items: string[] = [];
+  const entries: string[] = [];
   let pos = -1;
   let prevValue = '';
+
+  const save = () => {
+    localStorage.setItem('terminal-history', JSON.stringify(entries));
+  };
+
+  const load = () => {
+    const stored = localStorage.getItem('terminal-history');
+
+    if (!stored) {
+      return;
+    }
+
+    let parsed;
+
+    try {
+      parsed = JSON.parse(stored) as string[];
+    } catch {
+      return;
+    }
+
+    entries.push(...parsed);
+  };
 
   const up = () => {
     if (!~pos) {
       prevValue = els.input.value;
     }
 
-    pos = Math.min(pos + 1, items.length - 1);
-    const value = items[items.length - 1 - pos] ?? items[0] ?? '';
+    pos = Math.min(pos + 1, entries.length - 1);
+    const value = entries.at(-1 - pos) ?? entries.at(0) ?? '';
     options.onNavigate(value);
   };
 
   const down = () => {
     pos = Math.max(pos - 1, -1);
-    const value = items[items.length - 1 - pos] ?? prevValue ?? '';
+    const value = entries.at(-1 - pos) ?? prevValue ?? '';
     options.onNavigate(value);
   };
 
   const add = (value: string) => {
-    items.push(value);
+    if (entries.at(-1) === value) {
+      return;
+    }
+
+    entries.push(value);
+    save();
 
     if (!~pos) {
       return;
@@ -87,7 +114,8 @@ export const createTerminalHistory = (
   };
 
   const clear = () => {
-    items.length = 0;
+    entries.length = 0;
+    save();
     reset();
   };
 
@@ -122,10 +150,11 @@ export const createTerminalHistory = (
     els.input.removeEventListener('input', reset);
   };
 
+  load();
   listen();
 
   return {
-    items,
+    entries,
     up,
     down,
     add,

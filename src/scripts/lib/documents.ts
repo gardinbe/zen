@@ -1,13 +1,13 @@
-import { parse } from 'marked';
-import { type FetchError, http, ParseError } from '../utils/fetch';
-import { type Result } from '../utils/result';
+import { type Result, type FetchError, type ParseError, AbortError } from '../utils/result';
+import { parseMarkdown } from '../utils/markdown';
+import { http } from '../utils/fetch';
 
 /**
  * Array of available documents.
  *
  * Necessary as it's not possible to get a list of available documents without a dedicated HTTP server.
  */
-export const Documents = ['example.md', 'bee-movie.md'];
+export const Documents = ['bee-movie.md', 'example.md'];
 
 export type GetDocumentOptions = {
   /**
@@ -20,36 +20,36 @@ export type GetDocumentOptions = {
 /**
  * Retrieves and parses a markdown document.
  * @param name Document name.
+ * @param signal Abort signal.
  * @param raw If true, returns the raw markdown content.
  * @returns Document content.
  */
 export const getDocument = async (
   name: string,
+  signal: AbortSignal | null,
   options?: Partial<GetDocumentOptions>,
-): Promise<Result<string, FetchError | ParseError>> => {
+): Promise<Result<string, FetchError | ParseError | AbortError>> => {
   const url = `/docs/${name.replace(/^.\//, '').replace(/(\.md)?$/i, '.md')}`;
-  const [res, fetchError] = await http.fetch(url);
+  const [res, fetchError] = await http.fetch(url, signal);
 
   if (fetchError) {
     return [null, fetchError];
   }
 
-  const [md, parseError] = await http.parse.text(res);
+  const [text, parseError] = await http.parse.text(res, signal);
 
   if (parseError) {
     return [null, parseError];
   }
 
   if (options?.raw) {
-    return [md, null];
+    return [text, null];
   }
 
-  let html;
+  const [html, markdownParseError] = await parseMarkdown(text, signal);
 
-  try {
-    html = await parse(md);
-  } catch {
-    return [null, new ParseError()];
+  if (markdownParseError) {
+    return [null, markdownParseError];
   }
 
   return [html, null];

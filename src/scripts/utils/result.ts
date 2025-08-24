@@ -15,9 +15,7 @@ export type ErrorResult<E = unknown> = [null, E];
  * @template T Value type.
  * @template E Error type.
  */
-export type Result<T = unknown, E = unknown> =
-	| SuccessResult<T>
-	| ErrorResult<E>;
+export type Result<T = unknown, E = unknown> = SuccessResult<T> | ErrorResult<E>;
 
 /**
  * Unwraps a result.
@@ -26,46 +24,46 @@ export type Result<T = unknown, E = unknown> =
 export type Unwrapped<T> = T extends Result<infer U, never> ? U : never;
 
 export const unwrap: {
-	/**
-	 * Unwraps a result.
-	 * @param result Result to unwrap.
-	 * @returns Unwrapped value.
-	 * @throws Error if the result is an error.
-	 */
-	<T>(result: Result<T>): T;
-	<T>(result: PromiseLike<Result<T>>): Promise<T>;
+  /**
+   * Unwraps a result.
+   * @param result Result to unwrap.
+   * @returns Unwrapped value.
+   * @throws Error if the result is an error.
+   */
+  <T>(result: Result<T>): T;
+  <T>(result: PromiseLike<Result<T>>): Promise<T>;
 } = (result) => {
-	if (isPromiseLike(result)) {
-		return result.then(unwrap);
-	}
+  if (isPromiseLike(result)) {
+    return result.then(unwrap);
+  }
 
-	const [data, error] = result;
+  const [data, error] = result;
 
-	if (error) {
-		throw error;
-	}
+  if (error) {
+    throw error;
+  }
 
-	return data!;
+  return data!;
 };
 
 export const unwrapAll: {
-	/**
-	 * Unwraps multiple results.
-	 * @param results Results to unwrap.
-	 * @returns Unwrapped values.
-	 * @throws Error if any result is an error.
-	 */
-	<T extends Result[]>(...results: T[]): { [K in keyof T]: Unwrapped<T[K]> };
-	<T extends PromiseLike<Result[]>, U extends Awaited<T>>(
-		results: T
-	): Promise<{ [K in keyof U]: Unwrapped<U[K]> }>;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  /**
+   * Unwraps multiple results.
+   * @param results Results to unwrap.
+   * @returns Unwrapped values.
+   * @throws Error if any result is an error.
+   */
+  <T extends Result[]>(...results: T[]): { [K in keyof T]: Unwrapped<T[K]> };
+  <T extends PromiseLike<Result[]>, U extends Awaited<T>>(
+    results: T,
+  ): Promise<{ [K in keyof U]: Unwrapped<U[K]> }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } = (results: Result[] | PromiseLike<Result>[]): any => {
-	if (isPromiseLike(results)) {
-		return results.then(unwrapAll);
-	}
+  if (isPromiseLike(results)) {
+    return results.then(unwrapAll);
+  }
 
-	return results.map(unwrap);
+  return results.map(unwrap);
 };
 
 /**
@@ -73,7 +71,23 @@ export const unwrapAll: {
  * @param value Value to check.
  * @returns True if the value is Promise-like.
  */
-export const isPromiseLike = <T>(
-	value: T | PromiseLike<T>
-): value is PromiseLike<T> =>
-	typeof value === 'object' && value !== null && 'then' in value;
+export const isPromiseLike = <T>(value: T | PromiseLike<T>): value is PromiseLike<T> =>
+  typeof value === 'object' && value !== null && 'then' in value;
+
+export class AbortError extends Error {
+  override message = 'Aborted';
+}
+export class HttpNotFoundError extends Error {
+  override message = 'Web resource not found';
+}
+export class HttpGenericError extends Error {
+  override message = 'HTTP Generic error';
+}
+export class FetchFailedError extends Error {
+  override message = 'Fetch failed';
+}
+export class ParseError extends Error {
+  override message = 'Error parsing HTTP response';
+}
+
+export type FetchError = HttpNotFoundError | HttpGenericError | FetchFailedError;

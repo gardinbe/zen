@@ -25,16 +25,15 @@ export const createTerminalInputSuggester = (
   options: TerminalInputSuggesterOptions,
 ): TerminalInputSuggester => {
   const get = (value: string) => {
-    current ||= value;
-    suggestions ||= options.getSuggestions(value);
+    current ??= value;
+    suggestions ??= options.getSuggestions(value);
 
     if (!suggestions.length) {
       return null;
     }
 
     index = (index + 1) % suggestions.length;
-    const suggestion = suggestions[index]!;
-
+    const suggestion = suggestions.at(index)!;
     return suggestion;
   };
 

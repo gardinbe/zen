@@ -5,6 +5,9 @@ import { RemoveEffect } from './effects/remove';
 import { TypeEffect } from './effects/type';
 import { UndoEffect } from './effects/undo';
 
+/**
+ * Array of all available effect constructors.
+ */
 export const EffectConstructors: EffectConstructor[] = [
   DelayEffect,
   InsertEffect,
@@ -53,9 +56,9 @@ export type EffectContext = Readonly<{
   nodes: Text[];
 
   /**
-   * Current text node.
+   * Returns the current text node.
    */
-  node: Text;
+  readonly node: Text;
 
   /**
    * Sets the current text node.

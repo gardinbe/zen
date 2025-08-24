@@ -4,6 +4,7 @@ import { createDialog } from './components/dialog';
 import { createTyper } from './components/typer';
 import { createTerminal } from './components/terminal';
 import { getDocument } from './lib/documents';
+import { unwrap } from './utils/result';
 
 const backgroundAudio = createAudioPlayer({
   main: query<HTMLAudioElement>('.js-background-audio'),
@@ -42,13 +43,11 @@ const showBoot = async () => {
     main: query('.js-os-boot-typer'),
   });
 
-  const [html, error] = await getDocument('misc/os-boot.md', {
-    raw: true,
-  });
-
-  if (error) {
-    throw error;
-  }
+  const html = await unwrap(
+    getDocument('misc/os-boot.md', null, {
+      raw: true,
+    }),
+  );
 
   view.hidden = false;
   bootSequenceTyper.type(html, {
@@ -76,6 +75,7 @@ const showTerminal = () => {
 
   createTerminal({
     main: query('.js-terminal'),
+    outputContainer: query('.js-terminal-output-container'),
     output: query('.js-terminal-output'),
     prompt: query<HTMLFormElement>('.js-terminal-prompt'),
     prefix: query('.js-terminal-prefix'),

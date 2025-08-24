@@ -1,14 +1,13 @@
-import { timeout } from '../../../utils/delay';
-import { type Program, ArgumentError } from '../program';
+import { timeout } from '../../../utils/timeout';
+import { type ProgramConstructor, ArgumentError } from '../program';
 
-export const EvalProgram: Program = {
+export const EvalProgram: ProgramConstructor = {
   name: 'eval',
   description: 'Evaluates a JavaScript expression.',
   arguments: [
     {
       name: '[expression]',
-      description:
-        'The expression to evaluate. Must be surrounded in quotes if it contains spaces.',
+      description: 'Expression to evaluate. Must be surrounded in quotes if it has spaces.',
     },
   ],
   exec:
@@ -40,13 +39,18 @@ export const EvalProgram: Program = {
         console.clear = ctx.logger.clear;
 
         const result = eval?.(`void 'use strict';${expression}`);
-        await timeout();
-
         ctx.logger.stdout(result);
-      } catch (err) {
-        ctx.logger.stderr(err);
-      } finally {
-        Object.assign(console, originalConsole);
+      } catch (error) {
+        ctx.logger.stderr(error);
+      }
+
+      Object.assign(console, originalConsole);
+
+      const error = await timeout(0, ctx.signal);
+
+      if (error) {
+        ctx.logger.stderr(error);
+        return;
       }
     },
 };

@@ -134,6 +134,10 @@
     color: var(--color-background);
   }
 
+  small {
+    font-size: 0.6em;
+  }
+
   :is(p, ul, ol, blockquote, pre, table, details, .std-codeblock) {
     margin-bottom: 1.5rem;
 

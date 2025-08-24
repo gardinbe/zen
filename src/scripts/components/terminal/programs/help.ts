@@ -1,6 +1,11 @@
-import { type Program, ArgumentError, getProgram, Programs } from '../program';
+import {
+  type ProgramConstructor,
+  ArgumentError,
+  getProgram,
+  ProgramsConstructors,
+} from '../program';
 
-export const HelpProgram: Program = {
+export const HelpProgram: ProgramConstructor = {
   name: 'help',
   description: 'Provides information about available programs.',
   arguments: [
@@ -29,14 +34,12 @@ export const HelpProgram: Program = {
           return;
         }
 
-        let str =
-          `<strong>Name</strong>: ${program.name}` +
-          `\n<strong>Description</strong>: ${program.description}`;
+        let str = program.description;
 
         if (program.arguments) {
           const spacer = createSpacer(program.arguments.map((_arg) => _arg.name));
           str +=
-            '\n<strong>Arguments</strong>:\n' +
+            '\n\n' +
             program.arguments
               .map((_arg) => `${_arg.name}${spacer(_arg.name)}${_arg.description}`)
               .join('\n');
@@ -46,12 +49,14 @@ export const HelpProgram: Program = {
         return;
       }
 
-      const spacer = createSpacer(Programs.map((program) => program.name));
+      const spacer = createSpacer(ProgramsConstructors.map((program) => program.name));
       const str =
-        '<strong>Available programs</strong>:\n\n' +
-        Programs.map(
-          (program) => `${program.name}${spacer(program.name)}${program.description}`,
-        ).join('\n');
+        'Available programs:\n\n' +
+        ProgramsConstructors.map(
+          (program) =>
+            `<strong>${program.name}</strong>${spacer(program.name)}${program.description}`,
+        ).join('\n') +
+        '\n\nType `help [program]` for more information.';
 
       ctx.logger.stdout(str);
     },

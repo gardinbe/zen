@@ -4,15 +4,17 @@ import { ClearProgram } from './programs//clear';
 import { EvalProgram } from './programs//eval';
 import { HelpProgram } from './programs//help';
 import { HistoryProgram } from './programs//history';
+import { FetchProgram } from './programs/fetch';
 import { ListProgram } from './programs/list';
 import { PrintProgram } from './programs/print';
 
 /**
- * Object of available terminal programs.
+ * Array of available terminal program constructors.
  */
-export const Programs: Program[] = [
+export const ProgramsConstructors: ProgramConstructor[] = [
   ClearProgram,
   EvalProgram,
+  FetchProgram,
   HelpProgram,
   HistoryProgram,
   ListProgram,
@@ -20,23 +22,23 @@ export const Programs: Program[] = [
 ];
 
 /**
- * Object of aliases for terminal programs.
+ * Object of aliases for terminal program constructors.
  */
-export const Aliases: Record<string, Program> = {
+export const Aliases: Record<string, ProgramConstructor> = {
   cls: ClearProgram,
 };
 
-export type Program = {
+export type ProgramConstructor = {
   name: string;
   description: string;
   arguments?: {
     name: string;
     description: string;
   }[];
-  exec: (args: string[]) => ProgramFunction;
+  exec: (args: string[]) => Program;
 };
 
-export type ProgramFunction = (ctx: ProgramContext) => void | Promise<void>;
+export type Program = (ctx: ProgramContext) => void | Promise<void>;
 
 export type ProgramContext = Readonly<{
   /**
@@ -87,7 +89,7 @@ export const ArgumentError = {
  * @returns Array of commands.
  */
 export const getCommands = (): string[] => [
-  ...Programs.map(({ name }) => name),
+  ...ProgramsConstructors.map(({ name }) => name),
   ...Object.entries(Aliases).map(([name]) => name),
 ];
 
@@ -95,9 +97,11 @@ export const getCommands = (): string[] => [
  * Returns a program by name.
  * @param name Name of the program.
  */
-export const getProgram = (name: string): Program | null =>
-  Object.entries(Aliases).find(
-    ([_name]) => _name.toLocaleUpperCase() === name.toLocaleUpperCase(),
-  )?.[1] ??
-  Programs.find((program) => program.name.toLocaleUpperCase() === name.toLocaleUpperCase()) ??
+export const getProgram = (name: string): ProgramConstructor | null =>
+  (Object.entries(Aliases)
+    .find(([_name]) => _name.toLocaleUpperCase() === name.toLocaleUpperCase())
+    ?.at(1) as ProgramConstructor | undefined) ??
+  ProgramsConstructors.find(
+    (program) => program.name.toLocaleUpperCase() === name.toLocaleUpperCase(),
+  ) ??
   null;

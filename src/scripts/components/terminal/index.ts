@@ -7,6 +7,7 @@ import { Documents, getDocument } from '../../lib/documents';
 
 export type TerminalElements = {
   main: HTMLElement;
+  outputContainer: HTMLElement;
   output: HTMLElement;
   prompt: HTMLFormElement;
   prefix: HTMLElement;
@@ -79,12 +80,12 @@ export const createTerminal = (els: TerminalElements): Terminal => {
   };
 
   const logStartMessage = async () => {
-    const [html, error] = await getDocument('misc/terminal-start-message.md', {
+    const [html, error] = await getDocument('misc/terminal-start-message.md', controller.signal, {
       raw: true,
     });
 
     if (error) {
-      throw error;
+      return;
     }
 
     logger.stdout(html);
@@ -146,7 +147,7 @@ const parse = (str: string): ParsedInput | null => {
 
   const args = argsStr
     ? [...argsStr.matchAll(TokenRegex)].map(
-        (match) => (match[1] || match[2] || match[3] || match[4]) as string,
+        (match) => (match.at(1) || match.at(2) || match.at(3) || match.at(4)) as string,
       )
     : [];
 

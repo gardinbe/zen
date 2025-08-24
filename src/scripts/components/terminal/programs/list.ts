@@ -1,7 +1,7 @@
 import { Documents } from '../../../lib/documents';
-import { type Program, ArgumentError } from '../program';
+import { type ProgramConstructor, ArgumentError } from '../program';
 
-export const ListProgram: Program = {
+export const ListProgram: ProgramConstructor = {
   name: 'ls',
   description: 'Lists available documents.',
   exec:

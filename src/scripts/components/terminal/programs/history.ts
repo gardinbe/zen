@@ -1,6 +1,6 @@
-import { type Program, ArgumentError } from '../program';
+import { type ProgramConstructor, ArgumentError } from '../program';
 
-export const HistoryProgram: Program = {
+export const HistoryProgram: ProgramConstructor = {
   name: 'history',
   description: 'Handles the command history.',
   arguments: [
@@ -23,7 +23,7 @@ export const HistoryProgram: Program = {
 
       switch (option) {
         case 'all': {
-          ctx.logger.stdout(ctx.history.items.join('\n'));
+          ctx.logger.stdout(ctx.history.entries.join('\n'));
           break;
         }
         case 'clear': {

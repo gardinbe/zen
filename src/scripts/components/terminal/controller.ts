@@ -1,5 +1,10 @@
 export type TerminalProgramController = {
   /**
+   * Returns the current controller abort signal.
+   */
+  readonly signal: AbortSignal | null;
+
+  /**
    * Initializes a new program.
    *
    * Sets a new AbortController into state and returns the signal.
@@ -24,7 +29,7 @@ export type TerminalProgramControllerOptions = {
 export const createTerminalProgramController = (
   options: TerminalProgramControllerOptions,
 ): TerminalProgramController => {
-  let controller: AbortController | null = null;
+  let controller = new AbortController();
 
   const init = () => {
     controller = new AbortController();
@@ -34,10 +39,12 @@ export const createTerminalProgramController = (
   const terminate = async () => {
     controller?.abort();
     await options.onTerminate();
-    controller = null;
   };
 
   return {
+    get signal() {
+      return controller?.signal ?? null;
+    },
     init,
     terminate,
   };

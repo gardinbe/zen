@@ -34,39 +34,21 @@ export type TerminalLogger = {
 export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   const write = async (text: string) => {
     let finished = false;
-    let prevScrollPos = els.main.scrollTop;
-    let manuallyScrolled = false;
-    let scrolled = false;
-
-    // todo: this scroll shit doesn't work
-
-    const onscroll = () => {
-      if (manuallyScrolled) {
-        manuallyScrolled = false;
-        return;
-      }
-
-      scrolled = true;
-    };
-
-    els.output.addEventListener('scroll', onscroll, {
-      passive: true,
-      once: true,
-    });
+    let prevScrollTop = 0;
 
     const check = () => {
-      if (finished || scrolled) {
-        return;
-      }
-
-      if (els.main.scrollTop <= prevScrollPos) {
+      if (els.outputContainer.scrollTop < prevScrollTop) {
         requestAnimationFrame(check);
         return;
       }
 
-      manuallyScrolled = true;
-      els.main.scrollTop = els.main.scrollHeight;
-      prevScrollPos = els.main.scrollTop;
+      els.outputContainer.scrollTop = els.outputContainer.scrollHeight;
+      prevScrollTop = els.outputContainer.scrollTop;
+
+      if (finished) {
+        return;
+      }
+
       requestAnimationFrame(check);
     };
 
@@ -78,7 +60,6 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
       },
       onFinish: () => {
         typer.cursor.hide();
-        els.main.removeEventListener('scroll', onscroll);
         finished = true;
       },
     });
@@ -87,6 +68,8 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   const clear = () => {
     typer.clear();
   };
+
+  // todo: if a user types or program errors with [[]] it fucks with this
 
   const stdin = (input: string) => write(`[[insert:> ${input}\n]]`);
   const stdout = (output: string, options?: Partial<LoggerWriteOptions>) =>
@@ -111,7 +94,7 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
 
 export type LoggerWriteOptions = {
   /**
-   * Whether to prevent adding a newlines before/after the output.
+   * Whether to prevent adding newlines before/after the output.
    * @default false
    */
   noNewlines?: boolean;

@@ -1,17 +1,11 @@
 import { type EffectConstructor } from '../effect';
-import { timeout } from '../../../utils/delay';
+import { timeout } from '../../../utils/timeout';
 
 export const DelayEffect: EffectConstructor<number> = {
   name: 'delay',
   parse: (value) => parseFloat(value),
   create: (ms) => async (ctx) => {
-    try {
-      ctx.cursor.blink();
-      await timeout(ms, ctx.signal);
-    } catch (err) {
-      if (!ctx.signal.aborted) {
-        throw err;
-      }
-    }
+    ctx.cursor.blink();
+    await timeout(ms, ctx.signal);
   },
 };
