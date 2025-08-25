@@ -19,7 +19,9 @@ export const timeout = (ms: number, signal: AbortSignal | null): Promise<AbortEr
       resolve(new AbortError());
     };
 
-    signal?.addEventListener('abort', onAbort, { once: true });
+    signal?.addEventListener('abort', onAbort, {
+      once: true,
+    });
   });
 
 /**

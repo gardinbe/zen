@@ -14,22 +14,22 @@ export type TyperQueue = {
 };
 
 export const createTyperQueue = (): TyperQueue => {
-  const push = (..._batches: EffectBatch[]) => {
-    batches.push(..._batches);
+  const push = (...newBatches: EffectBatch[]) => {
+    batches.push(...newBatches);
 
     if (running) {
       return;
     }
 
-    current = exec(controller.signal).finally(() => {
-      current = null;
+    active = exec(controller.signal).finally(() => {
+      active = null;
     });
   };
 
   const clear = async () => {
     controller.abort();
     controller = new AbortController();
-    await current;
+    await active;
     batches.length = 0;
   };
 
@@ -83,7 +83,7 @@ export const createTyperQueue = (): TyperQueue => {
   };
 
   let running = false;
-  let current: ReturnType<typeof exec> | null = null;
+  let active: ReturnType<typeof exec> | null = null;
   let controller = new AbortController();
   const batches: EffectBatch[] = [];
 

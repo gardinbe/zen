@@ -44,7 +44,7 @@ const showBoot = async () => {
   });
 
   const html = await unwrap(
-    getDocument('misc/os-boot.md', null, {
+    getDocument('preformatted/os-boot.md', null, {
       raw: true,
     }),
   );

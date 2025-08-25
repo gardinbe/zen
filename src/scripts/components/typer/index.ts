@@ -1,3 +1,4 @@
+import { isTruthy } from '../../utils/predicates';
 import { type Cursor, createCursor } from '../cursor';
 import { type EffectContext, type EffectNodeState, createEffects } from './effects';
 import {
@@ -42,8 +43,8 @@ export type Typer = {
 };
 
 export const createTyper = (els: TyperElements): Typer => {
-  const setNode = (node: Text) => {
-    currentNode = node;
+  const setActiveNode = (node: Node) => {
+    activeNode = node;
 
     if (!node) {
       return;
@@ -53,67 +54,104 @@ export const createTyper = (els: TyperElements): Typer => {
   };
 
   const setNodeState = (node: Node, state: EffectNodeState) => {
-    const updateParent = (parent: HTMLElement) => {
-      // todo: a check like this needs to be in place for remove/undo to work properly
-
-      // if (parent.firstChild !== child) {
-      //   return;
-      // }
-
-      parent.dataset.typerState = state;
-
-      if (parent === els.main) {
+    const set = (element: HTMLElement, newState: EffectNodeState) => {
+      if (element === els.main) {
         return;
       }
 
-      updateParent(parent.parentElement!);
+      element.dataset.typerState = newState;
+
+      const parent = element.parentElement;
+
+      if (!parent) {
+        return;
+      }
+
+      // todo: tidy
+
+      const has = (givenState: EffectNodeState) =>
+        !!parent.querySelector(`[data-typer-state='${givenState}']`);
+
+      const hasComplete = has('complete');
+      const hasIncomplete = has('incomplete');
+      const hasActive = has('active');
+
+      const complete = hasComplete && !hasIncomplete && !hasActive;
+      const incomplete = hasIncomplete && !hasComplete && !hasActive;
+
+      const parentState: EffectNodeState = complete
+        ? 'complete'
+        : incomplete
+          ? 'incomplete'
+          : 'active';
+
+      set(parent, parentState);
     };
 
-    updateParent(node.parentElement!);
+    const element = node instanceof HTMLElement ? node : node.parentElement;
+
+    if (!element) {
+      return;
+    }
+
+    set(element, state);
   };
 
-  const createBatch = (nodes: Node[], callbacks?: Partial<EffectBatchCallbacks>): EffectBatch => {
-    return {
-      executors: createEffectExecutors(...nodes),
-      onStart: () => {
-        callbacks?.onStart?.();
-      },
-      onComplete: () => {
-        callbacks?.onComplete?.();
-      },
-      onAbort: () => {
-        callbacks?.onAbort?.();
-      },
-      onFinish: () => {
-        callbacks?.onFinish?.();
-      },
-    };
-  };
+  const createBatch = (nodes: Node[], callbacks?: Partial<EffectBatchCallbacks>): EffectBatch => ({
+    executors: createEffectExecutors(...nodes),
+    onStart: () => {
+      callbacks?.onStart?.();
+    },
+    onComplete: () => {
+      callbacks?.onComplete?.();
+    },
+    onAbort: () => {
+      callbacks?.onAbort?.();
+    },
+    onFinish: () => {
+      callbacks?.onFinish?.();
+    },
+  });
 
-  const createEffectExecutors = (..._nodes: Node[]): EffectExecutor[] => {
-    const nodes = parseNodes(..._nodes);
-    const executors = nodes.flatMap((node) => {
-      const text = node.textContent!;
+  const createEffectExecutors = (...sourceNodes: Node[]): EffectExecutor[] => {
+    const nodes = getLeafNodes(...sourceNodes);
+
+    const leaves = nodes.map<LeafNode>((node) => ({
+      node,
+      text: isPreformattedNode(node) ? node.textContent : node.textContent?.trim() || null,
+    }));
+
+    nodes.forEach((node) => {
       node.textContent = '';
+    });
 
-      return createEffects(text).map<EffectExecutor>((effect) => (signal) => {
-        setNode(node);
+    nodes
+      .map((node) => (node instanceof HTMLElement ? node : node.parentElement))
+      .filter(isTruthy)
+      .forEach((element) => {
+        element.dataset.typerState = 'incomplete';
+      });
+
+    const executors = leaves.flatMap((leaf) =>
+      createEffects(leaf.text).map<EffectExecutor>((effect) => (signal) => {
+        setActiveNode(leaf.node);
 
         const ctx: EffectContext = {
           signal,
           cursor,
           nodes,
+          targetNode: leaf.node,
           get node() {
-            return currentNode!;
+            return activeNode!;
           },
-          setNode,
+          setActiveNode,
           setNodeState,
           isPreformattedNode,
         };
 
         return effect(ctx);
-      });
-    });
+      }),
+    );
 
     return executors;
   };
@@ -135,7 +173,7 @@ export const createTyper = (els: TyperElements): Typer => {
     els.main.innerHTML = '';
   };
 
-  let currentNode: Text | null = null;
+  let activeNode: Node | null = null;
 
   const cursor = createCursor();
   const queue = createTyperQueue();
@@ -149,22 +187,13 @@ export const createTyper = (els: TyperElements): Typer => {
   };
 };
 
-const parseNodes = (...nodes: Node[]): Text[] =>
-  nodes.flatMap((node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      if (!isPreformattedNode(node) && !node.textContent!.trim()) {
-        return [];
-      }
+type LeafNode<T extends Node = Node> = {
+  node: T;
+  text: string | null;
+};
 
-      return [node as Text];
-    }
-
-    if (node instanceof HTMLElement) {
-      node.dataset.typerState = 'incomplete';
-    }
-
-    return parseNodes(...node.childNodes);
-  });
+const getLeafNodes = (...nodes: Node[]): Node[] =>
+  nodes.flatMap<Node>((node) => (node.childNodes.length ? getLeafNodes(...node.childNodes) : node));
 
 /**
  * Checks if the node is a preformatted node.
@@ -184,6 +213,5 @@ const parseNodes = (...nodes: Node[]): Text[] =>
  * @returns True if the node is a preformatted node.
  */
 const isPreformattedNode = (node: Node): boolean =>
-  ['preserve', 'preserve-breaks'].includes(
-    getComputedStyle(node.parentElement!).whiteSpaceCollapse,
-  );
+  !!node.parentElement &&
+  ['preserve', 'preserve-breaks'].includes(getComputedStyle(node.parentElement).whiteSpaceCollapse);

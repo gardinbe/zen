@@ -1,5 +1,10 @@
 export type Cursor = {
   /**
+   * The cursor element.
+   */
+  readonly element: HTMLElement;
+
+  /**
    * Attaches the cursor to the specified node.
    * @param node Target node.
    */
@@ -123,6 +128,7 @@ export const createCursor = (): Cursor => {
   blink();
 
   return {
+    element: cursor,
     attach,
     blink,
     freeze,

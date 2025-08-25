@@ -8,6 +8,10 @@
     tab-size: 2;
     text-shadow: var(--text-shadow);
 
+    [data-typer-state='incomplete'] {
+      display: none;
+    }
+
     [data-typer-state='incomplete'],
     [data-typer-state='active'] {
       &:is(a, .link) {
@@ -24,6 +28,7 @@
     pre,
     table,
     details {
+      // todo: broken
       &:nth-last-child(1 of :not([data-typer-state='incomplete'])) {
         margin-bottom: 0;
       }

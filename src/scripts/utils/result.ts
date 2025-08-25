@@ -53,10 +53,16 @@ export const unwrapAll: {
    * @returns Unwrapped values.
    * @throws Error if any result is an error.
    */
-  <T extends Result[]>(...results: T[]): { [K in keyof T]: Unwrapped<T[K]> };
+  <T extends Result[]>(
+    ...results: T[]
+  ): {
+    [K in keyof T]: Unwrapped<T[K]>;
+  };
   <T extends PromiseLike<Result[]>, U extends Awaited<T>>(
     results: T,
-  ): Promise<{ [K in keyof U]: Unwrapped<U[K]> }>;
+  ): Promise<{
+    [K in keyof U]: Unwrapped<U[K]>;
+  }>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } = (results: Result[] | PromiseLike<Result>[]): any => {
   if (isPromiseLike(results)) {

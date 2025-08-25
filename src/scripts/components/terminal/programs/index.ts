@@ -101,7 +101,7 @@ export const getProgramNames = (): string[] => [
  */
 export const getProgram = (name: string): ProgramConstructor | null =>
   (Object.entries(Aliases)
-    .find(([_name]) => _name.toLocaleUpperCase() === name.toLocaleUpperCase())
+    .find(([aliasName]) => aliasName.toLocaleUpperCase() === name.toLocaleUpperCase())
     ?.at(1) as ProgramConstructor | undefined) ??
   ProgramsConstructors.find(
     (program) => program.name.toLocaleUpperCase() === name.toLocaleUpperCase(),

@@ -3,9 +3,9 @@ import { randomTimeout } from '../../../utils/timeout';
 
 // todo: this effect is a bit broken
 
-export const UndoEffect: EffectConstructor<number> = {
+export const UndoEffect: EffectConstructor<[number]> = {
   name: 'undo',
-  parse: (value) => parseInt(value),
+  parse: (value) => [parseInt(value)],
   create: (quantity) => async (ctx) => {
     ctx.cursor.freeze();
 
@@ -19,7 +19,7 @@ export const UndoEffect: EffectConstructor<number> = {
         const prevNode = ctx.nodes.at(ctx.nodes.indexOf(ctx.node) - 1);
 
         if (prevNode) {
-          ctx.setNode(prevNode);
+          ctx.setActiveNode(prevNode);
         }
 
         continue;

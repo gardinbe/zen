@@ -2,9 +2,9 @@ import { type EffectConstructor } from '.';
 
 // todo: this effect is a bit broken
 
-export const RemoveEffect: EffectConstructor<number> = {
+export const RemoveEffect: EffectConstructor<[number]> = {
   name: 'remove',
-  parse: (value) => parseInt(value),
+  parse: (value) => [parseInt(value)],
   create: (quantity) => (ctx) => {
     let remaining = quantity;
 
@@ -27,7 +27,7 @@ export const RemoveEffect: EffectConstructor<number> = {
       const prevNode = ctx.nodes.at(ctx.nodes.indexOf(ctx.node) - 1);
 
       if (prevNode) {
-        ctx.setNode(prevNode);
+        ctx.setActiveNode(prevNode);
       }
     }
   },

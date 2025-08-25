@@ -17,7 +17,9 @@ export const parseMarkdown = (
       resolve([null, new AbortError()]);
     };
 
-    signal?.addEventListener('abort', onAbort, { once: true });
+    signal?.addEventListener('abort', onAbort, {
+      once: true,
+    });
 
     (async () => {
       try {

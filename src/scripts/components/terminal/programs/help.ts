@@ -32,11 +32,11 @@ export const HelpProgram: ProgramConstructor = {
         let str = program.description;
 
         if (program.arguments) {
-          const spacer = createSpacer(program.arguments.map((_arg) => _arg.name));
+          const spacer = createSpacer(program.arguments.map((argument) => argument.name));
           str +=
             '\n\n' +
             program.arguments
-              .map((_arg) => `${_arg.name}${spacer(_arg.name)}${_arg.description}`)
+              .map((argument) => `${argument.name}${spacer(argument.name)}${argument.description}`)
               .join('\n');
         }
 

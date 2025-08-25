@@ -1,4 +1,4 @@
-[[insert: /`·.¸
+[[insert:      /`·.¸
      /¸...¸`:·
 ¸.·´ ¸ `·.¸.·´)
 : © ):´;      ¸  {
@@ -12,10 +12,10 @@ Memory Test: <strong>[[insert:0K]][[delay:10]][[remove:2]][[insert:245K]][[delay
 
 Award Plug and Play BIOS Extension v1.0A[[delay:500]]
 [[insert:Copyright (C) 1991, Award Software, Inc.]][[delay:1500]]
-Detecting IDE Primary Master [[insert:.]][[delay:250]][[insert:.]][[delay:250]][[insert:.]][[delay:1200]]<strong>[[insert: PCemHD]]</strong>
-Detecting IDE Primary Slave [[insert:.]][[delay:250]][[insert:.]][[delay:250]][[insert:.]][[delay:800]]<strong>[[insert: PCemCD]]</strong>
-Detecting IDE Secondary Master [[insert:.]][[delay:250]][[insert:.]][[delay:250]][[insert:.]][[delay:1000]]<strong>[[insert: None]]</strong>
-Detecting IDE Secondary Slave [[insert:.]][[delay:250]][[insert:.]][[delay:250]][[insert:.]][[delay:1000]]<strong>[[insert: PCemCD]]</strong>[[delay:1000]]
+  Detecting IDE Primary Master [[insert:.]][[delay:250]][[insert:.]][[delay:250]][[insert:.]][[delay:1200]]<strong>[[insert: PCemHD]]</strong>
+  Detecting IDE Primary Slave [[insert:.]][[delay:250]][[insert:.]][[delay:250]][[insert:.]][[delay:800]]<strong>[[insert: PCemCD]]</strong>
+  Detecting IDE Secondary Master [[insert:.]][[delay:250]][[insert:.]][[delay:250]][[insert:.]][[delay:1000]]<strong>[[insert: None]]</strong>
+  Detecting IDE Secondary Slave [[insert:.]][[delay:250]][[insert:.]][[delay:250]][[insert:.]][[delay:1000]]<strong>[[insert: PCemCD]]</strong>[[delay:1000]]
 
 System Initialized[[delay:1000]]
 

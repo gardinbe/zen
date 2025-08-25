@@ -1,6 +1,6 @@
 import { type EffectConstructor } from '.';
 
-export const InsertEffect: EffectConstructor<string> = {
+export const InsertEffect: EffectConstructor<[string]> = {
   name: 'insert',
   create: (text) => (ctx) => {
     ctx.node.textContent += text;

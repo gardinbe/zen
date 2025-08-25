@@ -59,7 +59,7 @@ export const createTerminal = (els: TerminalElements): Terminal => {
   };
 
   const logStartMessage = async () => {
-    const [html, error] = await getDocument('misc/terminal-start-message.md', null, {
+    const [html, error] = await getDocument('preformatted/terminal-start-message.md', null, {
       raw: true,
     });
 

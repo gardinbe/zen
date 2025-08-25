@@ -1,6 +1,7 @@
 import { type Result } from '../../utils/result';
 import { type ProgramExitCode, type ProgramContext, getProgram } from './programs';
 import { MissingError, ParseError, NotFoundError } from '../../utils/error';
+import { isTruthy } from '../../utils/predicates';
 
 export type TerminalController = {
   /**
@@ -109,7 +110,7 @@ const parse = (str: string): Command | null => {
   }
 
   const args = argsStr
-    ? [...argsStr.matchAll(TokenRegex)].flatMap((match) => match.slice(1).filter((m) => m))
+    ? [...argsStr.matchAll(TokenRegex)].flatMap((match) => match.slice(1).filter(isTruthy))
     : [];
 
   return {
