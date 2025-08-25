@@ -100,7 +100,8 @@
     }
   }
 
-  :is(a, .link) {
+  a,
+  .link {
     color: var(--color-link);
     text-decoration: none;
 
@@ -138,15 +139,22 @@
     font-size: 0.6em;
   }
 
-  :is(p, ul, ol, blockquote, pre, table, details, .std-codeblock) {
+  p,
+  ul,
+  ol,
+  blockquote,
+  pre,
+  table,
+  details {
     margin-bottom: 1.5rem;
 
-    &:not([hidden]):nth-last-child(1 of :not([hidden])) {
+    &:last-child {
       margin-bottom: 0;
     }
   }
 
-  :is(ul, ol) {
+  ul,
+  ol {
     list-style-position: inside;
     margin-right: 1.5rem;
 
@@ -167,11 +175,22 @@
     list-style-type: decimal;
   }
 
-  :is(p, h1, h2, h3, h4, h5, h6) {
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     text-wrap: pretty;
   }
 
-  :is(h1, h2, h3, h4, h5, h6) {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin-bottom: 1.5rem;
     font-weight: 900;
     font-style: normal;

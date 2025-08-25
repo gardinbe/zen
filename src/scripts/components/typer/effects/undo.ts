@@ -1,4 +1,4 @@
-import { type EffectConstructor, WhitespaceRegex } from '../effect';
+import { type EffectConstructor, WhitespaceRegex } from '.';
 import { randomTimeout } from '../../../utils/timeout';
 
 // todo: this effect is a bit broken

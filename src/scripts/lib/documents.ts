@@ -1,6 +1,7 @@
-import { type Result, type FetchError, type ParseError, AbortError } from '../utils/result';
+import { type Result } from '../utils/result';
+import { type FetchError, http } from '../utils/fetch';
+import { AbortError, ParseError } from '../utils/error';
 import { parseMarkdown } from '../utils/markdown';
-import { http } from '../utils/fetch';
 
 /**
  * Array of available documents.

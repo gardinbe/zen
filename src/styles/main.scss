@@ -1,0 +1,18 @@
+@use 'reset';
+@use 'vars';
+@use 'fonts/dos';
+@use 'base';
+@use 'utils';
+@use 'components/container';
+@use 'components/cursor';
+@use 'components/dialog';
+@use 'components/terminal';
+@use 'components/typer';
+@use 'components/view';
+
+@layer reset,
+  vars,
+  fonts,
+  base,
+  utils,
+  components;

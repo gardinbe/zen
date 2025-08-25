@@ -1,0 +1,50 @@
+@layer components {
+  .zen-typer {
+    position: relative;
+    margin: 0;
+    font-size: 1.2rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    tab-size: 2;
+    text-shadow: var(--text-shadow);
+
+    [data-typer-state='incomplete'],
+    [data-typer-state='active'] {
+      &:is(a, .link) {
+        &::after {
+          display: none;
+        }
+      }
+    }
+
+    p,
+    ul,
+    ol,
+    blockquote,
+    pre,
+    table,
+    details {
+      &:nth-last-child(1 of :not([data-typer-state='incomplete'])) {
+        margin-bottom: 0;
+      }
+    }
+
+    &--no-wrap {
+      white-space: pre;
+    }
+
+    &-container {
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+      padding-right: 2ch;
+    }
+
+    &-html {
+      margin: 1rem 0;
+      padding: 1rem;
+      border: 1px solid var(--color-primary);
+      font: normal normal var(--font-size-base) / normal var(--font-base);
+      white-space: normal;
+    }
+  }
+}

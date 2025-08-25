@@ -1,9 +1,10 @@
-import { type ProgramContext, getCommands, getProgram } from './program';
+import { type TerminalController, createTerminalController } from './controller';
 import { type TerminalLogger, createTerminalLogger } from './logger';
-import { type TerminalProgramController, createTerminalProgramController } from './controller';
-import { type TerminalInput, createTerminalInput } from './input';
 import { type TerminalHistory, createTerminalHistory } from './history';
+import { type TerminalInput, createTerminalInput } from './input';
+import { ParseError, NotFoundError } from '../../utils/error';
 import { Documents, getDocument } from '../../lib/documents';
+import { getProgram, getProgramNames } from './programs';
 
 export type TerminalElements = {
   main: HTMLElement;
@@ -16,19 +17,14 @@ export type TerminalElements = {
 
 export type Terminal = {
   /**
+   * Controller instance.
+   */
+  controller: TerminalController;
+
+  /**
    * Logger instance.
    */
   logger: TerminalLogger;
-
-  /**
-   * Program controller instance.
-   */
-  controller: TerminalProgramController;
-
-  /**
-   * Input typer instance.
-   */
-  input: TerminalInput;
 
   /**
    * History instance.
@@ -36,51 +32,34 @@ export type Terminal = {
   history: TerminalHistory;
 
   /**
-   * Executes a command.
-   * @param value Command to execute.
+   * Input typer instance.
    */
-  exec: (value: string) => Promise<void>;
+  input: TerminalInput;
 };
 
 export const createTerminal = (els: TerminalElements): Terminal => {
   const exec = async (value: string) => {
-    await controller.terminate();
+    const [code, error] = await controller.exec(value);
 
-    history.reset();
-    history.add(value);
-    logger.stdin(value);
+    if (error) {
+      if (ParseError.is(error)) {
+        logger.stderr(`Error parsing command: ${value}`);
+      } else if (NotFoundError.is(error)) {
+        logger.stderr(`Unknown program: ${value}`);
+      }
 
-    if (!value) {
       return;
     }
 
-    const parsed = parse(value);
-
-    if (!parsed) {
-      logger.stderr(`Error parsing command: ${value}`);
+    if (code === 0) {
       return;
     }
 
-    const program = getProgram(parsed.name);
-
-    if (!program) {
-      logger.stderr(`Unknown program: ${parsed.name}`);
-      return;
-    }
-
-    const signal = controller.init();
-
-    const ctx: ProgramContext = {
-      signal,
-      logger,
-      history,
-    };
-
-    return program.exec(parsed.args)(ctx);
+    logger.stdout(`Program exited: ${code}`);
   };
 
   const logStartMessage = async () => {
-    const [html, error] = await getDocument('misc/terminal-start-message.md', controller.signal, {
+    const [html, error] = await getDocument('misc/terminal-start-message.md', null, {
       raw: true,
     });
 
@@ -91,22 +70,38 @@ export const createTerminal = (els: TerminalElements): Terminal => {
     logger.stdout(html);
   };
 
+  const controller = createTerminalController({
+    createContext: (signal) => ({
+      signal,
+      logger,
+      history,
+    }),
+    onExec: (value) => {
+      history.reset();
+      history.add(value);
+      logger.stdin(value);
+    },
+    onTerminate: () => logger.typer.stop(),
+  });
   const logger = createTerminalLogger(els);
-  const controller = createTerminalProgramController({
-    onTerminate: logger.typer.stop,
+  const history = createTerminalHistory({
+    getValue: () => input.value,
+    onNavigate: (value) => input.set(value),
   });
   const input = createTerminalInput(els, {
-    onCancel: async () => {
+    onCancel: async (value) => {
+      logger.stdin(`${value}^C`);
       await controller.terminate();
-      logger.stdin('^C');
     },
-    onSubmit: exec,
+    onSubmit: (value) => exec(value),
+    onUp: () => history.up(),
+    onDown: () => history.down(),
     suggester: {
       getSuggestions: (value) => {
-        const parsed = parse(value);
+        const parsed = controller.parse(value);
 
         if (!parsed || !getProgram(parsed.name)) {
-          return getCommands().filter((name) => name.startsWith(value));
+          return getProgramNames().filter((name) => name.startsWith(value));
         }
 
         const arg = parsed.args.at(-1) || '';
@@ -117,45 +112,13 @@ export const createTerminal = (els: TerminalElements): Terminal => {
       },
     },
   });
-  const history = createTerminalHistory(els, {
-    onNavigate: input.set,
-  });
 
   logStartMessage();
 
   return {
-    logger,
     controller,
-    input,
+    logger,
     history,
-    exec,
+    input,
   };
 };
-
-type ParsedInput = {
-  name: string;
-  args: string[];
-};
-
-const parse = (str: string): ParsedInput | null => {
-  const match = str.match(ExpressionRegex);
-  const [, name, argsStr] = match || [];
-
-  if (!name) {
-    return null;
-  }
-
-  const args = argsStr
-    ? [...argsStr.matchAll(TokenRegex)].map(
-        (match) => (match.at(1) || match.at(2) || match.at(3) || match.at(4)) as string,
-      )
-    : [];
-
-  return {
-    name,
-    args,
-  };
-};
-
-const ExpressionRegex = /(\S+)(?:\s+(.*))?/s;
-const TokenRegex = /"([^"]+)"|'([^']+)'|`([^`]+)`|(\S+)/gs;

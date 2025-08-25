@@ -19,6 +19,8 @@
       pointer-events: none;
 
       &[data-cursor-state='blink'] {
+        animation: blink 500ms 500ms linear infinite;
+
         @keyframes blink {
           0% {
             opacity: 1;
@@ -36,8 +38,6 @@
             opacity: 1;
           }
         }
-
-        animation: blink 500ms 500ms linear infinite;
       }
     }
   }

@@ -30,9 +30,6 @@ export type DialogOptions = {
 };
 
 export const createDialog = (els: DialogElements, options: DialogOptions): Dialog => {
-  const originalBtnText = els.closeBtn.textContent;
-  let ctrl = false;
-
   const open = () => {
     els.main.hidden = false;
   };
@@ -73,6 +70,9 @@ export const createDialog = (els: DialogElements, options: DialogOptions): Dialo
     removeEventListener('keyup', listeners.keyup);
     els.main.removeEventListener('submit', listeners.submit);
   };
+
+  const originalBtnText = els.closeBtn.textContent;
+  let ctrl = false;
 
   requestAnimationFrame(() => {
     els.closeBtn.focus();

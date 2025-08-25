@@ -73,21 +73,3 @@ export const unwrapAll: {
  */
 export const isPromiseLike = <T>(value: T | PromiseLike<T>): value is PromiseLike<T> =>
   typeof value === 'object' && value !== null && 'then' in value;
-
-export class AbortError extends Error {
-  override message = 'Aborted';
-}
-export class HttpNotFoundError extends Error {
-  override message = 'Web resource not found';
-}
-export class HttpGenericError extends Error {
-  override message = 'HTTP Generic error';
-}
-export class FetchFailedError extends Error {
-  override message = 'Fetch failed';
-}
-export class ParseError extends Error {
-  override message = 'Error parsing HTTP response';
-}
-
-export type FetchError = HttpNotFoundError | HttpGenericError | FetchFailedError;

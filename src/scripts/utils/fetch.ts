@@ -1,12 +1,7 @@
-import {
-  type FetchError,
-  type Result,
-  AbortError,
-  FetchFailedError,
-  HttpGenericError,
-  HttpNotFoundError,
-  ParseError,
-} from './result';
+import { type Result } from './result';
+import { Http404Error, HttpGenericError, FetchFailedError, AbortError, ParseError } from './error';
+
+export type FetchError = Http404Error | HttpGenericError | FetchFailedError;
 
 /**
  * Basic HTTP client.
@@ -31,7 +26,7 @@ export const http = {
 
       if (!res.ok) {
         if (res.status === 404) {
-          return [null, new HttpNotFoundError()];
+          return [null, new Http404Error()];
         }
 
         return [null, new HttpGenericError()];
@@ -82,13 +77,13 @@ const parse = async (
       try {
         const text = await res[method]();
         resolve([text, null]);
-      } catch (error) {
+      } catch {
         if (signal?.aborted) {
-          resolve([null, new ParseError()]);
+          resolve([null, new AbortError()]);
           return;
         }
 
-        resolve([null, error as Error]);
+        resolve([null, new ParseError()]);
       } finally {
         signal?.removeEventListener('abort', onAbort);
       }

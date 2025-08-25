@@ -1,4 +1,6 @@
-import { type EffectConstructor } from '../effect';
+import { type EffectConstructor } from '.';
+
+// todo: this effect is a bit broken
 
 export const RemoveEffect: EffectConstructor<number> = {
   name: 'remove',

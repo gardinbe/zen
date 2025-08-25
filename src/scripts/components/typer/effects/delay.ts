@@ -1,4 +1,4 @@
-import { type EffectConstructor } from '../effect';
+import { type EffectConstructor } from '.';
 import { timeout } from '../../../utils/timeout';
 
 export const DelayEffect: EffectConstructor<number> = {

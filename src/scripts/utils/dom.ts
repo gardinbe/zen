@@ -21,5 +21,5 @@ export const query = <T extends HTMLElement>(selector: string, parent: ParentNod
  */
 export const queryAll = <T extends HTMLElement>(
   selector: string,
-  parent: ParentNode = document
+  parent: ParentNode = document,
 ) => [...parent.querySelectorAll<T>(selector)];

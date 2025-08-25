@@ -49,7 +49,7 @@ export type Cursor = {
  * - ▁ Lower One-Eighth Block
  * - ▂ Lower One-Quarter Block
  * - ▃ Lower Three-Eighths Block
- * - 	 Lower Half Block
+ * - ▄ Lower Half Block
  * - █ Full Block
  * - _ Low Line (underscore)
  * - | Vertical Line (pipe)

@@ -1,21 +1,21 @@
 export type TerminalInputSuggester = {
   /**
-   * Returns the next suggestion for the input value.
-   * @param value Input value.
+   * Returns the next suggestion for the given value.
+   * @param value Value.
    * @returns Suggested value, or `null` if no suggestion is available.
    */
-  get: (value: string) => string | null;
+  suggest: (value: string) => string | null;
 
   /**
-   * Resets the suggestions.
+   * Clears the suggestions.
    */
-  reset: () => void;
+  clear: () => void;
 };
 
 export type TerminalInputSuggesterOptions = {
   /**
-   * Invoked to get suggestions for the input value.
-   * @param value Input value.
+   * Invoked to get suggestions for the given value.
+   * @param value Value.
    * @returns Suggested values.
    */
   getSuggestions: (value: string) => string[];
@@ -24,7 +24,7 @@ export type TerminalInputSuggesterOptions = {
 export const createTerminalInputSuggester = (
   options: TerminalInputSuggesterOptions,
 ): TerminalInputSuggester => {
-  const get = (value: string) => {
+  const suggest = (value: string) => {
     current ??= value;
     suggestions ??= options.getSuggestions(value);
 
@@ -37,7 +37,7 @@ export const createTerminalInputSuggester = (
     return suggestion;
   };
 
-  const reset = () => {
+  const clear = () => {
     current = null;
     suggestions = null;
     index = -1;
@@ -48,7 +48,7 @@ export const createTerminalInputSuggester = (
   let index = -1;
 
   return {
-    get,
-    reset,
+    suggest,
+    clear,
   };
 };

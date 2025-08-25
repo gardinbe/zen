@@ -18,6 +18,11 @@ export type TerminalInput = {
   suggester: TerminalInputSuggester;
 
   /**
+   * Returns the input value.
+   */
+  readonly value: string;
+
+  /**
    * Sets the input value.
    */
   set: (value: string) => void;
@@ -43,14 +48,27 @@ export type TerminalInputOptions = {
    * Invoked when the user cancels the input.
    *
    * I.e. whenever Ctrl+C is pressed.
+   * @param value Input value.
    */
-  onCancel: () => void;
+  onCancel: (value: string) => void;
 
   /**
    * Invoked when the user submits the input.
    * @param value Input value.
    */
   onSubmit: (value: string) => void;
+
+  /**
+   * Invoked when the user presses the up arrow key.
+   * @param value Input value.
+   */
+  onUp: (value: string) => void;
+
+  /**
+   * Invoked when the user presses the down arrow key.
+   * @param value Input value.
+   */
+  onDown: (value: string) => void;
 
   /**
    * Suggester options.
@@ -62,6 +80,8 @@ export const createTerminalInput = (
   els: TerminalElements,
   options: TerminalInputOptions,
 ): TerminalInput => {
+  const get = () => els.input.value;
+
   const set = (value: string) => {
     els.input.value = value;
     resize();
@@ -72,21 +92,44 @@ export const createTerminalInput = (
   };
 
   const resize = () => {
-    els.input.style.width = `${els.input.value.length}ch`;
+    els.input.style.width = `${get().length}ch`;
   };
 
-  const repositionCursor = () =>
-    cursor.setPosition(els.input.value.length - (els.input.selectionEnd ?? 0));
+  const repositionCursor = () => cursor.setPosition(get().length - (els.input.selectionEnd ?? 0));
 
   const listeners = {
     input: () => {
-      suggester.reset();
+      suggester.clear();
       resize();
       cursor.freeze();
       requestAnimationFrame(cursor.blink);
     },
 
-    keydown: async (ev: KeyboardEvent) => {
+    keydown: (ev: KeyboardEvent) => {
+      if (ev.key === 'Tab') {
+        ev.preventDefault();
+        const suggestion = suggester.suggest(get());
+
+        if (!suggestion) {
+          return;
+        }
+
+        set(suggestion);
+        return;
+      }
+
+      if (ev.key === 'ArrowUp') {
+        ev.preventDefault();
+        options.onUp(get());
+        return;
+      }
+
+      if (ev.key === 'ArrowDown') {
+        ev.preventDefault();
+        options.onDown(get());
+        return;
+      }
+
       if (ev.key === 'Delete') {
         requestAnimationFrame(repositionCursor);
         return;
@@ -103,20 +146,10 @@ export const createTerminalInput = (
         }
 
         ev.preventDefault();
+        const value = get();
         clear();
-        options.onCancel();
+        options.onCancel(value);
         return;
-      }
-
-      if (ev.key === 'Tab') {
-        ev.preventDefault();
-        const suggestion = suggester.get(els.input.value);
-
-        if (!suggestion) {
-          return;
-        }
-
-        set(suggestion);
       }
     },
 
@@ -138,7 +171,7 @@ export const createTerminalInput = (
 
     submit: (ev: SubmitEvent) => {
       ev.preventDefault();
-      const value = els.input.value;
+      const value = get();
       clear();
       options.onSubmit(value);
     },
@@ -164,9 +197,7 @@ export const createTerminalInput = (
   };
 
   const cursor = createCursor();
-  const suggester = createTerminalInputSuggester({
-    getSuggestions: options.suggester.getSuggestions,
-  });
+  const suggester = createTerminalInputSuggester(options.suggester);
 
   cursor.attach(els.input);
   cursor.hide();
@@ -180,6 +211,9 @@ export const createTerminalInput = (
   return {
     cursor,
     suggester,
+    get value() {
+      return get();
+    },
     set,
     clear,
     listen,

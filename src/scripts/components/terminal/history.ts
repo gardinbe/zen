@@ -1,8 +1,6 @@
-import { type TerminalElements } from '.';
-
 export type TerminalHistory = {
   /**
-   * History entries.
+   * Returns the history entries.
    */
   readonly entries: string[];
 
@@ -30,19 +28,15 @@ export type TerminalHistory = {
    * Resets the history position.
    */
   reset: () => void;
-
-  /**
-   * Starts listening for events.
-   */
-  listen: () => void;
-
-  /**
-   * Stops listening for events.
-   */
-  ignore: () => void;
 };
 
 export type TerminalHistoryOptions = {
+  /**
+   * Invoked to get the current value.
+   * @returns Current value.
+   */
+  getValue: () => string;
+
   /**
    * Invoked when the history is navigated.
    * @param value Navigated value.
@@ -50,16 +44,7 @@ export type TerminalHistoryOptions = {
   onNavigate: (value: string) => void;
 };
 
-// todo: refactor input element logic out, and into input
-
-export const createTerminalHistory = (
-  els: TerminalElements,
-  options: TerminalHistoryOptions,
-): TerminalHistory => {
-  const entries: string[] = [];
-  let pos = -1;
-  let prevValue = '';
-
+export const createTerminalHistory = (options: TerminalHistoryOptions): TerminalHistory => {
   const save = () => {
     localStorage.setItem('terminal-history', JSON.stringify(entries));
   };
@@ -84,7 +69,7 @@ export const createTerminalHistory = (
 
   const up = () => {
     if (!~pos) {
-      prevValue = els.input.value;
+      prevValue = options.getValue();
     }
 
     pos = Math.min(pos + 1, entries.length - 1);
@@ -124,34 +109,11 @@ export const createTerminalHistory = (
     prevValue = '';
   };
 
-  const listeners = {
-    keydown: (ev: KeyboardEvent) => {
-      if (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown') {
-        return;
-      }
-
-      ev.preventDefault();
-
-      if (ev.key === 'ArrowUp') {
-        up();
-      } else {
-        down();
-      }
-    },
-  };
-
-  const listen = () => {
-    els.input.addEventListener('keydown', listeners.keydown);
-    els.input.addEventListener('input', reset);
-  };
-
-  const ignore = () => {
-    els.input.removeEventListener('keydown', listeners.keydown);
-    els.input.removeEventListener('input', reset);
-  };
+  const entries: string[] = [];
+  let pos = -1;
+  let prevValue = '';
 
   load();
-  listen();
 
   return {
     entries,
@@ -160,7 +122,5 @@ export const createTerminalHistory = (
     add,
     clear,
     reset,
-    listen,
-    ignore,
   };
 };

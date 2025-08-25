@@ -1,9 +1,8 @@
-import { type EffectConstructor, WhitespaceRegex } from '../effect';
+import { type EffectConstructor, WhitespaceRegex } from '.';
 import { randomTimeout } from '../../../utils/timeout';
 
 export const TypeEffect: EffectConstructor<string> = {
   name: 'type',
-  parse: (value) => value,
   create: (text) => async (ctx) => {
     ctx.cursor.freeze();
 

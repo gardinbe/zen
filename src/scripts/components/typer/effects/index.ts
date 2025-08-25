@@ -1,9 +1,9 @@
-import { type Cursor } from '../cursor';
-import { DelayEffect } from './effects/delay';
-import { InsertEffect } from './effects/insert';
-import { RemoveEffect } from './effects/remove';
-import { TypeEffect } from './effects/type';
-import { UndoEffect } from './effects/undo';
+import { type Cursor } from '../../cursor';
+import { DelayEffect } from './delay';
+import { InsertEffect } from './insert';
+import { RemoveEffect } from './remove';
+import { TypeEffect } from './type';
+import { UndoEffect } from './undo';
 
 /**
  * Array of all available effect constructors.
@@ -25,10 +25,13 @@ export type EffectConstructor<T = any> = {
 
   /**
    * Parses the effect value.
+   *
+   * todo: enforce validating this. create `EffectConstructorParser` object with `int` and `float`
+   * methods. then enforce `Result<T, ParseError>` return type.
    * @param value Raw effect value.
    * @returns Parsed effect value.
    */
-  parse: (value: string) => T;
+  parse?: (value: string) => T;
 
   /**
    * Creates and returns an effect.
@@ -127,12 +130,12 @@ export const createEffects = (text: string): Effect[] => {
 
 const EffectRegex = /\[\[\s*(.*?)\s*:(.*?)\]\]/dgs;
 
-type EffectConstructorObject = {
+type CreateEffectObject = {
   key: string;
   value: string;
 };
 
-const createEffect = (obj: EffectConstructorObject): Effect => {
+const createEffect = (obj: CreateEffectObject): Effect => {
   const { key, value } = obj;
   const effect = EffectConstructors.find((effect) => effect.name === key);
 
@@ -140,5 +143,5 @@ const createEffect = (obj: EffectConstructorObject): Effect => {
     throw new Error('Unknown typer effect');
   }
 
-  return effect.create(effect.parse(value));
+  return effect.create(effect.parse?.(value) ?? value);
 };

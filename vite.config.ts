@@ -1,5 +1,9 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: []
+  build: {
+    rollupOptions: {
+      onwarn: (warning, warn) => warning.code !== 'EVAL' && warn(warning),
+    },
+  },
 });

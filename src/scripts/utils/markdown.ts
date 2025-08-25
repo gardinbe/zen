@@ -1,5 +1,6 @@
 import { marked } from 'marked';
-import { type Result, AbortError } from './result';
+import { type Result } from './result';
+import { AbortError, ParseError } from './error';
 
 /**
  * Parses markdown text into HTML and returns the result.
@@ -10,7 +11,7 @@ import { type Result, AbortError } from './result';
 export const parseMarkdown = (
   text: string,
   signal: AbortSignal | null,
-): Promise<Result<string, AbortError>> =>
+): Promise<Result<string, ParseError | AbortError>> =>
   new Promise((resolve) => {
     const onAbort = () => {
       resolve([null, new AbortError()]);
@@ -22,13 +23,13 @@ export const parseMarkdown = (
       try {
         const parsed = await marked.parse(text);
         resolve([parsed, null]);
-      } catch (error) {
+      } catch {
         if (signal?.aborted) {
           resolve([null, new AbortError()]);
           return;
         }
 
-        resolve([null, error as Error]);
+        resolve([null, new ParseError()]);
       } finally {
         signal?.removeEventListener('abort', onAbort);
       }

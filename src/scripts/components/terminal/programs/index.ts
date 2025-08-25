@@ -1,12 +1,12 @@
-import { type TerminalHistory } from './history';
-import { type TerminalLogger } from './logger';
-import { ClearProgram } from './programs//clear';
-import { EvalProgram } from './programs//eval';
-import { HelpProgram } from './programs//help';
-import { HistoryProgram } from './programs//history';
-import { FetchProgram } from './programs/fetch';
-import { ListProgram } from './programs/list';
-import { PrintProgram } from './programs/print';
+import { type TerminalHistory } from '../history';
+import { type TerminalLogger } from '../logger';
+import { ClearProgram } from './clear';
+import { EvalProgram } from './eval';
+import { HelpProgram } from './help';
+import { HistoryProgram } from './history';
+import { FetchProgram } from './fetch';
+import { ListProgram } from './list';
+import { PrintProgram } from './print';
 
 /**
  * Array of available terminal program constructors.
@@ -38,7 +38,7 @@ export type ProgramConstructor = {
   exec: (args: string[]) => Program;
 };
 
-export type Program = (ctx: ProgramContext) => void | Promise<void>;
+export type Program = (ctx: ProgramContext) => ProgramExitCode | Promise<ProgramExitCode>;
 
 export type ProgramContext = Readonly<{
   /**
@@ -56,6 +56,8 @@ export type ProgramContext = Readonly<{
    */
   history: TerminalHistory;
 }>;
+
+export type ProgramExitCode = 0 | 1;
 
 export const ArgumentError = {
   /**
@@ -85,16 +87,16 @@ export const ArgumentError = {
 };
 
 /**
- * Returns all available commands.
+ * Returns all available program names. Includes aliases.
  * @returns Array of commands.
  */
-export const getCommands = (): string[] => [
+export const getProgramNames = (): string[] => [
   ...ProgramsConstructors.map(({ name }) => name),
   ...Object.entries(Aliases).map(([name]) => name),
 ];
 
 /**
- * Returns a program by name.
+ * Returns a program constructor by name.
  * @param name Name of the program.
  */
 export const getProgram = (name: string): ProgramConstructor | null =>

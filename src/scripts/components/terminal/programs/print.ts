@@ -1,6 +1,6 @@
+import { type ProgramConstructor, ArgumentError } from '.';
 import { getDocument } from '../../../lib/documents';
-import { HttpNotFoundError } from '../../../utils/result';
-import { type ProgramConstructor, ArgumentError } from '../program';
+import { Http404Error } from '../../../utils/error';
 
 export const PrintProgram: ProgramConstructor = {
   name: 'print',
@@ -16,28 +16,30 @@ export const PrintProgram: ProgramConstructor = {
     async (ctx) => {
       if (arg) {
         ctx.logger.stderr(ArgumentError.unexpected(2, arg));
-        return;
+        return 1;
       }
 
       if (!filename) {
         ctx.logger.stderr(ArgumentError.missing(1));
-        return;
+        return 1;
       }
 
       const [html, error] = await getDocument(filename, ctx.signal);
 
       if (error) {
-        if (error instanceof HttpNotFoundError) {
+        if (Http404Error.is(error)) {
           ctx.logger.stderr(ArgumentError.invalid(1, `Document \`${filename}\` not found.`));
         } else {
           ctx.logger.stderr(error);
         }
 
-        return;
+        return 1;
       }
 
-      ctx.logger.stdout(`<div class="u-html">${html}</div>`, {
+      ctx.logger.stdout(`<div class="zen-typer-html">${html}</div>`, {
         noNewlines: true,
       });
+
+      return 0;
     },
 };

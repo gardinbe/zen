@@ -1,4 +1,4 @@
-import { AbortError } from './result';
+import { AbortError } from './error';
 
 /**
  * Creates a timeout with the given duration and returns a promise that resolves when the timeout

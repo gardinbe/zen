@@ -1,11 +1,6 @@
-import { type Effect } from './effect';
+import { type Effect } from './effects';
 
 export type TyperQueue = {
-  /**
-   * Returns the current queue abort signal.
-   */
-  readonly signal: AbortSignal;
-
   /**
    * Pushes batches to the queue.
    * @param batches Batches to push.
@@ -19,77 +14,86 @@ export type TyperQueue = {
 };
 
 export const createTyperQueue = (): TyperQueue => {
-  let active: ReturnType<typeof exec> | null = null;
-  let controller = new AbortController();
-  const batches: EffectBatch[] = [];
-
   const push = (..._batches: EffectBatch[]) => {
     batches.push(..._batches);
 
-    if (active) {
+    if (running) {
       return;
     }
 
-    active = exec(controller.signal);
-    active.then(() => {
-      active = null;
+    current = exec(controller.signal).finally(() => {
+      current = null;
     });
   };
 
   const clear = async () => {
     controller.abort();
     controller = new AbortController();
-    await active;
+    await current;
     batches.length = 0;
   };
 
   const exec = async (signal: AbortSignal) => {
-    // todo: maybe this can be tidier
+    running = true;
 
-    let batch;
+    const start = () => {
+      batch!.onStart();
+    };
+
+    const complete = () => {
+      batch!.onComplete();
+      batch!.onFinish();
+    };
+
+    const abort = () => {
+      batch!.onAbort();
+      batch!.onFinish();
+    };
+
+    let batch: EffectBatch | undefined;
 
     while ((batch = batches.shift())) {
       if (signal.aborted) {
-        batch.onAbort();
-        batch.onFinish();
+        abort();
         break;
       }
 
-      batch.onStart();
+      start();
 
       let executor;
 
       while ((executor = batch.executors.shift())) {
         if (signal.aborted) {
-          batch.onAbort();
-          batch.onFinish();
+          abort();
           break;
         }
 
-        await executor();
+        await executor(signal);
       }
 
       if (signal.aborted) {
-        batch.onAbort();
-        batch.onFinish();
+        abort();
         break;
       }
 
-      batch.onComplete();
-      batch.onFinish();
+      complete();
     }
+
+    running = false;
   };
 
+  let running = false;
+  let current: ReturnType<typeof exec> | null = null;
+  let controller = new AbortController();
+  const batches: EffectBatch[] = [];
+
   return {
-    get signal() {
-      return controller.signal;
-    },
     push,
     clear,
   };
 };
 
-export type EffectExecutor = () => ReturnType<Effect>;
+export type EffectExecutor = (signal: AbortSignal) => ReturnType<Effect>;
 
 export type EffectBatchCallbacks = {
   /**

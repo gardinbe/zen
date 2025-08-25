@@ -32,7 +32,7 @@ export type TerminalLogger = {
 };
 
 export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
-  const write = async (text: string) => {
+  const write = (text: string) => {
     let finished = false;
     let prevScrollTop = 0;
 
@@ -75,6 +75,7 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   const stdout = (output: string, options?: Partial<LoggerWriteOptions>) =>
     write(options?.noNewlines ? output : `[[insert:\n]]${output}[[insert:\n\n]]`);
   const stderr = (error: unknown) =>
+    // todo: add Error.isError when it's available
     write(`[[insert:ERROR: ${error instanceof Error ? error.message : error}\n]]`);
 
   const typer = createTyper({
@@ -89,8 +90,6 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
     clear,
   };
 };
-
-// todo: unsure if this is the best approach
 
 export type LoggerWriteOptions = {
   /**
