@@ -2,7 +2,7 @@
   :root {
     // fonts
 
-    --f-base: monospace;
+    --f-base: dos;
     --f-size-base: 1.1rem;
 
     // colors
@@ -10,25 +10,30 @@
     --c-primary-rgb: 33 221 255;
     --c-primary: rgb(var(--c-primary-rgb));
 
-    --c-background-rgb: 8 8 8;
+    --c-background-rgb: 12 28 40;
     --c-background: rgb(var(--c-background-rgb));
+
+    --c-background-secondary-rgb: 5 6 7;
+    --c-background-secondary: rgb(var(--c-background-secondary-rgb));
 
     --c-link-rgb: 200 255 202;
     --c-link: rgb(var(--c-link-rgb));
 
-    // borders and shadows
+    // borders
 
-    --bo: 1px dotted rgb(var(--c-primary-rgb) / 0.3);
-    --sh: 0 0 24px 0 rgb(var(--c-primary-rgb) / 0.5);
+    --bo: 1px solid var(--c-primary);
 
-    // button
+    // buttons
 
-    --btn-c-background: rgb(var(--c-background-rgb) / 0.25);
+    --btn-c-background: rgb(var(--c-background-rgb) / 0.5);
     --btn-c-text: var(--c-background);
     --btn-hover-c-background: var(--c-background);
     --btn-hover-c-text: var(--c-primary);
 
     // crt
+
+    --crt-c-background-rgb: 25 25 30;
+    --crt-c-background: rgb(var(--crt-c-background-rgb));
 
     --crt-c-red-rgb: 218 49 49;
     --crt-c-red: rgb(var(--crt-c-red-rgb));
@@ -46,7 +51,7 @@
     --crt-sh-flicker-to:
       2px 0.5px 2px var(--crt-c-text-pink), -1px -0.5px 2px var(--crt-c-text-green);
 
-    --crt-anim-flicker: CrtFlicker 10ms linear infinite alternate;
-    --crt-anim-flicker-text: CrtFlickerText 10ms linear infinite alternate;
+    --crt-anim-flicker: CrtFlicker 10ms infinite alternate;
+    --crt-anim-flicker-text: CrtFlickerText 10ms infinite alternate;
   }
 }

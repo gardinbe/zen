@@ -7,6 +7,7 @@ import { HistoryProgram } from './history';
 import { FetchProgram } from './fetch';
 import { ListProgram } from './list';
 import { PrintProgram } from './print';
+import { TipsProgram } from './tips';
 
 /**
  * Array of available terminal program constructors.
@@ -19,6 +20,7 @@ export const ProgramsConstructors: ProgramConstructor[] = [
   HistoryProgram,
   ListProgram,
   PrintProgram,
+  TipsProgram,
 ];
 
 /**

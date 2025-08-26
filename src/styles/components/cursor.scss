@@ -9,6 +9,7 @@
     user-select: none;
     line-height: 100%;
     pointer-events: none;
+    mix-blend-mode: difference;
 
     // contains zero-width-space
 
@@ -18,7 +19,6 @@
 
     &[data-cursor-state='blink'] {
       .zen-cursor-caret {
-        mix-blend-mode: difference;
         animation:
           var(--crt-anim-flicker),
           CursorBlink 500ms 500ms linear infinite alternate;
@@ -28,9 +28,13 @@
 
   .zen-cursor-caret {
     align-self: flex-end;
-    width: 80%;
+    width: 100%;
     height: 100%;
     background: currentcolor;
     animation: var(--crt-anim-flicker);
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
   }
 }

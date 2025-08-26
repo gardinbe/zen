@@ -1,8 +1,8 @@
+import { type Enum } from './enum';
 import { type Result } from './result';
 import { type FetchError, http } from './fetch';
 import { AbortError, ParseError } from './error';
 import { parseMarkdown } from './markdown';
-import type { Enum } from './enum';
 
 /**
  * Array of available documents.
@@ -67,7 +67,11 @@ export const getDocument = async (
 };
 
 const resolveUrl = (name: string): string => {
-  let resolved = name;
+  let resolved = name.trim();
+
+  if (/^(https?:\/\/)/i.test(resolved)) {
+    return resolved;
+  }
 
   if (resolved.includes('\\')) {
     resolved = resolved.replaceAll('\\', '/');

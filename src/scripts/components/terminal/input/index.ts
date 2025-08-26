@@ -179,6 +179,7 @@ export const createTerminalInput = (
       ev.preventDefault();
       const value = get();
       clear();
+      repositionCursor();
       options.onSubmit(value);
     },
   };

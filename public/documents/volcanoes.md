@@ -50,7 +50,7 @@ Eruptions can be:
 Volcanoes are destructive but also bring **fertile soils**, **new land**, and even **geothermal energy**.
 Civilizations throughout history have thrived around volcanoes despite the risks.
 
-![Eruption of a Volcano](https://upload.wikimedia.org/wikipedia/commons/1/16/Mount_Etna_erupting_in_2013.jpg)
+![Eruption of a Volcano](/images/volcano.webp)
 
 ---
 

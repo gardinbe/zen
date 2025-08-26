@@ -39,15 +39,22 @@ export type TerminalLogger = {
 export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   const write = (text: string) => {
     let prevScrollTop = 0;
+    let running = true;
 
     const tick = () => {
-      if (els.outputContainer.scrollTop < prevScrollTop) {
+      if (els.outputContainer.scrollTop + LoggerScrollRegion <= prevScrollTop) {
         requestAnimationFrame(tick);
         return;
       }
 
       els.outputContainer.scrollTop = els.outputContainer.scrollHeight;
       prevScrollTop = els.outputContainer.scrollTop;
+
+      if (!running) {
+        cancelAnimationFrame(frameRequestId);
+        return;
+      }
+
       frameRequestId = requestAnimationFrame(tick);
     };
 
@@ -59,7 +66,7 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
       },
       onFinish: () => {
         typer.cursor.hide();
-        cancelAnimationFrame(frameRequestId);
+        running = false;
       },
     });
   };
@@ -70,10 +77,10 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
 
   // todo: if a user types or program errors with [[]] it fucks with this
 
-  const stdin = (input: string) => write(`[[insert:> ${input}\n]]`);
+  const stdin = (input: string) => write(`[[insert:\n> ${input}\n]]`);
 
   const stdout = (output: string, options?: Partial<LoggerWriteOptions>) =>
-    write(options?.noNewlines ? output : `[[insert:\n]]${output}[[insert:\n\n]]`);
+    write(options?.noNewlines ? output : `[[insert:\n]]${output}[[insert:\n]]`);
 
   const stderr = (error: unknown) =>
     // todo: use Error.isError when available
@@ -99,3 +106,8 @@ export type LoggerWriteOptions = {
    */
   noNewlines?: boolean;
 };
+
+/**
+ * Region in which the logger will scroll to the bottom.
+ */
+const LoggerScrollRegion = 5;

@@ -1,5 +1,5 @@
-import { delay } from '../../../utils/delay';
 import { type ProgramConstructor, Arg } from '.';
+import { timeout } from '../../../utils/timeout';
 
 export const EvalProgram: ProgramConstructor = {
   name: 'eval',
@@ -7,7 +7,7 @@ export const EvalProgram: ProgramConstructor = {
   arguments: [
     {
       name: '[expression]',
-      description: 'Expression to evaluate. Must be surrounded in quotes if it has spaces.',
+      description: 'Expression to evaluate. Must be surrounded in quotes if contains spaces.',
     },
   ],
   exec:
@@ -31,6 +31,8 @@ export const EvalProgram: ProgramConstructor = {
         clear: console.clear,
       };
 
+      let result;
+
       try {
         console.log = ctx.logger.stdout;
         console.info = ctx.logger.stdout;
@@ -38,21 +40,21 @@ export const EvalProgram: ProgramConstructor = {
         console.error = ctx.logger.stderr;
         console.clear = ctx.logger.clear;
 
-        const result = eval?.(`void 'use strict';${expression}`);
-        ctx.logger.stdout(result);
+        result = eval?.(`void 'use strict';${expression}`);
       } catch (error) {
         ctx.logger.stderr(error);
       }
 
       Object.assign(console, originalConsole);
 
-      const fulfilled = await delay(0, ctx.signal);
+      const fulfilled = await timeout(0, null);
 
       if (!fulfilled) {
         ctx.logger.stderr(fulfilled);
         return 1;
       }
 
+      ctx.logger.stdout(result);
       return 0;
     },
 };

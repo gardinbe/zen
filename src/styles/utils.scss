@@ -1,4 +1,8 @@
 @layer utils {
+  .u-no-margin {
+    margin: 0;
+  }
+
   .u-zen-btn {
     outline: none;
     border: none;
@@ -26,7 +30,7 @@
 
   .u-zen-crt-background {
     position: relative;
-    background: rgb(25 25 30);
+    background: var(--crt-c-background);
 
     &::before,
     &::after {
@@ -59,16 +63,12 @@
     }
   }
 
-  .u-zen-crt-content {
+  .u-zen-crt-text {
     padding: 4px;
     animation: var(--crt-anim-flicker-text);
 
     @media (prefers-reduced-motion: reduce) {
       animation: none;
-    }
-
-    hr {
-      animation: var(--crt-anim-flicker);
     }
   }
 }

@@ -2,22 +2,20 @@
   @keyframes CrtFlicker {
     from {
       box-shadow: var(--crt-sh-flicker-to);
-      opacity: 1;
     }
     to {
       box-shadow: var(--crt-sh-flicker-to);
-      opacity: 0.5;
     }
   }
 
   @keyframes CrtFlickerText {
     from {
       text-shadow: var(--crt-sh-flicker-to);
-      opacity: 1;
+      opacity: 0;
     }
     to {
       text-shadow: var(--crt-sh-flicker-to);
-      opacity: 0.5;
+      opacity: 1;
     }
   }
 

@@ -1,4 +1,4 @@
-import type { Enum } from '../../../utils/enum';
+import { type Enum } from '../../../utils/enum';
 import { type Cursor } from '../../cursor';
 import { DelayEffect } from './delay';
 import { InsertEffect } from './insert';
@@ -154,5 +154,5 @@ const createEffect = (obj: CreateEffectObject): Effect | null => {
     return null;
   }
 
-  return effect.create(effect.parse?.(value) ?? value);
+  return effect.create(...(effect.parse?.(value) ?? [value]));
 };

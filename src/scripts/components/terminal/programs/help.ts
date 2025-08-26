@@ -36,7 +36,10 @@ export const HelpProgram: ProgramConstructor = {
           str +=
             '\n\n' +
             program.arguments
-              .map((argument) => `${argument.name}${spacer(argument.name)}${argument.description}`)
+              .map(
+                (argument) =>
+                  `<strong>${argument.name}</strong>${spacer(argument.name)}${argument.description}`,
+              )
               .join('\n');
         }
 
@@ -51,7 +54,7 @@ export const HelpProgram: ProgramConstructor = {
           (program) =>
             `<strong>${program.name}</strong>${spacer(program.name)}${program.description}`,
         ).join('\n') +
-        '\n\nType `help [program]` for more information.';
+        '\n\nType <code>help [program]</code> for more information.';
 
       ctx.logger.stdout(str);
 

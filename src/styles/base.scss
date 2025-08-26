@@ -1,5 +1,10 @@
 @layer base {
-  * {
+  *,
+  ::before,
+  ::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
 
   [hidden] {
@@ -8,17 +13,21 @@
 
   ::selection {
     background: var(--c-primary);
-    color: var(--c-background);
+    color: var(--c-background-secondary);
   }
 
   body {
-    position: relative;
     display: flex;
     flex-flow: column;
+
     height: 100dvh;
-    padding: 8%;
+    padding: 4%;
+
     color: var(--c-primary);
     font: normal normal var(--f-size-base) / normal var(--f-base);
+
+    scrollbar-color: rgb(var(--c-primary-rgb) / 0.5) transparent;
+    scrollbar-width: thin;
   }
 
   :is(a, .link) {
@@ -26,7 +35,7 @@
     text-decoration: none;
 
     &:focus-visible {
-      outline: unset;
+      outline: none;
     }
 
     &:hover,
@@ -46,48 +55,44 @@
       vertical-align: middle;
       mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 24 24"><path d="m13 3 3.293 3.293-7 7 1.414 1.414 7-7L21 11V3z"/><path d="M19 19H5V5h7l-2-2H3v18h18V13l-2-2v8z"/></svg>')
         no-repeat center / cover;
-      background: currentcolor;
+      background: #fff;
     }
   }
 
-  mark {
-    background: var(--c-link);
-    color: var(--c-background);
+  p {
+    margin: 0.75rem 0;
   }
 
-  small {
-    font-size: 0.6em;
-  }
-
-  hr {
-    margin: 1rem 0;
-    border-width: 3px;
-    border-color: var(--c-primary);
-  }
-
-  code {
-    background: var(--c-background);
-  }
-
-  :is(p, ul, ol, blockquote, pre, table, details) {
-    margin-bottom: 1.5rem;
+  :is(ul, ol, table, blockquote, details) {
+    margin: 1.5rem 0;
   }
 
   :is(ul, ol) {
     list-style-position: inside;
-    margin-right: 1.5rem;
 
-    > li {
-      margin-bottom: 0.75rem;
+    :is(ul, ol) {
+      margin: 0.75rem 0 0.75rem 2ch;
+    }
+
+    li {
+      margin: 0.75rem 0;
+
+      &::marker {
+        font-weight: 900;
+      }
     }
   }
 
   ul {
-    list-style-type: disc;
+    list-style-type: '- ';
   }
 
   ol {
-    list-style-type: decimal;
+    li {
+      &::marker {
+        content: counters(list-item, '.') '. ';
+      }
+    }
   }
 
   :is(p, h1, h2, h3, h4, h5, h6) {
@@ -102,7 +107,7 @@
 
   h1 {
     font-size: 2rem;
-    margin-top: 4rem;
+    margin-top: 3rem;
 
     @media (width < 992) {
       font-size: 2rem;
@@ -115,7 +120,7 @@
 
   h2 {
     font-size: 1.8rem;
-    margin-top: 3.5rem;
+    margin-top: 2.8rem;
 
     @media (width < 992) {
       font-size: 1.5rem;
@@ -128,7 +133,7 @@
 
   h3 {
     font-size: 1.5rem;
-    margin-top: 3.1rem;
+    margin-top: 2.6rem;
 
     @media (width < 992) {
       font-size: 1.3rem;
@@ -141,7 +146,7 @@
 
   h4 {
     font-size: 1.3rem;
-    margin-top: 2.9rem;
+    margin-top: 2.4rem;
 
     @media (width < 992) {
       font-size: 1.2rem;
@@ -154,7 +159,7 @@
 
   h5 {
     font-size: 1.25rem;
-    margin-top: 2.7rem;
+    margin-top: 2.4rem;
 
     @media (width < 992) {
       font-size: 1.15rem;
@@ -166,24 +171,16 @@
   }
 
   h6 {
-    margin-top: 2.5rem;
+    margin-top: 2.4rem;
     font-size: var(--f-size-base);
   }
 
   // crazy margin trimming
 
-  :is(h1, h2, h3, h4, h5, h6) {
-    hr + &,
-    &:nth-child(1 of :not([hidden])) {
-      margin-top: 0;
-    }
-  }
-
   :is(
     p,
-    ul,
-    ol,
-    :is(ul, ol) > li,
+    :is(ul, ol),
+    :is(ul, ol) li,
     blockquote,
     pre,
     code,
@@ -197,8 +194,61 @@
     h5,
     h6
   ) {
+    hr + &,
+    &:not(:is(ul, ol) :is(ul, ol)):nth-child(1 of :not([hidden])) {
+      margin-top: 0;
+    }
+
+    &:has(+ hr),
     &:nth-last-child(1 of :not([hidden])) {
       margin-bottom: 0;
     }
+  }
+
+  mark {
+    background: var(--c-link);
+    color: var(--c-background-secondary);
+  }
+
+  small {
+    font-size: 0.6em;
+  }
+
+  hr {
+    border: none;
+    border-top: var(--bo);
+    margin: 1rem 0;
+  }
+
+  code,
+  kbd,
+  pre {
+    font-family: var(--f-base);
+  }
+
+  code,
+  kbd {
+    padding: 4px;
+    background: var(--c-background-secondary);
+  }
+
+  pre:has(code) {
+    padding: 2rem;
+    background: var(--c-background-secondary);
+    box-shadow: 6px 6px 4px -2px #000;
+
+    code {
+      padding: 0;
+      background: none;
+    }
+  }
+
+  img {
+    width: auto;
+    max-width: 100%;
+  }
+
+  :is(input, button, textarea, select) {
+    font: inherit;
   }
 }

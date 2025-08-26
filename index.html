@@ -55,7 +55,7 @@
         class="zen-view js-os-boot-view"
         hidden
       >
-        <pre class="zen-typer u-zen-crt-content js-os-boot-typer"></pre>
+        <pre class="zen-typer u-zen-crt-text js-os-boot-typer"></pre>
       </div>
 
       <div
@@ -63,14 +63,16 @@
         hidden
       >
         <div class="zen-terminal js-terminal">
-          <div class="zen-typer-container js-terminal-output-container">
-            <div class="zen-terminal-output zen-typer u-zen-crt-content js-terminal-output"></div>
+          <div
+            class="zen-terminal-output-container zen-typer-container u-zen-crt-text js-terminal-output-container"
+          >
+            <div class="zen-terminal-output zen-typer js-terminal-output"></div>
           </div>
           <form
-            class="zen-terminal-prompt zen-typer zen-typer--no-wrap u-zen-crt-content js-terminal-prompt"
+            class="zen-terminal-prompt zen-typer zen-typer--no-wrap u-zen-crt-text js-terminal-prompt"
           >
-            <span class="zen-terminal-prefix js-terminal-prefix">> </span>
-            <span class="zen-terminal-input-container"
+            <span class="zen-terminal-prefix js-terminal-prefix">> </span
+            ><span class="zen-terminal-input-container"
               ><input
                 class="zen-terminal-input js-terminal-input"
                 name="zen-terminal-input"

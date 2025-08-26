@@ -5,13 +5,21 @@
     height: 100%;
   }
 
-  .zen-terminal-output {
+  .zen-terminal-output-container {
     padding-bottom: 0;
+    padding-bottom: 0.75rem;
+  }
+
+  .zen-terminal-output {
   }
 
   .zen-terminal-prompt {
-    padding-top: 0;
+    padding-top: 0.5rem;
     display: inline-flex;
+    background: rgb(25 25 30);
+  }
+
+  .zen-terminal-prefix {
   }
 
   .zen-terminal-input-container {

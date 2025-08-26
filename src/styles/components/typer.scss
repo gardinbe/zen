@@ -2,12 +2,14 @@
   .zen-typer-container {
     overflow-y: auto;
     scrollbar-gutter: stable;
-    padding-right: 2ch;
+
+    @media (pointer: fine) {
+      padding-right: 1rem;
+    }
   }
 
   .zen-typer {
     position: relative;
-    margin: 0;
     font-size: 1.2rem;
     white-space: pre-wrap;
     word-break: break-word;
@@ -28,17 +30,10 @@
 
     // crazy margin trimming
 
-    :is(h1, h2, h3, h4, h5, h6) {
-      &:nth-child(1 of :not([data-typer-state='incomplete'])) {
-        margin-top: 0;
-      }
-    }
-
     :is(
       p,
-      ul,
-      ol,
-      :is(ul, ol) > li,
+      :is(ul, ol),
+      :is(ul, ol) li,
       blockquote,
       pre,
       code,
@@ -52,6 +47,10 @@
       h5,
       h6
     ) {
+      &:not(:is(ul, ol) :is(ul, ol)):nth-child(1 of :not([data-typer-state='incomplete'])) {
+        margin-top: 0;
+      }
+
       &:nth-last-child(1 of :not([data-typer-state='incomplete'])) {
         margin-bottom: 0;
       }
@@ -65,12 +64,11 @@
   .zen-typer-html {
     margin: 1rem 0;
     padding: 1rem;
-    border: 1px solid currentcolor;
+    border: var(--bo);
     font: normal normal var(--f-size-base) / normal var(--f-base);
     white-space: normal;
 
     hr {
-      text-shadow: none;
       margin: 2rem 0;
     }
   }

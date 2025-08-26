@@ -4,11 +4,11 @@ import { Http404Error } from '../../../utils/error';
 
 export const PrintProgram: ProgramConstructor = {
   name: 'print',
-  description: 'Prints a document to the terminal.',
+  description: 'Prints markdown documents to the terminal.',
   arguments: [
     {
       name: '[filename]',
-      description: 'Name of the document to print. Use `ls` to list available documents.',
+      description: 'Document URL. Use <code>ls</code> to list saved documents. Can be external.',
     },
   ],
   exec:

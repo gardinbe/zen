@@ -1,5 +1,5 @@
+import { type Result } from './result';
 import { AbortError } from './error';
-import type { Result } from './result';
 
 /**
  * Returns a promise that resolves to the result of the given executor function.
