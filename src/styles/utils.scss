@@ -1,5 +1,5 @@
 @layer utils {
-  .u-btn {
+  .u-zen-btn {
     outline: none;
     border: none;
 
@@ -8,9 +8,9 @@
     align-items: center;
     text-align: center;
 
-    border-bottom: 1px solid var(--color-primary);
-    background: rgb(var(--color-primary-rgb) / 0.05);
-    color: var(--color-primary);
+    border-bottom: 2px solid var(--btn-c-text);
+    background: var(--btn-c-background);
+    color: var(--btn-c-text);
     padding: 0.5rem 1rem;
     cursor: pointer;
     user-select: none;
@@ -18,8 +18,57 @@
     &:hover,
     &:active,
     &:focus-visible {
-      background: var(--color-primary);
-      color: var(--color-background);
+      border-bottom-color: var(--btn-hover-c-background);
+      background: var(--btn-hover-c-background);
+      color: var(--btn-hover-c-text);
+    }
+  }
+
+  .u-zen-crt-background {
+    position: relative;
+    background: rgb(25 25 30);
+
+    &::before,
+    &::after {
+      content: '';
+      z-index: 1;
+      position: absolute;
+      inset: 0;
+      transform: translateZ(0);
+      mix-blend-mode: overlay;
+      pointer-events: none;
+    }
+
+    &::before {
+      background: repeating-linear-gradient(
+        var(--crt-c-red) 0,
+        var(--crt-c-green) 3px,
+        var(--crt-c-blue) 6px,
+        var(--crt-c-red) 0
+      );
+    }
+
+    &::after {
+      background: repeating-linear-gradient(
+        90deg,
+        var(--crt-c-red) 0,
+        var(--crt-c-green) 1px,
+        var(--crt-c-blue) 4px,
+        transparent 0
+      );
+    }
+  }
+
+  .u-zen-crt-content {
+    padding: 4px;
+    animation: var(--crt-anim-flicker-text);
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+
+    hr {
+      animation: var(--crt-anim-flicker);
     }
   }
 }

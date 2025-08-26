@@ -1,5 +1,5 @@
-import { timeout } from '../../../utils/timeout';
-import { type ProgramConstructor, ArgumentError } from '.';
+import { delay } from '../../../utils/delay';
+import { type ProgramConstructor, Arg } from '.';
 
 export const EvalProgram: ProgramConstructor = {
   name: 'eval',
@@ -14,12 +14,12 @@ export const EvalProgram: ProgramConstructor = {
     ([expression, arg]) =>
     async (ctx) => {
       if (arg) {
-        ctx.logger.stderr(ArgumentError.unexpected(2, arg));
+        ctx.logger.stderr(Arg.unexpected(2, arg));
         return 1;
       }
 
       if (!expression) {
-        ctx.logger.stderr(ArgumentError.missing(1));
+        ctx.logger.stderr(Arg.missing(1));
         return 1;
       }
 
@@ -46,10 +46,10 @@ export const EvalProgram: ProgramConstructor = {
 
       Object.assign(console, originalConsole);
 
-      const error = await timeout(0, ctx.signal);
+      const fulfilled = await delay(0, ctx.signal);
 
-      if (error) {
-        ctx.logger.stderr(error);
+      if (!fulfilled) {
+        ctx.logger.stderr(fulfilled);
         return 1;
       }
 

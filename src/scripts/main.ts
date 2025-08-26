@@ -3,7 +3,7 @@ import { createAudioPlayer } from './components/audio';
 import { createDialog } from './components/dialog';
 import { createTyper } from './components/typer';
 import { createTerminal } from './components/terminal';
-import { getDocument } from './lib/documents';
+import { DocumentFormat, getDocument } from './utils/documents';
 import { unwrap } from './utils/result';
 
 const backgroundAudio = createAudioPlayer({
@@ -44,9 +44,13 @@ const showBoot = async () => {
   });
 
   const html = await unwrap(
-    getDocument('preformatted/os-boot.md', null, {
-      raw: true,
-    }),
+    getDocument(
+      '/misc/boot.preformatted.html',
+      {
+        format: DocumentFormat.Html,
+      },
+      null,
+    ),
   );
 
   view.hidden = false;

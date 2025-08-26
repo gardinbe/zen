@@ -1,4 +1,4 @@
-import { type EffectConstructor } from '.';
+import { EffectNodeState, type EffectConstructor } from '.';
 
 // todo: this effect is a bit broken
 
@@ -15,7 +15,7 @@ export const RemoveEffect: EffectConstructor<[number]> = {
       ctx.node.textContent = text.slice(0, text.length - removed);
 
       if (!ctx.node.textContent) {
-        ctx.setNodeState(ctx.node, 'incomplete');
+        ctx.setNodeState(ctx.node, EffectNodeState.Incomplete);
       }
 
       remaining -= removed;

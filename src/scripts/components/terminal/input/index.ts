@@ -76,6 +76,12 @@ export type TerminalInputOptions = {
   suggester: TerminalInputSuggesterOptions;
 };
 
+/**
+ * Creates a terminal input instance.
+ * @param els Terminal elements.
+ * @param options Input options.
+ * @returns Terminal input instance.
+ */
 export const createTerminalInput = (
   els: TerminalElements,
   options: TerminalInputOptions,

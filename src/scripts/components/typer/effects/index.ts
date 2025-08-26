@@ -1,3 +1,4 @@
+import type { Enum } from '../../../utils/enum';
 import { type Cursor } from '../../cursor';
 import { DelayEffect } from './delay';
 import { InsertEffect } from './insert';
@@ -82,16 +83,15 @@ export type EffectContext = Readonly<{
    * @param state State to set.
    */
   setNodeState: (node: Node, state: EffectNodeState) => void;
-
-  /**
-   * Checks if the given node is preformatted.
-   * @param node Target node.
-   * @returns True if the node is preformatted.
-   */
-  isPreformattedNode: (node: Node) => boolean;
 }>;
 
-export type EffectNodeState = 'incomplete' | 'active' | 'complete';
+export const EffectNodeState = {
+  Incomplete: 'incomplete',
+  Active: 'active',
+  Complete: 'complete',
+} as const;
+
+export type EffectNodeState = Enum<typeof EffectNodeState>;
 
 export const WhitespaceRegex = /\s/;
 
@@ -106,19 +106,19 @@ export const createEffects = (text: string | null): Effect[] => {
     return [NullEffect.create()];
   }
 
-  const matches = [...text.matchAll(EffectRegex)];
+  const matches = Array.from(text.matchAll(EffectRegex));
 
   const effects = matches.flatMap<Effect>((match) => {
-    const [full, key, value] = match;
-
-    if (!key || !value) {
-      throw new Error('Error parsing typer');
-    }
+    const [full, key, value] = match as unknown as [string, string, string];
 
     const effect = createEffect({
       key,
       value,
     });
+
+    if (!effect) {
+      return [];
+    }
 
     const slice = text.slice(prevIndex, match.index);
     prevIndex = match.index + full.length;
@@ -146,12 +146,12 @@ type CreateEffectObject = {
   value: string;
 };
 
-const createEffect = (obj: CreateEffectObject): Effect => {
+const createEffect = (obj: CreateEffectObject): Effect | null => {
   const { key, value } = obj;
   const effect = EffectConstructors.find((effect) => effect.name === key);
 
   if (!effect) {
-    throw new Error('Unknown typer effect');
+    return null;
   }
 
   return effect.create(effect.parse?.(value) ?? value);

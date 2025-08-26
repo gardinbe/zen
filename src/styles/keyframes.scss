@@ -1,0 +1,41 @@
+@layer keyframes {
+  @keyframes CrtFlicker {
+    from {
+      box-shadow: var(--crt-sh-flicker-to);
+      opacity: 1;
+    }
+    to {
+      box-shadow: var(--crt-sh-flicker-to);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes CrtFlickerText {
+    from {
+      text-shadow: var(--crt-sh-flicker-to);
+      opacity: 1;
+    }
+    to {
+      text-shadow: var(--crt-sh-flicker-to);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes CursorBlink {
+    0% {
+      opacity: 1;
+    }
+    40% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 0;
+    }
+    60% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}

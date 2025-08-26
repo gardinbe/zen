@@ -1,5 +1,6 @@
 import { type Result } from './result';
 import { Http404Error, HttpGenericError, FetchFailedError, AbortError, ParseError } from './error';
+import { withAbortableResult } from './abortable';
 
 export type FetchError = Http404Error | HttpGenericError | FetchFailedError;
 
@@ -41,6 +42,7 @@ export const http = {
 
     return [res, null];
   },
+
   parse: {
     /**
      * Parses the response body as text and returns the result.
@@ -48,7 +50,7 @@ export const http = {
      * @param signal Abort signal.
      * @returns Parsed text.
      */
-    text: (res: Response, signal: AbortSignal | null) => parse(res, 'text', signal),
+    text: (res: Response, signal: AbortSignal | null) => parse<string>(res, 'text', signal),
 
     /**
      * Parses the response body as JSON and returns the result.
@@ -56,38 +58,33 @@ export const http = {
      * @param signal Abort signal.
      * @returns Parsed JSON.
      */
-    json: <T>(res: Response, signal: AbortSignal | null) => parse(res, 'json', signal) as T,
+    json: <T>(res: Response, signal: AbortSignal | null) => parse<T>(res, 'json', signal),
   },
 } as const;
 
-const parse = async (
+const parse = async <T>(
   res: Response,
   method: 'text' | 'json',
   signal: AbortSignal | null,
-): Promise<Result<string, ParseError | AbortError>> =>
-  new Promise((resolve) => {
-    const onAbort = async () => {
-      await res.body?.cancel();
-      resolve([null, new AbortError()]);
-    };
+): Promise<Result<T, ParseError | AbortError>> =>
+  withAbortableResult<T, ParseError>(
+    signal,
+    async () => {
+      let parsed: T;
 
-    signal?.addEventListener('abort', onAbort, {
-      once: true,
-    });
-
-    (async () => {
       try {
-        const text = await res[method]();
-        resolve([text, null]);
+        parsed = await res[method]();
       } catch {
-        if (signal?.aborted) {
-          resolve([null, new AbortError()]);
-          return;
-        }
-
-        resolve([null, new ParseError()]);
-      } finally {
-        signal?.removeEventListener('abort', onAbort);
+        return [null, new ParseError()];
       }
-    })();
-  });
+
+      return [parsed, null];
+    },
+    () => {
+      if (res.body?.locked) {
+        return;
+      }
+
+      res.body!.cancel();
+    },
+  );

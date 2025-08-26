@@ -1,22 +1,52 @@
 @layer vars {
   :root {
-    /* fonts */
-    --font-base: monospace;
-    --font-size-base: 1.1rem;
+    // fonts
 
-    /* colors */
-    --color-primary: #77ea7b;
-    --color-primary-rgb: 119 234 123;
-    --color-secondary: #5b735c;
-    --color-secondary-rgb: 91 115 92;
-    --color-background: #000;
-    --color-background-rgb: 0 0 0;
-    --color-link: #c8ffca;
-    --color-link-rgb: 200 255 202;
+    --f-base: monospace;
+    --f-size-base: 1.1rem;
 
-    /* borders and shadows */
-    --border: 1px dotted rgb(var(--color-primary-rgb) / 0.3);
-    --shadow: 0 0 16px 0 rgb(var(--color-primary-rgb) / 0.04);
-    --text-shadow: 0 0 8px rgb(var(--color-primary-rgb) / 0.5);
+    // colors
+
+    --c-primary-rgb: 33 221 255;
+    --c-primary: rgb(var(--c-primary-rgb));
+
+    --c-background-rgb: 8 8 8;
+    --c-background: rgb(var(--c-background-rgb));
+
+    --c-link-rgb: 200 255 202;
+    --c-link: rgb(var(--c-link-rgb));
+
+    // borders and shadows
+
+    --bo: 1px dotted rgb(var(--c-primary-rgb) / 0.3);
+    --sh: 0 0 24px 0 rgb(var(--c-primary-rgb) / 0.5);
+
+    // button
+
+    --btn-c-background: rgb(var(--c-background-rgb) / 0.25);
+    --btn-c-text: var(--c-background);
+    --btn-hover-c-background: var(--c-background);
+    --btn-hover-c-text: var(--c-primary);
+
+    // crt
+
+    --crt-c-red-rgb: 218 49 49;
+    --crt-c-red: rgb(var(--crt-c-red-rgb));
+    --crt-c-green-rgb: 112 159 115;
+    --crt-c-green: rgb(var(--crt-c-green-rgb));
+    --crt-c-blue-rgb: 40 129 206;
+    --crt-c-blue: rgb(var(--crt-c-blue-rgb));
+
+    --crt-c-text-pink-rgb: 255 0 255;
+    --crt-c-text-pink: rgb(var(--crt-c-text-pink-rgb));
+    --crt-c-text-green-rgb: 0 255 255;
+    --crt-c-text-green: rgb(var(--crt-c-text-green-rgb));
+
+    --crt-sh-flicker-from: 1px 0 0 var(--crt-c-text-pink), -2px 0 0 var(--crt-c-text-green);
+    --crt-sh-flicker-to:
+      2px 0.5px 2px var(--crt-c-text-pink), -1px -0.5px 2px var(--crt-c-text-green);
+
+    --crt-anim-flicker: CrtFlicker 10ms linear infinite alternate;
+    --crt-anim-flicker-text: CrtFlickerText 10ms linear infinite alternate;
   }
 }

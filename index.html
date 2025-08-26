@@ -11,7 +11,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Zen</title>
+    <title>ZenOS</title>
     <link
       href="/src/styles/main.scss"
       rel="stylesheet"
@@ -21,7 +21,7 @@
       src="/src/scripts/main.ts"
     ></script>
   </head>
-  <body>
+  <body class="u-zen-crt-background">
     <audio
       class="js-background-audio"
       src="/audio/background.mp3"
@@ -41,7 +41,7 @@
             </div>
             <div class="zen-dialog-actions">
               <button
-                class="zen-dialog-button u-btn js-start-dialog-close"
+                class="zen-dialog-button u-zen-btn js-start-dialog-close"
                 data-alt="Terminal"
               >
                 Start
@@ -55,7 +55,7 @@
         class="zen-view js-os-boot-view"
         hidden
       >
-        <pre class="zen-typer js-os-boot-typer"></pre>
+        <pre class="zen-typer u-zen-crt-content js-os-boot-typer"></pre>
       </div>
 
       <div
@@ -64,13 +64,15 @@
       >
         <div class="zen-terminal js-terminal">
           <div class="zen-typer-container js-terminal-output-container">
-            <div class="zen-typer js-terminal-output"></div>
+            <div class="zen-terminal-output zen-typer u-zen-crt-content js-terminal-output"></div>
           </div>
-          <form class="zen-terminal-prompt zen-typer zen-typer--no-wrap js-terminal-prompt">
+          <form
+            class="zen-terminal-prompt zen-typer zen-typer--no-wrap u-zen-crt-content js-terminal-prompt"
+          >
             <span class="zen-terminal-prefix js-terminal-prefix">> </span>
             <span class="zen-terminal-input-container"
               ><input
-                class="zen-terminal-input zen-typer js-terminal-input"
+                class="zen-terminal-input js-terminal-input"
                 name="zen-terminal-input"
                 type="text"
                 autocomplete="off"

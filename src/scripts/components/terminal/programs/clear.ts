@@ -1,4 +1,4 @@
-import { type ProgramConstructor, ArgumentError } from '.';
+import { type ProgramConstructor, Arg } from '.';
 
 export const ClearProgram: ProgramConstructor = {
   name: 'clear',
@@ -7,7 +7,7 @@ export const ClearProgram: ProgramConstructor = {
     ([arg]) =>
     (ctx) => {
       if (arg) {
-        ctx.logger.stderr(ArgumentError.unexpected(1, arg));
+        ctx.logger.stderr(Arg.unexpected(1, arg));
         return 1;
       }
 

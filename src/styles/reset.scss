@@ -7,10 +7,7 @@
     padding: 0;
   }
 
-  input,
-  button,
-  textarea,
-  select {
+  :is(input, button, textarea, select) {
     font: inherit;
   }
 }

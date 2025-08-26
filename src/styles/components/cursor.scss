@@ -1,44 +1,36 @@
 @layer components {
   .zen-cursor {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 1ch;
+    height: 1lh;
+    user-select: none;
+    line-height: 100%;
+    pointer-events: none;
+
+    // contains zero-width-space
+
     *:has(> &) {
       caret-color: transparent;
     }
 
-    &-caret {
-      position: absolute;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      vertical-align: middle;
-      width: 1ch;
-      height: 1lh;
-      overflow: hidden;
-      mix-blend-mode: difference;
-      user-select: none;
-      pointer-events: none;
-
-      &[data-cursor-state='blink'] {
-        animation: blink 500ms 500ms linear infinite;
-
-        @keyframes blink {
-          0% {
-            opacity: 1;
-          }
-          40% {
-            opacity: 0.5;
-          }
-          50% {
-            opacity: 0;
-          }
-          60% {
-            opacity: 0.5;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
+    &[data-cursor-state='blink'] {
+      .zen-cursor-caret {
+        mix-blend-mode: difference;
+        animation:
+          var(--crt-anim-flicker),
+          CursorBlink 500ms 500ms linear infinite alternate;
       }
     }
+  }
+
+  .zen-cursor-caret {
+    align-self: flex-end;
+    width: 80%;
+    height: 100%;
+    background: currentcolor;
+    animation: var(--crt-anim-flicker);
   }
 }

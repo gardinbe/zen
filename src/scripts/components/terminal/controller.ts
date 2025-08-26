@@ -42,6 +42,11 @@ export type TerminalControllerOptions = {
   onTerminate: () => void | Promise<void>;
 };
 
+/**
+ * Creates a terminal controller instance.
+ * @param options Controller options.
+ * @returns Terminal controller instance.
+ */
 export const createTerminalController = (
   options: TerminalControllerOptions,
 ): TerminalController => {
@@ -110,7 +115,7 @@ const parse = (str: string): Command | null => {
   }
 
   const args = argsStr
-    ? [...argsStr.matchAll(TokenRegex)].flatMap((match) => match.slice(1).filter(isTruthy))
+    ? Array.from(argsStr.matchAll(TokenRegex)).flatMap((match) => match.slice(1).filter(isTruthy))
     : [];
 
   return {

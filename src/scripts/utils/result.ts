@@ -2,13 +2,13 @@
  * Represents a successful result.
  * @template T Value type.
  */
-export type SuccessResult<T = unknown> = [T, null];
+export type SuccessResult<T> = [T, null];
 
 /**
  * Represents an error result.
  * @template E Error type.
  */
-export type ErrorResult<E = unknown> = [null, E];
+export type ErrorResult<E> = [null, E];
 
 /**
  * Represents a value or an error.
@@ -23,12 +23,18 @@ export type Result<T = unknown, E = unknown> = SuccessResult<T> | ErrorResult<E>
  */
 export type Unwrapped<T> = T extends Result<infer U, never> ? U : never;
 
+/**
+ * Unwraps an error result.
+ * @template E Error type.
+ */
+export type UnwrappedError<E> = E extends Result<never, infer U> ? U : never;
+
 export const unwrap: {
   /**
    * Unwraps a result.
    * @param result Result to unwrap.
    * @returns Unwrapped value.
-   * @throws Error if the result is an error.
+   * @throws {Error} If the result is an error.
    */
   <T>(result: Result<T>): T;
   <T>(result: PromiseLike<Result<T>>): Promise<T>;
@@ -51,7 +57,7 @@ export const unwrapAll: {
    * Unwraps multiple results.
    * @param results Results to unwrap.
    * @returns Unwrapped values.
-   * @throws Error if any result is an error.
+   * @throws {Error} If any result is an error.
    */
   <T extends Result[]>(
     ...results: T[]

@@ -1,6 +1,7 @@
 import { marked } from 'marked';
-import { type Result } from './result';
 import { AbortError, ParseError } from './error';
+import { withAbortableResult } from './abortable';
+import { type Result } from './result';
 
 /**
  * Parses markdown text into HTML and returns the result.
@@ -12,28 +13,14 @@ export const parseMarkdown = (
   text: string,
   signal: AbortSignal | null,
 ): Promise<Result<string, ParseError | AbortError>> =>
-  new Promise((resolve) => {
-    const onAbort = () => {
-      resolve([null, new AbortError()]);
-    };
+  withAbortableResult<string, ParseError>(signal, async () => {
+    let parsed: string;
 
-    signal?.addEventListener('abort', onAbort, {
-      once: true,
-    });
+    try {
+      parsed = await marked.parse(text);
+    } catch {
+      return [null, new ParseError()];
+    }
 
-    (async () => {
-      try {
-        const parsed = await marked.parse(text);
-        resolve([parsed, null]);
-      } catch {
-        if (signal?.aborted) {
-          resolve([null, new AbortError()]);
-          return;
-        }
-
-        resolve([null, new ParseError()]);
-      } finally {
-        signal?.removeEventListener('abort', onAbort);
-      }
-    })();
+    return [parsed, null] as const;
   });

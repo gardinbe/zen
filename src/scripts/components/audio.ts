@@ -14,6 +14,11 @@ export type AudioPlayer = {
   pause: () => void;
 };
 
+/**
+ * Creates an audio player instance.
+ * @param els Audio player elements.
+ * @returns Audio player instance.
+ */
 export const createAudioPlayer = (els: AudioPlayerElements): AudioPlayer => {
   const play = () => els.main.play();
   const pause = () => els.main.pause();

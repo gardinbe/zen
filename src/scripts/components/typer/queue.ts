@@ -13,6 +13,10 @@ export type TyperQueue = {
   clear: () => Promise<void>;
 };
 
+/**
+ * Creates a typer queue instance.
+ * @returns Typer queue instance.
+ */
 export const createTyperQueue = (): TyperQueue => {
   const push = (...newBatches: EffectBatch[]) => {
     batches.push(...newBatches);

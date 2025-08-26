@@ -59,7 +59,10 @@ export type ProgramContext = Readonly<{
 
 export type ProgramExitCode = 0 | 1;
 
-export const ArgumentError = {
+/**
+ * Object of argument helpers.
+ */
+export const Arg = {
   /**
    * Returns an error message for an unexpected argument.
    * @param position Position of the argument.
@@ -88,16 +91,17 @@ export const ArgumentError = {
 
 /**
  * Returns all available program names. Includes aliases.
- * @returns Array of commands.
+ * @returns Array of program names.
  */
-export const getProgramNames = (): string[] => [
-  ...ProgramsConstructors.map(({ name }) => name),
-  ...Object.entries(Aliases).map(([name]) => name),
-];
+export const getProgramNames = (): string[] =>
+  ProgramsConstructors.map(({ name }) => name).concat(
+    Object.entries(Aliases).map(([name]) => name),
+  );
 
 /**
  * Returns a program constructor by name.
  * @param name Name of the program.
+ * @returns Program constructor, or `null` if not found.
  */
 export const getProgram = (name: string): ProgramConstructor | null =>
   (Object.entries(Aliases)

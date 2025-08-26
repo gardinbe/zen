@@ -29,6 +29,12 @@ export type DialogOptions = {
   onClose: (alt: boolean) => void;
 };
 
+/**
+ * Creates a dialog instance.
+ * @param els Dialog elements.
+ * @param options Dialog options.
+ * @returns Dialog instance.
+ */
 export const createDialog = (els: DialogElements, options: DialogOptions): Dialog => {
   const open = () => {
     els.main.hidden = false;
@@ -73,10 +79,6 @@ export const createDialog = (els: DialogElements, options: DialogOptions): Dialo
 
   const originalBtnText = els.closeBtn.textContent;
   let ctrl = false;
-
-  requestAnimationFrame(() => {
-    els.closeBtn.focus();
-  });
   listen();
 
   return {

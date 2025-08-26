@@ -1,5 +1,5 @@
-import { Documents } from '../../../lib/documents';
-import { type ProgramConstructor, ArgumentError } from '.';
+import { Documents } from '../../../utils/documents';
+import { type ProgramConstructor, Arg } from '.';
 
 export const ListProgram: ProgramConstructor = {
   name: 'ls',
@@ -8,7 +8,7 @@ export const ListProgram: ProgramConstructor = {
     ([arg]) =>
     (ctx) => {
       if (arg) {
-        ctx.logger.stderr(ArgumentError.unexpected(1, arg));
+        ctx.logger.stderr(Arg.unexpected(1, arg));
         return 1;
       }
 

@@ -1,10 +1,5 @@
 export type Cursor = {
   /**
-   * The cursor element.
-   */
-  readonly element: HTMLElement;
-
-  /**
    * Attaches the cursor to the specified node.
    * @param node Target node.
    */
@@ -40,48 +35,27 @@ export type Cursor = {
 };
 
 /**
- * Symbol used for the caret.
- *
- * Suggested values:
- *
- * - ▏ Left One-Eighth Block
- * - ▎ Left One-Quarter Block
- * - ▍ Left Three-Eighths Block
- * - ▌ Left Half Block
- * - ▋ Left Five-Eighths Block
- * - ▊ Left Three-Quarters Block
- * - ▉ Left Seven-Eighths Block
- * - ▁ Lower One-Eighth Block
- * - ▂ Lower One-Quarter Block
- * - ▃ Lower Three-Eighths Block
- * - ▄ Lower Half Block
- * - █ Full Block
- * - _ Low Line (underscore)
- * - | Vertical Line (pipe)
- * - │ Box Drawings Light Vertical
- * - ▮ Black Vertical Rectangle - **not great on mobile**
- * - ■ Black Square
- * - □ White Square
- * - ● Black Circle
- * - ○ White Circle
- * - ◆ Black Diamond
- * - ◇ White Diamond
- * - ❖ Black Diamond Minus White X
- * - ☚ Black Left-Pointing Index
- * - \< Less-Than Sign
- * - \> Greater-Than Sign
- * - ◁ White Left-Pointing Triangle
- * - ▷ White Right-Pointing Triangle
- * - ‹ Single Left-Pointing Angle Quotation Mark
- * - › Single Right-Pointing Angle Quotation Mark
+ * Creates a cursor instance.
+ * @returns Cursor instance.
  */
-const Caret = '▮';
-
 export const createCursor = (): Cursor => {
+  const createElement = () => {
+    const cursor = document.createElement('div');
+    cursor.classList.add('zen-cursor');
+    cursor.ariaHidden = 'true';
+    cursor.innerHTML = '\u200B';
+
+    const caret = document.createElement('div');
+    caret.classList.add('zen-cursor-caret');
+
+    cursor.append(caret);
+    return cursor;
+  };
+
   const attach = (node: Node) => {
     const parent = node.parentElement;
 
-    if (!parent || node.nextSibling === caret) {
+    if (!parent || node.nextSibling === cursor) {
       return;
     }
 
@@ -90,11 +64,11 @@ export const createCursor = (): Cursor => {
   };
 
   const blink = () => {
-    caret.dataset.cursorState = 'blink';
+    cursor.dataset.cursorState = 'blink';
   };
 
   const freeze = () => {
-    caret.dataset.cursorState = 'static';
+    cursor.dataset.cursorState = 'static';
   };
 
   const show = () => {
@@ -106,29 +80,13 @@ export const createCursor = (): Cursor => {
   };
 
   const setPosition = (offset: number) => {
-    const parent = cursor.parentElement;
-
-    if (!parent) {
-      return;
-    }
-
-    caret.style.translate = offset ? `-${offset}ch` : '';
+    cursor.style.translate = offset ? `-${offset}ch` : '';
   };
 
-  const cursor = document.createElement('span');
-  cursor.classList.add('zen-cursor');
-  cursor.textContent = '\u200B';
-
-  const caret = document.createElement('span');
-  caret.classList.add('zen-cursor-caret');
-  caret.ariaHidden = 'true';
-  caret.textContent = Caret;
-  cursor.append(caret);
-
+  const cursor = createElement();
   blink();
 
   return {
-    element: cursor,
     attach,
     blink,
     freeze,

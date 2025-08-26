@@ -1,4 +1,4 @@
-import { type ProgramConstructor, ArgumentError } from '.';
+import { type ProgramConstructor, Arg } from '.';
 
 export const HistoryProgram: ProgramConstructor = {
   name: 'history',
@@ -17,7 +17,7 @@ export const HistoryProgram: ProgramConstructor = {
     ([option = 'all', arg]) =>
     (ctx) => {
       if (arg) {
-        ctx.logger.stderr(ArgumentError.unexpected(2, arg));
+        ctx.logger.stderr(Arg.unexpected(2, arg));
         return 1;
       }
 
@@ -31,7 +31,7 @@ export const HistoryProgram: ProgramConstructor = {
           break;
         }
         default: {
-          ctx.logger.stderr(ArgumentError.invalid(1, option));
+          ctx.logger.stderr(Arg.invalid(1, option));
           break;
         }
       }

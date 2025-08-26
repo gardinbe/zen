@@ -2,7 +2,7 @@ export type TerminalHistory = {
   /**
    * Returns the history entries.
    */
-  readonly entries: string[];
+  entries: string[];
 
   /**
    * Scrolls up in the history.
@@ -44,6 +44,11 @@ export type TerminalHistoryOptions = {
   onNavigate: (value: string) => void;
 };
 
+/**
+ * Creates a terminal history instance.
+ * @param options History options.
+ * @returns Terminal history instance.
+ */
 export const createTerminalHistory = (options: TerminalHistoryOptions): TerminalHistory => {
   const save = () => {
     localStorage.setItem('terminal-history', JSON.stringify(entries));

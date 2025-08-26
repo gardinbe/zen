@@ -1,5 +1,6 @@
-import { type EffectConstructor, WhitespaceRegex } from '.';
-import { randomTimeout } from '../../../utils/timeout';
+import { type EffectConstructor, EffectNodeState, WhitespaceRegex } from '.';
+import { isPreformattedNode } from '..';
+import { randomDelay } from '../../../utils/delay';
 
 export const TypeEffect: EffectConstructor<[string]> = {
   name: 'type',
@@ -10,7 +11,7 @@ export const TypeEffect: EffectConstructor<[string]> = {
     let i = 0;
 
     while (i < text.length) {
-      ctx.setNodeState(ctx.node, 'active');
+      ctx.setNodeState(ctx.node, EffectNodeState.Active);
 
       const char = text.at(i)!;
       i++;
@@ -18,7 +19,7 @@ export const TypeEffect: EffectConstructor<[string]> = {
       ctx.node.textContent! += char;
 
       if (
-        !ctx.isPreformattedNode(ctx.node) &&
+        !isPreformattedNode(ctx.node) &&
         WhitespaceRegex.test(char) &&
         prevChar &&
         WhitespaceRegex.test(prevChar)
@@ -28,7 +29,7 @@ export const TypeEffect: EffectConstructor<[string]> = {
 
       prevChar = char;
 
-      const error = await randomTimeout(
+      const fulfilled = await randomDelay(
         {
           min: 1,
           max: 5,
@@ -36,14 +37,14 @@ export const TypeEffect: EffectConstructor<[string]> = {
         ctx.signal,
       );
 
-      if (error) {
-        ctx.setNodeState(ctx.node, 'complete');
+      if (!fulfilled) {
+        ctx.setNodeState(ctx.node, EffectNodeState.Complete);
         ctx.cursor.blink();
         return;
       }
     }
 
-    ctx.setNodeState(ctx.node, 'complete');
+    ctx.setNodeState(ctx.node, EffectNodeState.Complete);
     ctx.cursor.blink();
   },
 };

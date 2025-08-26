@@ -1,4 +1,4 @@
-import { type ProgramConstructor, ArgumentError, getProgram, ProgramsConstructors } from '.';
+import { type ProgramConstructor, Arg, getProgram, ProgramsConstructors } from '.';
 
 export const HelpProgram: ProgramConstructor = {
   name: 'help',
@@ -17,7 +17,7 @@ export const HelpProgram: ProgramConstructor = {
     ([command, arg]) =>
     (ctx) => {
       if (arg) {
-        ctx.logger.stderr(ArgumentError.unexpected(2, arg));
+        ctx.logger.stderr(Arg.unexpected(2, arg));
         return 1;
       }
 
@@ -25,7 +25,7 @@ export const HelpProgram: ProgramConstructor = {
         const program = getProgram(command);
 
         if (!program) {
-          ctx.logger.stderr(ArgumentError.invalid(1, `Unknown program: ${command}`));
+          ctx.logger.stderr(Arg.invalid(1, `Unknown program: ${command}`));
           return 1;
         }
 
@@ -41,7 +41,7 @@ export const HelpProgram: ProgramConstructor = {
         }
 
         ctx.logger.stdout(str);
-        return 1;
+        return 0;
       }
 
       const spacer = createSpacer(ProgramsConstructors.map((program) => program.name));

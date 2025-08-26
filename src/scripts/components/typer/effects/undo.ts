@@ -1,5 +1,6 @@
-import { type EffectConstructor, WhitespaceRegex } from '.';
-import { randomTimeout } from '../../../utils/timeout';
+import { type EffectConstructor, EffectNodeState, WhitespaceRegex } from '.';
+import { isPreformattedNode } from '..';
+import { randomDelay } from '../../../utils/delay';
 
 // todo: this effect is a bit broken
 
@@ -27,15 +28,15 @@ export const UndoEffect: EffectConstructor<[number]> = {
 
       i++;
 
-      ctx.setNodeState(ctx.node, 'active');
+      ctx.setNodeState(ctx.node, EffectNodeState.Active);
       ctx.node.textContent = ctx.node.textContent!.slice(0, -1);
 
       if (!ctx.node.textContent) {
-        ctx.setNodeState(ctx.node, 'incomplete');
+        ctx.setNodeState(ctx.node, EffectNodeState.Incomplete);
       }
 
       if (
-        !ctx.isPreformattedNode(ctx.node) &&
+        !isPreformattedNode(ctx.node) &&
         WhitespaceRegex.test(char) &&
         prevChar &&
         WhitespaceRegex.test(prevChar)
@@ -45,7 +46,7 @@ export const UndoEffect: EffectConstructor<[number]> = {
 
       prevChar = char;
 
-      const error = await randomTimeout(
+      const fulfilled = await randomDelay(
         {
           min: 30,
           max: 60,
@@ -53,14 +54,14 @@ export const UndoEffect: EffectConstructor<[number]> = {
         ctx.signal,
       );
 
-      if (error) {
-        ctx.setNodeState(ctx.node, 'complete');
+      if (!fulfilled) {
+        ctx.setNodeState(ctx.node, EffectNodeState.Complete);
         ctx.cursor.blink();
         return;
       }
     }
 
-    ctx.setNodeState(ctx.node, 'complete');
+    ctx.setNodeState(ctx.node, EffectNodeState.Complete);
     ctx.cursor.blink();
   },
 };

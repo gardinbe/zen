@@ -1,108 +1,28 @@
 @layer base {
+  * {
+  }
+
   [hidden] {
     display: none !important;
   }
 
   ::selection {
-    background: var(--color-primary);
-    color: var(--color-background);
+    background: var(--c-primary);
+    color: var(--c-background);
   }
 
   body {
     position: relative;
     display: flex;
-    flex-direction: column;
+    flex-flow: column;
     height: 100dvh;
-    background: linear-gradient(to top, #000, #000, #111, #111) 0 0 / 100% 2px;
-    color: var(--color-primary);
-    font: normal normal var(--font-size-base) / normal var(--font-base);
     padding: 8%;
-    box-shadow: inset 0 0 7vw -2vw var(--color-secondary);
-    scrollbar-color: var(--color-primary) var(--color-background);
-    scrollbar-width: thin;
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      display: flex;
-
-      background: rgb(18 16 16 / 0.1);
-      opacity: 0;
-      pointer-events: none;
-      animation: flicker 0.15s infinite;
-
-      @keyframes flicker {
-        0% {
-          opacity: 0.27861;
-        }
-        5% {
-          opacity: 0.34769;
-        }
-        10% {
-          opacity: 0.23604;
-        }
-        15% {
-          opacity: 0.90626;
-        }
-        20% {
-          opacity: 0.18128;
-        }
-        25% {
-          opacity: 0.83891;
-        }
-        30% {
-          opacity: 0.65583;
-        }
-        35% {
-          opacity: 0.67807;
-        }
-        40% {
-          opacity: 0.26559;
-        }
-        45% {
-          opacity: 0.84693;
-        }
-        50% {
-          opacity: 0.96019;
-        }
-        55% {
-          opacity: 0.08594;
-        }
-        60% {
-          opacity: 0.20313;
-        }
-        65% {
-          opacity: 0.71988;
-        }
-        70% {
-          opacity: 0.53455;
-        }
-        75% {
-          opacity: 0.37288;
-        }
-        80% {
-          opacity: 0.71428;
-        }
-        85% {
-          opacity: 0.70419;
-        }
-        90% {
-          opacity: 0.7003;
-        }
-        95% {
-          opacity: 0.36108;
-        }
-        100% {
-          opacity: 0.24387;
-        }
-      }
-    }
+    color: var(--c-primary);
+    font: normal normal var(--f-size-base) / normal var(--f-base);
   }
 
-  a,
-  .link {
-    color: var(--color-link);
+  :is(a, .link) {
+    color: var(--c-link);
     text-decoration: none;
 
     &:focus-visible {
@@ -131,39 +51,34 @@
   }
 
   mark {
-    background: var(--color-link);
-    color: var(--color-background);
+    background: var(--c-link);
+    color: var(--c-background);
   }
 
   small {
     font-size: 0.6em;
   }
 
-  p,
-  ul,
-  ol,
-  blockquote,
-  pre,
-  table,
-  details {
-    margin-bottom: 1.5rem;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
+  hr {
+    margin: 1rem 0;
+    border-width: 3px;
+    border-color: var(--c-primary);
   }
 
-  ul,
-  ol {
+  code {
+    background: var(--c-background);
+  }
+
+  :is(p, ul, ol, blockquote, pre, table, details) {
+    margin-bottom: 1.5rem;
+  }
+
+  :is(ul, ol) {
     list-style-position: inside;
     margin-right: 1.5rem;
 
     > li {
       margin-bottom: 0.75rem;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
     }
   }
 
@@ -175,33 +90,14 @@
     list-style-type: decimal;
   }
 
-  p,
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  :is(p, h1, h2, h3, h4, h5, h6) {
     text-wrap: pretty;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  :is(h1, h2, h3, h4, h5, h6) {
     margin-bottom: 1.5rem;
     font-weight: 900;
     font-style: normal;
-
-    &:first-child {
-      margin-top: 0;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
   }
 
   h1 {
@@ -271,10 +167,38 @@
 
   h6 {
     margin-top: 2.5rem;
-    font-size: var(--font-size-base);
+    font-size: var(--f-size-base);
   }
 
-  code {
-    background: var(--color-background);
+  // crazy margin trimming
+
+  :is(h1, h2, h3, h4, h5, h6) {
+    hr + &,
+    &:nth-child(1 of :not([hidden])) {
+      margin-top: 0;
+    }
+  }
+
+  :is(
+    p,
+    ul,
+    ol,
+    :is(ul, ol) > li,
+    blockquote,
+    pre,
+    code,
+    table,
+    details,
+    hr,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6
+  ) {
+    &:nth-last-child(1 of :not([hidden])) {
+      margin-bottom: 0;
+    }
   }
 }

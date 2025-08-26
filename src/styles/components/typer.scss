@@ -1,4 +1,10 @@
 @layer components {
+  .zen-typer-container {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding-right: 2ch;
+  }
+
   .zen-typer {
     position: relative;
     margin: 0;
@@ -6,7 +12,6 @@
     white-space: pre-wrap;
     word-break: break-word;
     tab-size: 2;
-    text-shadow: var(--text-shadow);
 
     [data-typer-state='incomplete'] {
       display: none;
@@ -21,14 +26,32 @@
       }
     }
 
-    p,
-    ul,
-    ol,
-    blockquote,
-    pre,
-    table,
-    details {
-      // todo: broken
+    // crazy margin trimming
+
+    :is(h1, h2, h3, h4, h5, h6) {
+      &:nth-child(1 of :not([data-typer-state='incomplete'])) {
+        margin-top: 0;
+      }
+    }
+
+    :is(
+      p,
+      ul,
+      ol,
+      :is(ul, ol) > li,
+      blockquote,
+      pre,
+      code,
+      table,
+      details,
+      hr,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6
+    ) {
       &:nth-last-child(1 of :not([data-typer-state='incomplete'])) {
         margin-bottom: 0;
       }
@@ -37,19 +60,18 @@
     &--no-wrap {
       white-space: pre;
     }
+  }
 
-    &-container {
-      overflow-y: auto;
-      scrollbar-gutter: stable;
-      padding-right: 2ch;
-    }
+  .zen-typer-html {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid currentcolor;
+    font: normal normal var(--f-size-base) / normal var(--f-base);
+    white-space: normal;
 
-    &-html {
-      margin: 1rem 0;
-      padding: 1rem;
-      border: 1px solid var(--color-primary);
-      font: normal normal var(--font-size-base) / normal var(--font-base);
-      white-space: normal;
+    hr {
+      text-shadow: none;
+      margin: 2rem 0;
     }
   }
 }

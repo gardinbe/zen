@@ -1,5 +1,5 @@
 import { http } from '../../../utils/fetch';
-import { type ProgramConstructor, ArgumentError } from '.';
+import { type ProgramConstructor, Arg } from '.';
 
 export const FetchProgram: ProgramConstructor = {
   name: 'fetch',
@@ -14,12 +14,12 @@ export const FetchProgram: ProgramConstructor = {
     ([url, arg]) =>
     async (ctx) => {
       if (arg) {
-        ctx.logger.stderr(ArgumentError.unexpected(2, arg));
+        ctx.logger.stderr(Arg.unexpected(2, arg));
         return 1;
       }
 
       if (!url) {
-        ctx.logger.stderr(ArgumentError.missing(2));
+        ctx.logger.stderr(Arg.missing(2));
         return 1;
       }
 

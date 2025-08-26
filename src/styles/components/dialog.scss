@@ -8,42 +8,49 @@
     flex-flow: column;
     justify-content: center;
     align-items: center;
+    background: var(--c-background);
+  }
 
-    &-inner {
-      display: flex;
-      flex-flow: column;
-      align-items: center;
-      text-align: center;
-      min-width: 10rem;
+  .zen-dialog-inner {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    text-align: center;
+    min-width: 10rem;
 
-      padding: 1.5rem;
-      background: #000;
-      border: var(--border);
-      box-shadow:
-        var(--shadow),
-        inset var(--shadow);
+    padding: 1.5rem;
+    background: var(--c-primary);
+    color: var(--c-background);
+    border: var(--bo);
+    box-shadow:
+      var(--sh),
+      inset var(--sh);
+
+    ::selection {
+      background: var(--background);
+      color: var(--primary);
     }
+  }
 
-    &-heading {
-      display: flex;
-      flex-flow: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+  .zen-dialog-heading {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 
-      * {
-        margin: 0;
-      }
+    * {
+      margin: 0;
     }
+  }
 
-    &-actions {
-      display: flex;
-      align-self: stretch;
-      margin-top: 1rem;
+  .zen-dialog-actions {
+    display: flex;
+    align-self: stretch;
+    margin-top: 1rem;
 
-      * {
-        flex: 1;
-      }
+    * {
+      flex: 1;
     }
   }
 }

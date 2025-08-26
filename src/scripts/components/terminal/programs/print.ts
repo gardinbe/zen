@@ -1,5 +1,5 @@
-import { type ProgramConstructor, ArgumentError } from '.';
-import { getDocument } from '../../../lib/documents';
+import { type ProgramConstructor, Arg } from '.';
+import { DocumentFormat, getDocument } from '../../../utils/documents';
 import { Http404Error } from '../../../utils/error';
 
 export const PrintProgram: ProgramConstructor = {
@@ -15,20 +15,26 @@ export const PrintProgram: ProgramConstructor = {
     ([filename, arg]) =>
     async (ctx) => {
       if (arg) {
-        ctx.logger.stderr(ArgumentError.unexpected(2, arg));
+        ctx.logger.stderr(Arg.unexpected(2, arg));
         return 1;
       }
 
       if (!filename) {
-        ctx.logger.stderr(ArgumentError.missing(1));
+        ctx.logger.stderr(Arg.missing(1));
         return 1;
       }
 
-      const [html, error] = await getDocument(filename, ctx.signal);
+      const [html, error] = await getDocument(
+        filename,
+        {
+          format: DocumentFormat.Markdown,
+        },
+        ctx.signal,
+      );
 
       if (error) {
         if (Http404Error.is(error)) {
-          ctx.logger.stderr(ArgumentError.invalid(1, `Document \`${filename}\` not found.`));
+          ctx.logger.stderr(Arg.invalid(1, `Document \`${filename}\` not found.`));
         } else {
           ctx.logger.stderr(error);
         }

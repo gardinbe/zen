@@ -3,7 +3,7 @@ import { type TerminalLogger, createTerminalLogger } from './logger';
 import { type TerminalHistory, createTerminalHistory } from './history';
 import { type TerminalInput, createTerminalInput } from './input';
 import { ParseError, NotFoundError } from '../../utils/error';
-import { Documents, getDocument } from '../../lib/documents';
+import { DocumentFormat, Documents, getDocument } from '../../utils/documents';
 import { getProgram, getProgramNames } from './programs';
 
 export type TerminalElements = {
@@ -37,6 +37,11 @@ export type Terminal = {
   input: TerminalInput;
 };
 
+/**
+ * Creates a terminal instance.
+ * @param els Terminal elements.
+ * @returns Terminal instance.
+ */
 export const createTerminal = (els: TerminalElements): Terminal => {
   const exec = async (value: string) => {
     const [code, error] = await controller.exec(value);
@@ -55,13 +60,17 @@ export const createTerminal = (els: TerminalElements): Terminal => {
       return;
     }
 
-    logger.stdout(`Program exited: ${code}`);
+    logger.stdout(`Program exited with code: ${code}`);
   };
 
   const logStartMessage = async () => {
-    const [html, error] = await getDocument('preformatted/terminal-start-message.md', null, {
-      raw: true,
-    });
+    const [html, error] = await getDocument(
+      '/misc/banner.preformatted.html',
+      {
+        format: DocumentFormat.Html,
+      },
+      null,
+    );
 
     if (error) {
       return;
@@ -90,8 +99,8 @@ export const createTerminal = (els: TerminalElements): Terminal => {
   });
   const input = createTerminalInput(els, {
     onCancel: async (value) => {
-      logger.stdin(`${value}^C`);
       await controller.terminate();
+      logger.stdin(`${value}^C`);
     },
     onSubmit: (value) => exec(value),
     onUp: () => history.up(),

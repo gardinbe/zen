@@ -3,25 +3,29 @@
     display: flex;
     flex-flow: column;
     height: 100%;
-    text-shadow: var(--text-shadow);
+  }
 
-    &-prompt {
-      display: inline-flex;
-    }
+  .zen-terminal-output {
+    padding-bottom: 0;
+  }
 
-    &-input {
-      background: none;
-      outline: none;
-      border: none;
-      color: inherit;
-      font: inherit;
-      text-shadow: inherit;
+  .zen-terminal-prompt {
+    padding-top: 0;
+    display: inline-flex;
+  }
 
-      &-container {
-        position: relative;
-        flex: 1;
-        overflow-x: auto;
-      }
-    }
+  .zen-terminal-input-container {
+    position: relative;
+    flex: 1;
+    overflow-x: auto;
+  }
+
+  .zen-terminal-input {
+    background: none;
+    outline: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    text-shadow: inherit;
   }
 }

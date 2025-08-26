@@ -31,28 +31,27 @@ export type TerminalLogger = {
   clear: () => void;
 };
 
+/**
+ * Creates a new terminal logger instance.
+ * @param els Terminal elements.
+ * @returns Terminal logger instance.
+ */
 export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   const write = (text: string) => {
-    let finished = false;
     let prevScrollTop = 0;
 
-    const check = () => {
+    const tick = () => {
       if (els.outputContainer.scrollTop < prevScrollTop) {
-        requestAnimationFrame(check);
+        requestAnimationFrame(tick);
         return;
       }
 
       els.outputContainer.scrollTop = els.outputContainer.scrollHeight;
       prevScrollTop = els.outputContainer.scrollTop;
-
-      if (finished) {
-        return;
-      }
-
-      requestAnimationFrame(check);
+      frameRequestId = requestAnimationFrame(tick);
     };
 
-    requestAnimationFrame(check);
+    let frameRequestId = requestAnimationFrame(tick);
 
     typer.type(text, {
       onStart: () => {
@@ -60,7 +59,7 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
       },
       onFinish: () => {
         typer.cursor.hide();
-        finished = true;
+        cancelAnimationFrame(frameRequestId);
       },
     });
   };
@@ -72,10 +71,12 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   // todo: if a user types or program errors with [[]] it fucks with this
 
   const stdin = (input: string) => write(`[[insert:> ${input}\n]]`);
+
   const stdout = (output: string, options?: Partial<LoggerWriteOptions>) =>
     write(options?.noNewlines ? output : `[[insert:\n]]${output}[[insert:\n\n]]`);
+
   const stderr = (error: unknown) =>
-    // todo: add Error.isError when it's available
+    // todo: use Error.isError when available
     write(`[[insert:ERROR: ${error instanceof Error ? error.message : error}\n]]`);
 
   const typer = createTyper({

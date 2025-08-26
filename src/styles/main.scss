@@ -1,6 +1,7 @@
 @use 'reset';
 @use 'vars';
 @use 'fonts/dos';
+@use 'keyframes';
 @use 'base';
 @use 'utils';
 @use 'components/container';
@@ -13,6 +14,7 @@
 @layer reset,
   vars,
   fonts,
+  keyframes,
   base,
   utils,
   components;

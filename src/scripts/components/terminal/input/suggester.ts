@@ -21,6 +21,11 @@ export type TerminalInputSuggesterOptions = {
   getSuggestions: (value: string) => string[];
 };
 
+/**
+ * Creates a terminal input suggester instance.
+ * @param options Suggester options.
+ * @returns Terminal input suggester instance.
+ */
 export const createTerminalInputSuggester = (
   options: TerminalInputSuggesterOptions,
 ): TerminalInputSuggester => {

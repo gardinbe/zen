@@ -6,20 +6,18 @@
  * @throws {Error} If the element is not found.
  */
 export const query = <T extends HTMLElement>(selector: string, parent: ParentNode = document) => {
-  const el = parent.querySelector<T>(selector);
+  const element = parent.querySelector<T>(selector);
 
-  if (!el) {
+  if (!element) {
     throw new Error(`Element not found: ${selector}`);
   }
 
-  return el;
+  return element;
 };
 
 /**
  * Alias for `ParentNode.querySelectorAll` whose generic extends `HTMLElement`.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll
  */
-export const queryAll = <T extends HTMLElement>(
-  selector: string,
-  parent: ParentNode = document,
-) => [...parent.querySelectorAll<T>(selector)];
+export const queryAll = <T extends HTMLElement>(selector: string, parent: ParentNode = document) =>
+  Array.from(parent.querySelectorAll<T>(selector));
