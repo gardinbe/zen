@@ -50,7 +50,7 @@ Eruptions can be:
 Volcanoes are destructive but also bring **fertile soils**, **new land**, and even **geothermal energy**.
 Civilizations throughout history have thrived around volcanoes despite the risks.
 
-![Eruption of a Volcano](/images/volcano.webp)
+![Eruption of a Volcano](https://images.newscientist.com/wp-content/uploads/2020/12/21145328/volcanoes-f0r7pt_web.jpg)
 
 ---
 

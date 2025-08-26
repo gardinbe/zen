@@ -85,5 +85,9 @@ const resolveUrl = (name: string): string => {
     return '/documents/';
   }
 
-  return resolved.startsWith('/') ? resolved : `/documents/${resolved}`;
+  if (!resolved.startsWith('/')) {
+    resolved = `/documents/${resolved}`;
+  }
+
+  return `${import.meta.env.BASE_URL || ''}${resolved}`;
 };

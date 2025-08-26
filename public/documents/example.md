@@ -20,8 +20,8 @@ This is a paragraph.
 
 ###### Heading 6
 
-**Bold text**  
-_Italic text_  
+**Bold text**
+_Italic text_
 ~~Strikethrough~~
 
 ---
@@ -33,8 +33,6 @@ _Italic text_
 1. Numbered item 1
 2. Numbered item 2
 
-> Blockquote example
-
 `Inline code`
 
 ```python
@@ -42,3 +40,5 @@ _Italic text_
 def hello():
     print("Hello, Markdown!")
 ```
+
+> Blockquote example
