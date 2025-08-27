@@ -33,7 +33,7 @@
         class="zen-view js-start-view"
         hidden
       >
-        <form class="zen-dialog js-start-dialog">
+        <form class="zen-start zen-dialog js-start-dialog">
           <div class="zen-dialog-inner">
             <div class="zen-dialog-heading">
               <h1>ZenOS</h1>
@@ -55,7 +55,14 @@
         class="zen-view js-os-boot-view"
         hidden
       >
-        <pre class="zen-typer u-zen-crt-text js-os-boot-typer"></pre>
+        <div class="zen-os-boot">
+          <div
+            class="zen-os-boot-output zen-typer zen-typer--scroll u-zen-crt-text js-os-boot-typer"
+          ></div>
+          <button class="zen-os-boot-continue zen-dialog-button u-zen-btn js-os-boot-continue">
+            Continue
+          </button>
+        </div>
       </div>
 
       <div
@@ -64,10 +71,8 @@
       >
         <div class="zen-terminal js-terminal">
           <div
-            class="zen-terminal-output-container zen-typer-container u-zen-crt-text js-terminal-output-container"
-          >
-            <div class="zen-terminal-output zen-typer js-terminal-output"></div>
-          </div>
+            class="zen-terminal-output zen-typer zen-typer--scroll u-zen-crt-text js-terminal-output"
+          ></div>
           <form
             class="zen-terminal-prompt zen-typer zen-typer--no-wrap u-zen-crt-text js-terminal-prompt"
           >

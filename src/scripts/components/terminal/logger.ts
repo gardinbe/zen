@@ -28,7 +28,7 @@ export type TerminalLogger = {
   /**
    * Clears the terminal output.
    */
-  clear: () => void;
+  clear: () => Promise<void>;
 };
 
 /**
@@ -39,18 +39,18 @@ export type TerminalLogger = {
 export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   const write = (text: string) => {
     let prevScrollTop = 0;
-    let running = true;
+    let isRunning = true;
 
     const tick = () => {
-      if (els.outputContainer.scrollTop + LoggerScrollRegion <= prevScrollTop) {
+      if (els.output.scrollTop + LoggerScrollRegion <= prevScrollTop) {
         requestAnimationFrame(tick);
         return;
       }
 
-      els.outputContainer.scrollTop = els.outputContainer.scrollHeight;
-      prevScrollTop = els.outputContainer.scrollTop;
+      els.output.scrollTop = els.output.scrollHeight;
+      prevScrollTop = els.output.scrollTop;
 
-      if (!running) {
+      if (!isRunning) {
         cancelAnimationFrame(frameRequestId);
         return;
       }
@@ -66,14 +66,12 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
       },
       onFinish: () => {
         typer.cursor.hide();
-        running = false;
+        isRunning = false;
       },
     });
   };
 
-  const clear = () => {
-    typer.clear();
-  };
+  const clear = () => typer.clear();
 
   // todo: if a user types or program errors with [[]] it fucks with this
 

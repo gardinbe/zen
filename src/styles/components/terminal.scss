@@ -5,12 +5,9 @@
     height: 100%;
   }
 
-  .zen-terminal-output-container {
+  .zen-terminal-output {
     padding-bottom: 0;
     padding-bottom: 0.75rem;
-  }
-
-  .zen-terminal-output {
   }
 
   .zen-terminal-prompt {
@@ -35,5 +32,6 @@
     color: inherit;
     font: inherit;
     text-shadow: inherit;
+    min-width: 1px;
   }
 }

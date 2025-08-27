@@ -9,10 +9,14 @@
 @use 'components/terminal';
 @use 'components/typer';
 @use 'components/view';
+@use 'views/os-boot-view';
+@use 'views/start-view';
+@use 'views/terminal-view';
 
 @layer vars,
   fonts,
   keyframes,
   base,
   utils,
-  components;
+  components,
+  views;

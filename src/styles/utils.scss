@@ -12,7 +12,8 @@
     align-items: center;
     text-align: center;
 
-    border-bottom: 2px solid var(--btn-c-text);
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid var(--btn-c-border);
     background: var(--btn-c-background);
     color: var(--btn-c-text);
     padding: 0.5rem 1rem;
@@ -22,7 +23,7 @@
     &:hover,
     &:active,
     &:focus-visible {
-      border-bottom-color: var(--btn-hover-c-background);
+      border-bottom-color: var(--btn-hover-c-border);
       background: var(--btn-hover-c-background);
       color: var(--btn-hover-c-text);
     }

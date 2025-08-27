@@ -175,6 +175,58 @@
     font-size: var(--f-size-base);
   }
 
+  mark {
+    background: var(--c-link);
+    color: var(--c-background-secondary);
+  }
+
+  small {
+    font-size: 0.6em;
+  }
+
+  hr {
+    border: none;
+    border-top: var(--bo);
+    margin: 1rem 0;
+  }
+
+  code,
+  kbd,
+  pre {
+    font-family: var(--f-base);
+  }
+
+  code,
+  kbd {
+    padding: 4px;
+    background: var(--c-background-secondary);
+  }
+
+  pre {
+    display: flex;
+    overflow: auto;
+  }
+
+  pre:has(code) {
+    padding: 2rem;
+    background: var(--c-background-secondary);
+    box-shadow: 6px 6px 4px -2px #000;
+
+    code {
+      padding: 0;
+      background: none;
+    }
+  }
+
+  img {
+    width: auto;
+    max-width: 100%;
+  }
+
+  :is(input, button, textarea, select) {
+    font: inherit;
+  }
+
   // crazy margin trimming
 
   :is(
@@ -203,52 +255,5 @@
     &:nth-last-child(1 of :not([hidden])) {
       margin-bottom: 0;
     }
-  }
-
-  mark {
-    background: var(--c-link);
-    color: var(--c-background-secondary);
-  }
-
-  small {
-    font-size: 0.6em;
-  }
-
-  hr {
-    border: none;
-    border-top: var(--bo);
-    margin: 1rem 0;
-  }
-
-  code,
-  kbd,
-  pre {
-    font-family: var(--f-base);
-  }
-
-  code,
-  kbd {
-    padding: 4px;
-    background: var(--c-background-secondary);
-  }
-
-  pre:has(code) {
-    padding: 2rem;
-    background: var(--c-background-secondary);
-    box-shadow: 6px 6px 4px -2px #000;
-
-    code {
-      padding: 0;
-      background: none;
-    }
-  }
-
-  img {
-    width: auto;
-    max-width: 100%;
-  }
-
-  :is(input, button, textarea, select) {
-    font: inherit;
   }
 }

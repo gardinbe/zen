@@ -5,13 +5,13 @@ export const ClearProgram: ProgramConstructor = {
   description: 'Clears the terminal output.',
   exec:
     ([arg]) =>
-    (ctx) => {
+    async (ctx) => {
       if (arg) {
         ctx.logger.stderr(Arg.unexpected(1, arg));
         return 1;
       }
 
-      ctx.logger.clear();
+      await ctx.logger.clear();
       return 0;
     },
 };

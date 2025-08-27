@@ -1,0 +1,13 @@
+@layer views {
+  .zen-os-boot {
+    display: flex;
+    flex-flow: column;
+    gap: 1rem;
+  }
+
+  .zen-os-boot-continue {
+    @media (pointer: fine) {
+      display: none;
+    }
+  }
+}

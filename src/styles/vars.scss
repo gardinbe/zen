@@ -25,10 +25,12 @@
 
     // buttons
 
-    --btn-c-background: rgb(var(--c-background-rgb) / 0.5);
+    --btn-c-border: var(--c-primary);
+    --btn-c-background: rgb(var(--c-primary-rgb) / 0.7);
     --btn-c-text: var(--c-background);
-    --btn-hover-c-background: var(--c-background);
-    --btn-hover-c-text: var(--c-primary);
+    --btn-hover-c-border: var(--c-primary);
+    --btn-hover-c-background: var(--c-primary);
+    --btn-hover-c-text: var(--c-background);
 
     // crt
 

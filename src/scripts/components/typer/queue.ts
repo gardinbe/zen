@@ -21,7 +21,7 @@ export const createTyperQueue = (): TyperQueue => {
   const push = (...newBatches: EffectBatch[]) => {
     batches.push(...newBatches);
 
-    if (running) {
+    if (isRunning) {
       return;
     }
 
@@ -38,7 +38,7 @@ export const createTyperQueue = (): TyperQueue => {
   };
 
   const exec = async (signal: AbortSignal) => {
-    running = true;
+    isRunning = true;
 
     const start = () => {
       batch!.onStart();
@@ -83,10 +83,10 @@ export const createTyperQueue = (): TyperQueue => {
       complete();
     }
 
-    running = false;
+    isRunning = false;
   };
 
-  let running = false;
+  let isRunning = false;
   let active: ReturnType<typeof exec> | null = null;
   let controller = new AbortController();
   const batches: EffectBatch[] = [];

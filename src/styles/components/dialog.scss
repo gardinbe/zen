@@ -12,6 +12,13 @@
   }
 
   .zen-dialog-inner {
+    --btn-c-border: var(--c-background);
+    --btn-c-background: rgb(var(--c-background-rgb) / 0.5);
+    --btn-c-text: var(--c-background);
+    --btn-hover-c-border: var(--c-background);
+    --btn-hover-c-background: var(--c-background);
+    --btn-hover-c-text: var(--c-primary);
+
     display: flex;
     flex-flow: column;
     align-items: center;

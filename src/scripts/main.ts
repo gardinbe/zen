@@ -10,7 +10,7 @@ const backgroundAudio = createAudioPlayer({
   main: query<HTMLAudioElement>('.js-background-audio'),
 });
 
-const showLaunch = () => {
+const showStart = () => {
   const view = query('.js-start-view');
   const startDialog = createDialog(
     {
@@ -53,23 +53,35 @@ const showBoot = async () => {
     ),
   );
 
+  const continueBtn = query('.js-os-boot-continue');
+
+  const cleanup = () => {
+    removeEventListener('keydown', keydown);
+    continueBtn.addEventListener('click', next);
+  };
+
+  const next = () => {
+    view.hidden = true;
+    showTerminal();
+    cleanup();
+  };
+
+  const keydown = (ev: KeyboardEvent) => {
+    if (ev.key !== 'Enter') {
+      return;
+    }
+
+    next();
+  };
+
   view.hidden = false;
+  continueBtn.hidden = true;
+
   bootSequenceTyper.type(html, {
     onFinish: () => {
-      addEventListener(
-        'keydown',
-        (ev) => {
-          if (ev.key !== 'Enter') {
-            return;
-          }
-
-          view.hidden = true;
-          showTerminal();
-        },
-        {
-          once: true,
-        },
-      );
+      continueBtn.hidden = false;
+      addEventListener('keydown', keydown);
+      continueBtn.addEventListener('click', next);
     },
   });
 };
@@ -79,7 +91,6 @@ const showTerminal = () => {
 
   createTerminal({
     main: query('.js-terminal'),
-    outputContainer: query('.js-terminal-output-container'),
     output: query('.js-terminal-output'),
     prompt: query<HTMLFormElement>('.js-terminal-prompt'),
     prefix: query('.js-terminal-prefix'),
@@ -89,4 +100,4 @@ const showTerminal = () => {
   view.hidden = false;
 };
 
-showLaunch();
+showStart();

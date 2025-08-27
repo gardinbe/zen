@@ -24,11 +24,11 @@ export const withAbortable = <T>(
     };
 
     const settle = async (result: T) => {
-      if (settled) {
+      if (isSettled) {
         return;
       }
 
-      settled = true;
+      isSettled = true;
       await cleanupAll();
       resolve(result);
     };
@@ -43,7 +43,7 @@ export const withAbortable = <T>(
       return;
     }
 
-    let settled = false;
+    let isSettled = false;
 
     signal?.addEventListener('abort', abort, {
       once: true,

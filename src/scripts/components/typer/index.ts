@@ -38,7 +38,7 @@ export type Typer = {
   /**
    * Clears the main element.
    */
-  clear: () => void;
+  clear: () => Promise<void>;
 };
 
 /**

@@ -1,13 +1,4 @@
 @layer components {
-  .zen-typer-container {
-    overflow-y: auto;
-    scrollbar-gutter: stable;
-
-    @media (pointer: fine) {
-      padding-right: 1rem;
-    }
-  }
-
   .zen-typer {
     position: relative;
     font-size: 1.2rem;
@@ -53,6 +44,17 @@
 
       &:nth-last-child(1 of :not([data-typer-state='incomplete'])) {
         margin-bottom: 0;
+      }
+    }
+
+    &--scroll {
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+      padding-right: 1rem;
+
+      @media (pointer: coarse) {
+        padding-left: 8px;
+        padding-right: 8px;
       }
     }
 

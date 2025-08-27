@@ -8,7 +8,6 @@ import { getProgram, getProgramNames } from './programs';
 
 export type TerminalElements = {
   main: HTMLElement;
-  outputContainer: HTMLElement;
   output: HTMLElement;
   prompt: HTMLFormElement;
   prefix: HTMLElement;
