@@ -8,7 +8,7 @@ import { TypeEffect } from './type';
 import { UndoEffect } from './undo';
 
 /**
- * Array of all available effect constructors.
+ * Array of available effect constructors.
  */
 export const EffectConstructors: EffectConstructor[] = [
   DelayEffect,
