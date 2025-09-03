@@ -71,8 +71,6 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
     });
   };
 
-  const clear = () => typer.clear();
-
   // todo: if a user types or program errors with [[]] it fucks with this
 
   const stdin = (input: string) => write(`[[insert:\n> ${input}\n]]`);
@@ -83,6 +81,8 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   const stderr = (error: unknown) =>
     // todo: use Error.isError when available
     write(`[[insert:ERROR: ${error instanceof Error ? error.message : error}\n]]`);
+
+  const clear = () => typer.clear();
 
   const typer = createTyper({
     main: els.output,

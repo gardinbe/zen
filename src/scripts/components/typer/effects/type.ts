@@ -29,13 +29,7 @@ export const TypeEffect: EffectConstructor<[string]> = {
 
       prevChar = char;
 
-      const fulfilled = await randomDelay(
-        {
-          min: 1,
-          max: 5,
-        },
-        ctx.signal,
-      );
+      const fulfilled = await randomDelay(1, 4, ctx.signal);
 
       if (!fulfilled) {
         ctx.setNodeState(ctx.node, EffectNodeState.Complete);

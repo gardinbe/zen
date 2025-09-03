@@ -4,7 +4,7 @@ import { withAbortable } from './abortable';
  * Delays execution for the given number of milliseconds using `requestAnimationFrame`.
  *
  * Value *shouldn't* be less than 16.7ms as that's the fastest a 60fps screen can refresh.
- * @param ms Delay duration in milliseconds.
+ * @param ms Duration in milliseconds.
  * @param signal Abort signal.
  * @returns Promise that resolves to `true` if completed successfully, and `false` if aborted.
  */
@@ -52,19 +52,7 @@ export const delay = async (ms: number, signal: AbortSignal | null): Promise<boo
  * @returns Promise that resolves to `true` if completed successfully, and `false` if aborted.
  */
 export const randomDelay = (
-  {
-    min,
-    max,
-  }: {
-    /**
-     * Minimum duration in milliseconds.
-     */
-    min: number;
-
-    /**
-     * Maximum duration in milliseconds.
-     */
-    max: number;
-  },
+  min: number,
+  max: number,
   signal: AbortSignal | null,
 ): Promise<boolean> => delay(Math.random() * (max - min) + min, signal);

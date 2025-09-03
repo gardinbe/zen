@@ -18,25 +18,6 @@ export type TyperQueue = {
  * @returns Typer queue instance.
  */
 export const createTyperQueue = (): TyperQueue => {
-  const push = (...newBatches: EffectBatch[]) => {
-    batches.push(...newBatches);
-
-    if (isRunning) {
-      return;
-    }
-
-    active = exec(controller.signal).finally(() => {
-      active = null;
-    });
-  };
-
-  const clear = async () => {
-    controller.abort();
-    controller = new AbortController();
-    await active;
-    batches.length = 0;
-  };
-
   const exec = async (signal: AbortSignal) => {
     isRunning = true;
 
@@ -84,6 +65,25 @@ export const createTyperQueue = (): TyperQueue => {
     }
 
     isRunning = false;
+  };
+
+  const push = (...newBatches: EffectBatch[]) => {
+    batches.push(...newBatches);
+
+    if (isRunning) {
+      return;
+    }
+
+    active = exec(controller.signal).finally(() => {
+      active = null;
+    });
+  };
+
+  const clear = async () => {
+    controller.abort();
+    controller = new AbortController();
+    await active;
+    batches.length = 0;
   };
 
   let isRunning = false;

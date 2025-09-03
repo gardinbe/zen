@@ -1,3 +1,5 @@
+import { clamp } from '../../utils/clamp';
+
 export type TerminalHistory = {
   /**
    * Returns the history entries.
@@ -5,29 +7,32 @@ export type TerminalHistory = {
   entries: string[];
 
   /**
-   * Scrolls up in the history.
+   * Navigates to the next history entry.
+   * @returns Next history entry.
    */
-  up: () => void;
+  next: () => string;
 
   /**
-   * Scrolls down in the history.
+   * Navigates to the previous history entry.
+   * @returns Previous history entry.
    */
-  down: () => void;
-
-  /**
-   * Adds a command to the history.
-   */
-  add: (value: string) => void;
-
-  /**
-   * Clears the history.
-   */
-  clear: () => void;
+  prev: () => string;
 
   /**
    * Resets the history position.
    */
   reset: () => void;
+
+  /**
+   * Adds an entry to the history.
+   * @param entry Entry.
+   */
+  add: (entry: string) => void;
+
+  /**
+   * Clears the history.
+   */
+  clear: () => void;
 };
 
 export type TerminalHistoryOptions = {
@@ -36,12 +41,6 @@ export type TerminalHistoryOptions = {
    * @returns Current value.
    */
   getValue: () => string;
-
-  /**
-   * Invoked when the history is navigated.
-   * @param value Navigated value.
-   */
-  onNavigate: (value: string) => void;
 };
 
 /**
@@ -51,11 +50,11 @@ export type TerminalHistoryOptions = {
  */
 export const createTerminalHistory = (options: TerminalHistoryOptions): TerminalHistory => {
   const save = () => {
-    localStorage.setItem('terminal-history', JSON.stringify(entries));
+    localStorage.setItem(LocalStorageKey, JSON.stringify(entries));
   };
 
   const load = () => {
-    const stored = localStorage.getItem('terminal-history');
+    const stored = localStorage.getItem(LocalStorageKey);
 
     if (!stored) {
       return;
@@ -69,31 +68,32 @@ export const createTerminalHistory = (options: TerminalHistoryOptions): Terminal
       return;
     }
 
+    entries.length = 0;
     entries.push(...parsed);
   };
 
-  const up = () => {
-    if (!~pos) {
-      prevValue = options.getValue();
-    }
-
-    pos = Math.min(pos + 1, entries.length - 1);
-    const value = entries.at(-1 - pos) ?? entries.at(0) ?? '';
-    options.onNavigate(value);
+  const navigate = (delta: number) => {
+    storedValue ??= options.getValue();
+    pos = clamp(pos + delta, -1, entries.length - 1);
+    const value = ~pos ? entries.at(-1 - pos)! : storedValue;
+    return value;
   };
 
-  const down = () => {
-    pos = Math.max(pos - 1, -1);
-    const value = entries.at(-1 - pos) ?? prevValue ?? '';
-    options.onNavigate(value);
+  const next = () => navigate(-1);
+
+  const prev = () => navigate(1);
+
+  const reset = () => {
+    pos = -1;
+    storedValue = null;
   };
 
-  const add = (value: string) => {
-    if (entries.at(-1) === value) {
+  const add = (entry: string) => {
+    if (entries.at(-1) === entry) {
       return;
     }
 
-    entries.push(value);
+    entries.push(entry);
     save();
 
     if (!~pos) {
@@ -109,23 +109,20 @@ export const createTerminalHistory = (options: TerminalHistoryOptions): Terminal
     reset();
   };
 
-  const reset = () => {
-    pos = -1;
-    prevValue = '';
-  };
-
   const entries: string[] = [];
   let pos = -1;
-  let prevValue = '';
+  let storedValue: string | null = null;
 
   load();
 
   return {
     entries,
-    up,
-    down,
+    next,
+    prev,
+    reset,
     add,
     clear,
-    reset,
   };
 };
+
+const LocalStorageKey = 'terminal-history';

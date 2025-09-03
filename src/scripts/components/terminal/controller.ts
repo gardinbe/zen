@@ -8,7 +8,7 @@ export type TerminalController = {
    * Executes a command.
    * @param value Command to execute.
    */
-  exec: (value: string) => Promise<Result<ProgramExitCode, ProgramExecutionError>>;
+  exec: (value: string) => Promise<ProgramResult>;
 
   /**
    * Terminates the running program.
@@ -31,13 +31,7 @@ export type TerminalControllerOptions = {
   createContext: (signal: AbortSignal) => ProgramContext;
 
   /**
-   * Invoked when a command is executed.
-   * @param value Command to execute.
-   */
-  onExec: (value: string) => void | Promise<void>;
-
-  /**
-   * Invoked when the program is terminated.
+   * Invoked when the controller is terminated.
    */
   onTerminate: () => void | Promise<void>;
 };
@@ -58,16 +52,9 @@ export const createTerminalController = (
     controller = new AbortController();
   };
 
-  const terminate = async () => {
-    controller.abort();
-    await options.onTerminate();
-  };
-
-  const exec = async (value: string): Promise<Result<ProgramExitCode, ProgramExecutionError>> => {
+  const exec = async (value: string): Promise<ProgramResult> => {
     await terminate();
     init();
-
-    await options.onExec(value);
 
     if (!value) {
       return [null, new MissingError()];
@@ -90,6 +77,11 @@ export const createTerminalController = (
     return [code, null];
   };
 
+  const terminate = async () => {
+    controller.abort();
+    await options.onTerminate();
+  };
+
   let controller = new AbortController();
 
   return {
@@ -98,6 +90,8 @@ export const createTerminalController = (
     parse,
   };
 };
+
+export type ProgramResult = Result<ProgramExitCode, ProgramExecutionError>;
 
 export type ProgramExecutionError = MissingError | ParseError | NotFoundError;
 
@@ -108,7 +102,7 @@ export type Command = {
 
 const parse = (str: string): Command | null => {
   const match = str.match(ExpressionRegex);
-  const [, name, argsStr] = match || [];
+  const [, name, argsStr] = match ?? [];
 
   if (!name) {
     return null;

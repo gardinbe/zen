@@ -46,13 +46,7 @@ export const UndoEffect: EffectConstructor<[number]> = {
 
       prevChar = char;
 
-      const fulfilled = await randomDelay(
-        {
-          min: 30,
-          max: 60,
-        },
-        ctx.signal,
-      );
+      const fulfilled = await randomDelay(30, 60, ctx.signal);
 
       if (!fulfilled) {
         ctx.setNodeState(ctx.node, EffectNodeState.Complete);

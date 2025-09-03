@@ -36,7 +36,7 @@ export type Typer = {
   stop: () => Promise<void>;
 
   /**
-   * Clears the main element.
+   * Clears the typer queue.
    */
   clear: () => Promise<void>;
 };
@@ -184,6 +184,7 @@ export const createTyper = (els: TyperElements): Typer => {
   let activeNode: Node | null = null;
 
   const cursor = createCursor();
+
   const queue = createTyperQueue();
 
   return {

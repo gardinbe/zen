@@ -89,5 +89,5 @@ const resolveUrl = (name: string): string => {
     resolved = `/documents/${resolved}`;
   }
 
-  return `${import.meta.env.BASE_URL || ''}${resolved}`;
+  return `${import.meta.env.BASE_URL ?? ''}${resolved}`;
 };

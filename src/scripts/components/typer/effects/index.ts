@@ -139,7 +139,7 @@ export const createEffects = (text: string | null): Effect[] => {
   return effects;
 };
 
-const EffectRegex = /\[\[\s*(.*?)\s*:(.*?)\]\]/dgs;
+const EffectRegex = /\[\[\s*(.*?)\s*:(.*?)]]/dgs;
 
 type CreateEffectObject = {
   key: string;

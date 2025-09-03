@@ -1,21 +1,11 @@
-import { type TerminalElements } from '../';
-import { type Cursor, createCursor } from '../../cursor';
-import {
-  type TerminalInputSuggester,
-  type TerminalInputSuggesterOptions,
-  createTerminalInputSuggester,
-} from './suggester';
+import { type TerminalElements } from '.';
+import { type Cursor, createCursor } from '../cursor';
 
 export type TerminalInput = {
   /**
    * Cursor instance.
    */
   cursor: Cursor;
-
-  /**
-   * Suggester instance.
-   */
-  suggester: TerminalInputSuggester;
 
   /**
    * Returns the input value.
@@ -45,12 +35,10 @@ export type TerminalInput = {
 
 export type TerminalInputOptions = {
   /**
-   * Invoked when the user cancels the input.
-   *
-   * I.e. whenever Ctrl+C is pressed.
+   * Invoked whenever the input value changes.
    * @param value Input value.
    */
-  onCancel: (value: string) => void;
+  onInput: (value: string) => void;
 
   /**
    * Invoked when the user submits the input.
@@ -59,21 +47,32 @@ export type TerminalInputOptions = {
   onSubmit: (value: string) => void;
 
   /**
-   * Invoked when the user presses the up arrow key.
+   * Invoked when the user cancels the input.
+   *
+   * I.e. whenever Ctrl+C is pressed.
    * @param value Input value.
    */
-  onUp: (value: string) => void;
+  onCancel: (value: string) => void;
+
+  /**
+   * Invoked when the user presses the up arrow key.
+   */
+  onUp: () => void;
 
   /**
    * Invoked when the user presses the down arrow key.
-   * @param value Input value.
    */
-  onDown: (value: string) => void;
+  onDown: () => void;
 
   /**
-   * Suggester options.
+   * Invoked when the user presses the tab key.
    */
-  suggester: TerminalInputSuggesterOptions;
+  onTab: () => void;
+
+  /**
+   * Invoked when the user presses the shift and tab keys simultaneously.
+   */
+  onShiftTab: () => void;
 };
 
 /**
@@ -105,57 +104,63 @@ export const createTerminalInput = (
 
   const listeners = {
     input: () => {
-      suggester.clear();
       resize();
       cursor.freeze();
       requestAnimationFrame(cursor.blink);
+      options.onInput(get());
     },
 
     keydown: (ev: KeyboardEvent) => {
-      if (ev.key === 'Tab') {
-        ev.preventDefault();
-        const suggestion = suggester.suggest(get());
+      switch (ev.key) {
+        case 'Tab': {
+          ev.preventDefault();
 
-        if (!suggestion) {
+          if (ev.shiftKey) {
+            options.onShiftTab();
+          } else {
+            options.onTab();
+          }
+
           return;
         }
 
-        set(suggestion);
-        return;
-      }
-
-      if (ev.key === 'ArrowUp') {
-        ev.preventDefault();
-        options.onUp(get());
-        return;
-      }
-
-      if (ev.key === 'ArrowDown') {
-        ev.preventDefault();
-        options.onDown(get());
-        return;
-      }
-
-      if (ev.key === 'Delete') {
-        requestAnimationFrame(repositionCursor);
-        return;
-      }
-
-      if (ev.ctrlKey && ev.key === 'c') {
-        const selection = getSelection();
-
-        if (
-          selection?.toString() &&
-          (selection.anchorNode?.contains(els.input) || selection.focusNode?.contains(els.input))
-        ) {
+        case 'ArrowUp': {
+          ev.preventDefault();
+          options.onUp();
           return;
         }
 
-        ev.preventDefault();
-        const value = get();
-        clear();
-        options.onCancel(value);
-        return;
+        case 'ArrowDown': {
+          ev.preventDefault();
+          options.onDown();
+          return;
+        }
+
+        case 'c': {
+          if (!ev.ctrlKey) {
+            return;
+          }
+
+          const selection = getSelection();
+
+          if (
+            selection?.toString() &&
+            (selection.anchorNode?.contains(els.input) || selection.focusNode?.contains(els.input))
+          ) {
+            return;
+          }
+
+          ev.preventDefault();
+          const value = get();
+          clear();
+          options.onCancel(value);
+          return;
+        }
+
+        case 'Delete': {
+          requestAnimationFrame(repositionCursor);
+          return;
+        }
       }
     },
 
@@ -204,7 +209,6 @@ export const createTerminalInput = (
   };
 
   const cursor = createCursor();
-  const suggester = createTerminalInputSuggester(options.suggester);
 
   cursor.attach(els.input);
   cursor.hide();
@@ -217,7 +221,6 @@ export const createTerminalInput = (
 
   return {
     cursor,
-    suggester,
     get value() {
       return get();
     },

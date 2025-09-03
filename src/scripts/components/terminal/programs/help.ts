@@ -65,5 +65,5 @@ export const HelpProgram: ProgramConstructor = {
 const createSpacer = (strings: string[]): ((str: string) => string) => {
   const gap = 4;
   const length = strings.map((str) => str.length).reduce((a, b) => Math.max(a, b), 0);
-  return (str: string) => new Array(length + gap - str.length + 1).join(' ');
+  return (str) => new Array(length + gap - str.length + 1).join(' ');
 };
