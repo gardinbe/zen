@@ -21,6 +21,16 @@
     }
   }
 
+  .zen-terminal-column {
+    display: flex;
+    flex-flow: column;
+  }
+
+  .zen-terminal-row {
+    display: flex;
+    flex-flow: row;
+  }
+
   .zen-terminal-output {
   }
 

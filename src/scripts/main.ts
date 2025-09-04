@@ -6,9 +6,9 @@ import { createOSBoot, createOSBootElements } from './components/os-boot';
 
 const createBackgroundAudio = () => {
   const container = query('.js-background-audio');
-  const elements = createAudioPlayerElements();
-  const audioPlayer = createAudioPlayer(elements);
-  container.append(elements.main);
+  const els = createAudioPlayerElements();
+  const audioPlayer = createAudioPlayer(els);
+  container.append(els.main);
   return audioPlayer;
 };
 
@@ -16,16 +16,16 @@ const backgroundAudio = createBackgroundAudio();
 
 const showStart = () => {
   const view = query('.js-start-view');
-  const elements = createDialogElements();
-  elements.main.classList.add('zen-start');
-  elements.heading.innerHTML = /*html*/ `
+  const els = createDialogElements();
+  els.main.classList.add('zen-start');
+  els.heading.innerHTML = /*html*/ `
     <h1>ZenOS</h1>
     <p>v0.1</p>
   `;
-  elements.closeBtn.innerHTML = 'Start';
-  elements.closeBtn.dataset.alt = 'Terminal';
+  els.closeBtn.innerHTML = 'Start';
+  els.closeBtn.dataset.alt = 'Terminal';
 
-  const startDialog = createDialog(elements, {
+  const startDialog = createDialog(els, {
     onClose: (alt) => {
       view.hidden = true;
       backgroundAudio.play();
@@ -39,32 +39,32 @@ const showStart = () => {
     },
   });
 
-  view.append(elements.main);
+  view.append(els.main);
   view.hidden = false;
   startDialog.open();
 };
 
 const showBoot = async () => {
   const view = query('.js-os-boot-view');
-  const elements = createOSBootElements();
+  const els = createOSBootElements();
 
-  const osBoot = createOSBoot(elements, {
+  const osBoot = createOSBoot(els, {
     onContinue: () => {
       view.hidden = true;
       showTerminal();
     },
   });
 
-  view.append(elements.main);
+  view.append(els.main);
   view.hidden = false;
   osBoot.start();
 };
 
 const showTerminal = () => {
   const view = query('.js-terminal-view');
-  const elements = createTerminalElements();
-  createTerminal(elements);
-  view.append(elements.main);
+  const els = createTerminalElements();
+  createTerminal(els);
+  view.append(els.main);
   view.hidden = false;
 };
 

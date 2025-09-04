@@ -1,6 +1,6 @@
 import { type TerminalElements } from '.';
 import { type Cursor, createCursor } from '../cursor';
-import { TerminalSpawnDirection } from './manager';
+import { type Enum } from '../../utils/enum.ts';
 
 export type TerminalInput = {
   /**
@@ -84,18 +84,18 @@ export type TerminalInputOptions = {
 
 /**
  * Creates a terminal input instance.
- * @param elements Terminal elements.
+ * @param els Terminal elements.
  * @param options Input options.
  * @returns Terminal input instance.
  */
 export const createTerminalInput = (
-  elements: TerminalElements,
+  els: TerminalElements,
   options: TerminalInputOptions,
 ): TerminalInput => {
-  const get = () => elements.input.value;
+  const get = () => els.input.value;
 
   const set = (value: string) => {
-    elements.input.value = value;
+    els.input.value = value;
     resize();
   };
 
@@ -104,11 +104,10 @@ export const createTerminalInput = (
   };
 
   const resize = () => {
-    elements.input.style.width = `${get().length}ch`;
+    els.input.style.width = `${get().length}ch`;
   };
 
-  const repositionCursor = () =>
-    cursor.setPosition(get().length - (elements.input.selectionEnd ?? 0));
+  const repositionCursor = () => cursor.setPosition(get().length - (els.input.selectionEnd ?? 0));
 
   const listeners = {
     input: () => {
@@ -129,8 +128,7 @@ export const createTerminalInput = (
 
         if (
           selection?.toString() &&
-          (selection.anchorNode?.contains(elements.input) ||
-            selection.focusNode?.contains(elements.input))
+          (selection.anchorNode?.contains(els.input) || selection.focusNode?.contains(els.input))
         ) {
           return;
         }
@@ -201,7 +199,7 @@ export const createTerminalInput = (
         return;
       }
 
-      elements.input.focus();
+      els.input.focus();
     },
 
     submit: (ev: SubmitEvent) => {
@@ -214,31 +212,31 @@ export const createTerminalInput = (
   };
 
   const listen = () => {
-    elements.input.addEventListener('focus', cursor.show);
-    elements.input.addEventListener('blur', cursor.hide);
-    elements.input.addEventListener('input', listeners.input);
-    elements.input.addEventListener('keydown', listeners.keydown);
-    elements.input.addEventListener('selectionchange', listeners.selectionchange);
-    elements.main.addEventListener('click', listeners.click);
-    elements.prompt.addEventListener('submit', listeners.submit);
+    els.input.addEventListener('focus', cursor.show);
+    els.input.addEventListener('blur', cursor.hide);
+    els.input.addEventListener('input', listeners.input);
+    els.input.addEventListener('keydown', listeners.keydown);
+    els.input.addEventListener('selectionchange', listeners.selectionchange);
+    els.main.addEventListener('click', listeners.click);
+    els.prompt.addEventListener('submit', listeners.submit);
   };
 
   const ignore = () => {
-    elements.input.removeEventListener('focus', cursor.show);
-    elements.input.removeEventListener('blur', cursor.hide);
-    elements.input.removeEventListener('input', listeners.input);
-    elements.input.removeEventListener('selectionchange', listeners.selectionchange);
-    elements.main.removeEventListener('click', listeners.click);
-    elements.prompt.removeEventListener('submit', listeners.submit);
+    els.input.removeEventListener('focus', cursor.show);
+    els.input.removeEventListener('blur', cursor.hide);
+    els.input.removeEventListener('input', listeners.input);
+    els.input.removeEventListener('selectionchange', listeners.selectionchange);
+    els.main.removeEventListener('click', listeners.click);
+    els.prompt.removeEventListener('submit', listeners.submit);
   };
 
   const cursor = createCursor();
 
-  cursor.attach(elements.input);
+  cursor.attach(els.input);
   cursor.hide();
 
   requestAnimationFrame(() => {
-    elements.input.focus();
+    els.input.focus();
   });
   resize();
   listen();
@@ -254,3 +252,11 @@ export const createTerminalInput = (
     ignore,
   };
 };
+
+export type TerminalSpawnDirection = Enum<typeof TerminalSpawnDirection>;
+export const TerminalSpawnDirection = {
+  North: 0,
+  East: 1,
+  South: 2,
+  West: 3,
+} as const;

@@ -6,13 +6,13 @@
  * @throws {Error} If the element is not found.
  */
 export const query = <T extends HTMLElement>(selector: string, parent: ParentNode = document) => {
-  const element = parent.querySelector<T>(selector);
+  const el = parent.querySelector<T>(selector);
 
-  if (!element) {
+  if (!el) {
     throw new Error(`Element not found: ${selector}`);
   }
 
-  return element;
+  return el;
 };
 
 /**

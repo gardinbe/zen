@@ -36,17 +36,17 @@ export type OSBootOptions = {
   onContinue: () => void;
 };
 
-export const createOSBoot = (elements: OSBootElements, options: OSBootOptions) => {
+export const createOSBoot = (els: OSBootElements, options: OSBootOptions) => {
   const init = () => {
-    elements.main.classList.add('zen-os-boot');
-    elements.output.classList.add('zen-os-boot-output');
-    elements.continueBtn.classList.add('zen-os-boot-continue', 'u-zen-btn');
-    elements.continueBtn.hidden = true;
+    els.main.classList.add('zen-os-boot');
+    els.output.classList.add('zen-os-boot-output');
+    els.continueBtn.classList.add('zen-os-boot-continue', 'u-zen-btn');
+    els.continueBtn.hidden = true;
   };
 
   const next = () => {
     removeEventListener('keydown', listeners.keydown);
-    elements.continueBtn.removeEventListener('click', next);
+    els.continueBtn.removeEventListener('click', next);
     options.onContinue();
   };
 
@@ -63,9 +63,9 @@ export const createOSBoot = (elements: OSBootElements, options: OSBootOptions) =
 
     typer.type(html, {
       onFinish: () => {
-        elements.continueBtn.hidden = false;
+        els.continueBtn.hidden = false;
         addEventListener('keydown', listeners.keydown);
-        elements.continueBtn.addEventListener('click', next);
+        els.continueBtn.addEventListener('click', next);
       },
     });
   };
@@ -82,7 +82,7 @@ export const createOSBoot = (elements: OSBootElements, options: OSBootOptions) =
 
   const typer = createTyper(
     {
-      main: elements.output,
+      main: els.output,
     },
     {
       scrollable: true,

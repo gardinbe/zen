@@ -42,35 +42,35 @@ export const createCursor = (): Cursor => {
   const attach = (node: Node) => {
     const parent = node.parentElement;
 
-    if (!parent || node.nextSibling === elements.main) {
+    if (!parent || node.nextSibling === els.main) {
       return;
     }
 
-    parent.insertBefore(elements.main, node);
-    parent.insertBefore(node, elements.main);
+    parent.insertBefore(els.main, node);
+    parent.insertBefore(node, els.main);
   };
 
   const blink = () => {
-    elements.main.dataset.cursorState = 'blink';
+    els.main.dataset.cursorState = 'blink';
   };
 
   const freeze = () => {
-    elements.main.dataset.cursorState = 'static';
+    els.main.dataset.cursorState = 'static';
   };
 
   const show = () => {
-    elements.main.hidden = false;
+    els.main.hidden = false;
   };
 
   const hide = () => {
-    elements.main.hidden = true;
+    els.main.hidden = true;
   };
 
   const setPosition = (offset: number) => {
-    elements.main.style.translate = offset ? `-${offset}ch` : '';
+    els.main.style.translate = offset ? `-${offset}ch` : '';
   };
 
-  const elements = createCursorElements();
+  const els = createCursorElements();
 
   blink();
 

@@ -58,34 +58,36 @@ export type Typer = {
 export type TyperOptions = {
   /**
    * Whether the typer should be scrollable.
-   * REFAC: make optional
+   *
+   * todo: make optional. do alongside event listener amends
    */
   scrollable: boolean;
 };
 
 /**
  * Creates a new typer instance.
- * @param els Typer elements. REFAC: fix docs
+ * @param els Typer elements.
+ * @param options Typer options.
  * @returns Typer instance.
  */
-export const createTyper = (elements: TyperElements, options: TyperOptions): Typer => {
+export const createTyper = (els: TyperElements, options: TyperOptions): Typer => {
   const init = () => {
-    elements.main.classList.add('zen-typer', 'u-zen-crt-text');
+    els.main.classList.add('zen-typer', 'u-zen-crt-text');
 
     if (options.scrollable) {
-      elements.main.classList.add('zen-typer--scrollable');
+      els.main.classList.add('zen-typer--scrollable');
     }
   };
 
   const createScroller = (): TyperScroller => {
     const tick: FrameRequestCallback = () => {
-      if (elements.main.scrollTop + LoggerScrollRegion <= prevScrollTop) {
+      if (els.main.scrollTop + LoggerScrollRegion <= prevScrollTop) {
         requestAnimationFrame(tick);
         return;
       }
 
-      elements.main.scrollTop = elements.main.scrollHeight;
-      prevScrollTop = elements.main.scrollTop;
+      els.main.scrollTop = els.main.scrollHeight;
+      prevScrollTop = els.main.scrollTop;
 
       if (!isRunning) {
         cancelAnimationFrame(id);
@@ -127,14 +129,14 @@ export const createTyper = (elements: TyperElements, options: TyperOptions): Typ
   const setNodeState = (node: Node, state: EffectNodeState) => {
     // todo: top level parent not getting right state (complete when it shouldn't be)
 
-    const applyState = (element: HTMLElement, newState: EffectNodeState) => {
-      if (element === elements.main) {
+    const applyState = (el: HTMLElement, newState: EffectNodeState) => {
+      if (el === els.main) {
         return;
       }
 
-      element.dataset.typerState = newState;
+      el.dataset.typerState = newState;
 
-      const parent = element.parentElement;
+      const parent = el.parentElement;
 
       if (!parent) {
         return;
@@ -144,13 +146,13 @@ export const createTyper = (elements: TyperElements, options: TyperOptions): Typ
       applyState(parent, parentState);
     };
 
-    const element = node instanceof HTMLElement ? node : node.parentElement;
+    const el = node instanceof HTMLElement ? node : node.parentElement;
 
-    if (!element) {
+    if (!el) {
       return;
     }
 
-    applyState(element, state);
+    applyState(el, state);
   };
 
   const getParentState = (parent: HTMLElement): EffectNodeState => {
@@ -189,15 +191,15 @@ export const createTyper = (elements: TyperElements, options: TyperOptions): Typ
   });
 
   const createEffectExecutors = (...sourceNodes: Node[]): EffectExecutor[] => {
-    const elements = getChildrenDeep(...sourceNodes);
+    const sourceEls = getChildrenDeep(...sourceNodes);
 
-    elements.forEach((element) => {
-      element.dataset.typerState = EffectNodeState.Incomplete;
+    sourceEls.forEach((el) => {
+      el.dataset.typerState = EffectNodeState.Incomplete;
     });
 
-    const nodes = getLeafNodesDeep(...sourceNodes);
+    const leafNodes = getLeafNodesDeep(...sourceNodes);
 
-    const leaves = nodes.map<LeafNode>((node) => ({
+    const leaves = leafNodes.map<LeafNode>((node) => ({
       node,
       text: isPreformattedNode(node)
         ? node.textContent
@@ -206,7 +208,7 @@ export const createTyper = (elements: TyperElements, options: TyperOptions): Typ
           : null,
     }));
 
-    nodes.forEach((node) => {
+    leafNodes.forEach((node) => {
       node.textContent = '';
     });
 
@@ -217,7 +219,7 @@ export const createTyper = (elements: TyperElements, options: TyperOptions): Typ
         const ctx: EffectContext = {
           signal,
           cursor,
-          nodes,
+          nodes: leafNodes,
           targetNode: leaf.node,
           get node() {
             return activeNode!;
@@ -236,7 +238,7 @@ export const createTyper = (elements: TyperElements, options: TyperOptions): Typ
   const insert = (html: string) => {
     const scroller = createScroller();
     scroller.start();
-    elements.main.insertAdjacentHTML('beforeend', html);
+    els.main.insertAdjacentHTML('beforeend', html);
     scroller.stop();
   };
 
@@ -244,7 +246,7 @@ export const createTyper = (elements: TyperElements, options: TyperOptions): Typ
     const tpl = document.createElement('template');
     tpl.innerHTML = html;
     const nodes = Array.from(tpl.content.childNodes);
-    elements.main.append(...nodes);
+    els.main.append(...nodes);
 
     const scroller = createScroller();
 
@@ -267,7 +269,7 @@ export const createTyper = (elements: TyperElements, options: TyperOptions): Typ
 
   const clear = async () => {
     await stop();
-    elements.main.innerHTML = '';
+    els.main.innerHTML = '';
   };
 
   let activeNode: Node | null = null;

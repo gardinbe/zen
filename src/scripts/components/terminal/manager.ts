@@ -1,106 +1,104 @@
-import { type Terminal, createTerminal, createTerminalElements } from '.';
-import { type Enum } from '../../utils/enum';
+// import { type Terminal, createTerminal, createTerminalElements } from '.';
+// import { type Enum } from '../../utils/enum';
 
-export type TerminalManagerElements = {
-  main: HTMLElement;
-};
+// export type TerminalManagerElements = {
+//   main: HTMLElement;
+// };
 
-export const createTerminalManagerElements = (): TerminalManagerElements => {
-  const main = document.createElement('div');
+// export const createTerminalManagerElements = (): TerminalManagerElements => {
+//   const main = document.createElement('div');
 
-  return {
-    main,
-  };
-};
+//   return {
+//     main,
+//   };
+// };
 
-export const createTerminalManager = (elements: TerminalManagerElements) => {
-  const init = () => {
-    elements.main.classList.add('zen-terminal-manager');
-  };
+// export const createTerminalManager = (els: TerminalManagerElements) => {
+//   const init = () => {
+//     els.main.classList.add('zen-terminal-manager');
+//   };
 
-  const spawn = (direction: TerminalSpawnDirection) => {
-    const terminalElements = createTerminalElements();
-    const terminal = createTerminal(terminalElements);
+//   const spawn = (source: Terminal, direction: TerminalSpawnDirection) => {
+//     const sourceEl = terminals.get(source);
 
-    const element = terminalElements.main;
+//     if (!sourceEl?.parentElement) {
+//       return;
+//     }
 
-    terminals.push(terminal);
+//     const terminalEls = createTerminalElements();
+//     const terminal = createTerminal(terminalEls);
 
-    let container;
+//     const el = terminalEls.main;
+//     terminals.set(terminal, el);
 
-    switch (direction) {
-      case TerminalSpawnDirection.North:
-      case TerminalSpawnDirection.South: {
-        container = createColumn();
-        break;
-      }
-      case TerminalSpawnDirection.East:
-      case TerminalSpawnDirection.West: {
-        container = createRow();
-        break;
-      }
-    }
+//     const parent = sourceEl.parentElement;
 
-    if (container.type === )
+//     const isAfter =
+//       direction === TerminalSpawnDirection.South || direction === TerminalSpawnDirection.East;
 
-    switch (direction) {
-      case TerminalSpawnDirection.North:
-      case TerminalSpawnDirection.East: {
-        container.prepend(element);
-        break;
-      }
-      case TerminalSpawnDirection.South:
-      case TerminalSpawnDirection.West: {
-        container.append(element);
-        break;
-      }
-    }
-  };
+//     if (isColumn(parent) || isRow(parent)) {
+//       if (isAfter) {
+//         parent.append(el);
+//       } else {
+//         parent.prepend(el);
+//       }
 
-  const kill = (terminal: Terminal) => {
-    // todo: kill terminal properly, remove all listeners, stop typer
+//       return;
+//     }
 
-    terminal.elements.main.remove();
+//     const container =
+//       direction === TerminalSpawnDirection.North || direction === TerminalSpawnDirection.South
+//         ? createColumn()
+//         : createRow();
 
-    terminals.splice(terminals.indexOf(terminal), 1);
-  };
+//     parent.insertBefore(container, sourceEl);
 
-  const terminals: Terminal[] = [];
-};
+//     if (isAfter) {
+//       container.append(sourceEl, el);
+//     } else {
+//       container.append(el, sourceEl);
+//     }
+//   };
 
-export type TerminalSpawnDirection = Enum<typeof TerminalSpawnDirection>;
-export const TerminalSpawnDirection = {
-  North: 0,
-  East: 1,
-  South: 2,
-  West: 3,
-} as const;
+//   const kill = (terminal: Terminal) => {
+//     // todo: kill terminal properly, remove all listeners, stop typer
+//     terminals.delete(terminal);
+//   };
 
-type TerminalContainerType = Enum<typeof TerminalContainerType>;
-const TerminalContainerType = {
-  Column: 0,
-  Row: 1,
-} as const;
+//   const terminals = new WeakMap<Terminal, HTMLElement>();
 
-type TerminalContainer = {
-  type: TerminalContainerType;
-  element: HTMLElement;
-};
+//   const create = () => {
+//     const terminalEls = createTerminalElements();
+//     const terminal = createTerminal(terminalEls, {
+//       onSpawn: (direction) => {
+//         spawn(terminal, direction);
+//       },
+//     });
+//     terminals.set(terminal, terminalEls.main);
+//     els.main.append(terminalEls.main);
+//   };
 
-const createColumn = (): TerminalContainer => {
-  const element = document.createElement('div');
-  element.classList.add('zen-terminal-column');
-  return {
-    type: TerminalContainerType.Column,
-    element,
-  };
-};
+//   init();
+//   create();
 
-const createRow = (): TerminalContainer => {
-  const element = document.createElement('div');
-  element.classList.add('zen-terminal-row');
-  return {
-    type: TerminalContainerType.Row,
-    element,
-  };
-};
+//   return {
+//     spawn,
+//     kill,
+//   };
+// };
+
+// const isColumn = (el: HTMLElement) => el.classList.contains('zen-terminal-column');
+
+// const isRow = (el: HTMLElement) => el.classList.contains('zen-terminal-row');
+
+// const createColumn = () => {
+//   const el = document.createElement('div');
+//   el.classList.add('zen-terminal-column');
+//   return el;
+// };
+
+// const createRow = () => {
+//   const el = document.createElement('div');
+//   el.classList.add('zen-terminal-row');
+//   return el;
+// };

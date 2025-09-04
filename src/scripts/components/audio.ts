@@ -29,15 +29,15 @@ export type AudioPlayer = {
  * @param els Audio player elements.
  * @returns Audio player instance.
  */
-export const createAudioPlayer = (elements: AudioPlayerElements): AudioPlayer => {
+export const createAudioPlayer = (els: AudioPlayerElements): AudioPlayer => {
   const init = () => {
-    elements.main.src = asset('/audio/background.mp3');
-    elements.main.loop = true;
-    elements.main.hidden = true;
+    els.main.src = asset('/audio/background.mp3');
+    els.main.loop = true;
+    els.main.hidden = true;
   };
 
-  const play = () => elements.main.play();
-  const pause = () => elements.main.pause();
+  const play = () => els.main.play();
+  const pause = () => els.main.pause();
 
   init();
 

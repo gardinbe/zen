@@ -1,11 +1,11 @@
 import { type TerminalController, createTerminalController } from './controller';
 import { type TerminalLogger, createTerminalLogger, LogMethod } from './logger';
-import { type TerminalInput, TerminalSpawnDirection, createTerminalInput } from './input';
+import { type TerminalInput, createTerminalInput } from './input';
 import { type TerminalHistory, createTerminalHistory } from './history';
 import { type TerminalSuggester, createTerminalSuggester } from './suggester';
+import { getProgram, getProgramNames } from './programs';
 import { ParseError, NotFoundError } from '../../utils/error';
 import { DocumentFormat, Documents, getDocument } from '../../utils/documents';
-import { getProgram, getProgramNames } from './programs';
 
 export type TerminalElements = {
   main: HTMLElement;
@@ -69,21 +69,21 @@ export type Terminal = {
  * Creates a terminal instance.
  * @returns Terminal instance.
  */
-export const createTerminal = (elements: TerminalElements): Terminal => {
+export const createTerminal = (els: TerminalElements): Terminal => {
   const init = () => {
-    elements.main.classList.add('zen-terminal');
-    elements.output.classList.add('zen-terminal-output');
-    elements.prompt.classList.add('zen-terminal-prompt', 'zen-typer', 'u-zen-crt-text');
-    elements.prefix.classList.add('zen-terminal-prefix');
-    elements.prefix.innerHTML = '> ';
-    elements.inputContainer.classList.add('zen-terminal-input-container');
-    elements.input.classList.add('zen-terminal-input');
-    elements.input.name = 'zen-terminal-input';
-    elements.input.type = 'text';
-    elements.input.autocomplete = 'off';
-    elements.input.spellcheck = false;
-    elements.input.setAttribute('autocorrect', 'off');
-    elements.input.autocapitalize = 'off';
+    els.main.classList.add('zen-terminal');
+    els.output.classList.add('zen-terminal-output');
+    els.prompt.classList.add('zen-terminal-prompt', 'zen-typer', 'u-zen-crt-text');
+    els.prefix.classList.add('zen-terminal-prefix');
+    els.prefix.innerHTML = '> ';
+    els.inputContainer.classList.add('zen-terminal-input-container');
+    els.input.classList.add('zen-terminal-input');
+    els.input.name = 'zen-terminal-input';
+    els.input.type = 'text';
+    els.input.autocomplete = 'off';
+    els.input.spellcheck = false;
+    els.input.setAttribute('autocorrect', 'off');
+    els.input.autocapitalize = 'off';
   };
 
   const logStartMessage = async () => {
@@ -114,9 +114,9 @@ export const createTerminal = (elements: TerminalElements): Terminal => {
     onTerminate: () => logger.typer.stop(),
   });
 
-  const logger = createTerminalLogger(elements);
+  const logger = createTerminalLogger(els);
 
-  const input = createTerminalInput(elements, {
+  const input = createTerminalInput(els, {
     onInput: (value) => {
       history.reset();
       suggester.set(value);
@@ -186,7 +186,9 @@ export const createTerminal = (elements: TerminalElements): Terminal => {
       history.reset();
       input.set(suggestion);
     },
-    onSpawn: (direction) => {},
+    onSpawn: () => {
+      // todo: implement
+    },
   });
 
   const history = createTerminalHistory({
