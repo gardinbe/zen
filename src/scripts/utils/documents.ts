@@ -3,6 +3,7 @@ import { type Result } from './result';
 import { type FetchError, http } from './fetch';
 import { AbortError, ParseError } from './error';
 import { parseMarkdown } from './markdown';
+import { asset } from './asset';
 
 /**
  * Array of available documents.
@@ -11,18 +12,18 @@ import { parseMarkdown } from './markdown';
  */
 export const Documents = ['bee-movie.md', 'example.md', 'volcanoes.md'];
 
-export type DocumentFormat = Enum<typeof DocumentFormat>;
-export const DocumentFormat = {
-  Html: 0,
-  Markdown: 1,
-} as const;
-
 export type GetDocumentOptions = {
   /**
    * Document format.
    */
   format: DocumentFormat;
 };
+
+export type DocumentFormat = Enum<typeof DocumentFormat>;
+export const DocumentFormat = {
+  Html: 0,
+  Markdown: 1,
+} as const;
 
 /**
  * Retrieves and parses a markdown document.
@@ -85,5 +86,5 @@ const resolveUrl = (name: string): string => {
     resolved = `/documents/${resolved}`;
   }
 
-  return `${import.meta.env.BASE_URL ?? ''}${resolved}`;
+  return asset(resolved);
 };

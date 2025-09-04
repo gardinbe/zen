@@ -48,78 +48,29 @@
   <body class="u-zen-crt-background">
     <!-- background audio -->
 
-    <audio
-      class="js-background-audio"
-      src="/audio/background.mp3"
-      loop
-      hidden
-    ></audio>
+    <div class="js-background-audio"></div>
+
     <div class="zen-container">
       <!-- start view -->
 
       <div
         class="zen-view js-start-view"
         hidden
-      >
-        <form class="zen-start zen-dialog js-start-dialog">
-          <div class="zen-dialog-inner">
-            <div class="zen-dialog-heading">
-              <h1>ZenOS</h1>
-              <p>v0.1</p>
-            </div>
-            <div class="zen-dialog-actions">
-              <button
-                class="zen-dialog-button u-zen-btn js-start-dialog-close"
-                data-alt="Terminal"
-              >
-                Start
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+      ></div>
 
       <!-- os boot view -->
 
       <div
         class="zen-view js-os-boot-view"
         hidden
-      >
-        <div class="zen-os-boot">
-          <div
-            class="zen-os-boot-output zen-typer zen-typer--scrollable u-zen-crt-text js-os-boot-typer"
-          ></div>
-          <button class="zen-os-boot-continue zen-dialog-button u-zen-btn js-os-boot-continue">
-            Continue
-          </button>
-        </div>
-      </div>
+      ></div>
 
       <!-- terminal view -->
 
       <div
         class="zen-view js-terminal-view"
         hidden
-      >
-        <div class="zen-terminal js-terminal">
-          <div
-            class="zen-terminal-output zen-typer zen-typer--scrollable u-zen-crt-text js-terminal-output"
-          ></div>
-          <form class="zen-terminal-prompt zen-typer u-zen-crt-text js-terminal-prompt">
-            <span class="zen-terminal-prefix js-terminal-prefix">> </span
-            ><span class="zen-terminal-input-container"
-              ><input
-                class="zen-terminal-input js-terminal-input"
-                name="zen-terminal-input"
-                type="text"
-                autocomplete="off"
-                spellcheck="false"
-                autocorrect="off"
-                autocapitalize="off"
-            /></span>
-          </form>
-        </div>
-      </div>
+      ></div>
     </div>
   </body>
 </html>

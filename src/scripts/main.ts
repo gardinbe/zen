@@ -1,102 +1,70 @@
 import { query } from './utils/dom';
-import { createAudioPlayer } from './components/audio';
-import { createDialog } from './components/dialog';
-import { createTyper } from './components/typer';
-import { createTerminal } from './components/terminal';
-import { DocumentFormat, getDocument } from './utils/documents';
-import { unwrap } from './utils/result';
+import { createAudioPlayer, createAudioPlayerElements } from './components/audio';
+import { createDialog, createDialogElements } from './components/dialog';
+import { createTerminal, createTerminalElements } from './components/terminal';
+import { createOSBoot, createOSBootElements } from './components/os-boot';
 
-const backgroundAudio = createAudioPlayer({
-  main: query<HTMLAudioElement>('.js-background-audio'),
-});
+const createBackgroundAudio = () => {
+  const container = query('.js-background-audio');
+  const elements = createAudioPlayerElements();
+  const audioPlayer = createAudioPlayer(elements);
+  container.append(elements.main);
+  return audioPlayer;
+};
+
+const backgroundAudio = createBackgroundAudio();
 
 const showStart = () => {
   const view = query('.js-start-view');
-  const startDialog = createDialog(
-    {
-      main: query('.js-start-dialog'),
-      closeBtn: query('.js-start-dialog-close'),
+  const elements = createDialogElements();
+  elements.main.classList.add('zen-start');
+  elements.heading.innerHTML = /*html*/ `
+    <h1>ZenOS</h1>
+    <p>v0.1</p>
+  `;
+  elements.closeBtn.innerHTML = 'Start';
+  elements.closeBtn.dataset.alt = 'Terminal';
+
+  const startDialog = createDialog(elements, {
+    onClose: (alt) => {
+      view.hidden = true;
+      backgroundAudio.play();
+
+      if (alt) {
+        showTerminal();
+        return;
+      }
+
+      showBoot();
     },
-    {
-      onClose: (alt) => {
-        view.hidden = true;
-        backgroundAudio.play();
+  });
 
-        if (alt) {
-          showTerminal();
-          return;
-        }
-
-        showBoot();
-      },
-    },
-  );
-
+  view.append(elements.main);
   view.hidden = false;
   startDialog.open();
 };
 
 const showBoot = async () => {
   const view = query('.js-os-boot-view');
+  const elements = createOSBootElements();
 
-  const bootSequenceTyper = createTyper({
-    main: query('.js-os-boot-typer'),
-  });
-
-  const html = await unwrap(
-    getDocument(
-      '/misc/boot.preformatted.html',
-      {
-        format: DocumentFormat.Html,
-      },
-      null,
-    ),
-  );
-
-  const continueBtn = query('.js-os-boot-continue');
-
-  const cleanup = () => {
-    removeEventListener('keydown', keydown);
-    continueBtn.addEventListener('click', next);
-  };
-
-  const next = () => {
-    view.hidden = true;
-    showTerminal();
-    cleanup();
-  };
-
-  const keydown = (ev: KeyboardEvent) => {
-    if (ev.key !== 'Enter') {
-      return;
-    }
-
-    next();
-  };
-
-  view.hidden = false;
-  continueBtn.hidden = true;
-
-  bootSequenceTyper.type(html, {
-    onFinish: () => {
-      continueBtn.hidden = false;
-      addEventListener('keydown', keydown);
-      continueBtn.addEventListener('click', next);
+  const osBoot = createOSBoot(elements, {
+    onContinue: () => {
+      view.hidden = true;
+      showTerminal();
     },
   });
+
+  view.append(elements.main);
+  view.hidden = false;
+  osBoot.start();
 };
 
 const showTerminal = () => {
   const view = query('.js-terminal-view');
-
-  createTerminal({
-    main: query('.js-terminal'),
-    output: query('.js-terminal-output'),
-    prompt: query<HTMLFormElement>('.js-terminal-prompt'),
-    prefix: query('.js-terminal-prefix'),
-    input: query<HTMLInputElement>('.js-terminal-input'),
-  });
-
+  const elements = createTerminalElements();
+  createTerminal(elements);
+  view.append(elements.main);
   view.hidden = false;
 };
 

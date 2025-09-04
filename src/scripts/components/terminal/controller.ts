@@ -44,7 +44,7 @@ export type TerminalControllerOptions = {
 export const createTerminalController = (
   options: TerminalControllerOptions,
 ): TerminalController => {
-  const init = () => {
+  const create = () => {
     if (!controller.signal.aborted) {
       return;
     }
@@ -54,7 +54,7 @@ export const createTerminalController = (
 
   const exec = async (value: string): Promise<ProgramResult> => {
     await terminate();
-    init();
+    create();
 
     if (!value) {
       return [null, new MissingError()];

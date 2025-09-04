@@ -39,51 +39,39 @@ export type Cursor = {
  * @returns Cursor instance.
  */
 export const createCursor = (): Cursor => {
-  const createElement = () => {
-    const cursor = document.createElement('div');
-    cursor.classList.add('zen-cursor');
-    cursor.ariaHidden = 'true';
-    cursor.innerHTML = '\u200B';
-
-    const caret = document.createElement('div');
-    caret.classList.add('zen-cursor-caret');
-
-    cursor.append(caret);
-    return cursor;
-  };
-
   const attach = (node: Node) => {
     const parent = node.parentElement;
 
-    if (!parent || node.nextSibling === cursor) {
+    if (!parent || node.nextSibling === elements.main) {
       return;
     }
 
-    parent.insertBefore(cursor, node);
-    parent.insertBefore(node, cursor);
+    parent.insertBefore(elements.main, node);
+    parent.insertBefore(node, elements.main);
   };
 
   const blink = () => {
-    cursor.dataset.cursorState = 'blink';
+    elements.main.dataset.cursorState = 'blink';
   };
 
   const freeze = () => {
-    cursor.dataset.cursorState = 'static';
+    elements.main.dataset.cursorState = 'static';
   };
 
   const show = () => {
-    cursor.hidden = false;
+    elements.main.hidden = false;
   };
 
   const hide = () => {
-    cursor.hidden = true;
+    elements.main.hidden = true;
   };
 
   const setPosition = (offset: number) => {
-    cursor.style.translate = offset ? `-${offset}ch` : '';
+    elements.main.style.translate = offset ? `-${offset}ch` : '';
   };
 
-  const cursor = createElement();
+  const elements = createCursorElements();
+
   blink();
 
   return {
@@ -93,5 +81,27 @@ export const createCursor = (): Cursor => {
     setPosition,
     show,
     hide,
+  };
+};
+
+type CursorElements = {
+  main: HTMLElement;
+  caret: HTMLElement;
+};
+
+const createCursorElements = (): CursorElements => {
+  const main = document.createElement('div');
+  main.classList.add('zen-cursor');
+  main.ariaHidden = 'true';
+  main.innerHTML = '\u200B';
+
+  const caret = document.createElement('div');
+  caret.classList.add('zen-cursor-caret');
+
+  main.append(caret);
+
+  return {
+    main,
+    caret,
   };
 };

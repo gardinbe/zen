@@ -1,5 +1,6 @@
 import { type TerminalElements } from '.';
 import { type Cursor, createCursor } from '../cursor';
+import { TerminalSpawnDirection } from './manager';
 
 export type TerminalInput = {
   /**
@@ -35,19 +36,19 @@ export type TerminalInput = {
 
 export type TerminalInputOptions = {
   /**
-   * Invoked whenever the input value changes.
+   * Invoked when the user inputs a value.
    * @param value Input value.
    */
   onInput: (value: string) => void;
 
   /**
-   * Invoked when the user submits the input.
+   * Invoked when the user presses the submit key bind.
    * @param value Input value.
    */
   onSubmit: (value: string) => void;
 
   /**
-   * Invoked when the user cancels the input.
+   * Invoked when the user presses the cancel key bind.
    *
    * I.e. whenever Ctrl+C is pressed.
    * @param value Input value.
@@ -73,22 +74,28 @@ export type TerminalInputOptions = {
    * Invoked when the user presses the shift and tab keys simultaneously.
    */
   onShiftTab: () => void;
+
+  /**
+   * Invoked when the user presses the terminal spawn key bind.
+   * @param direction Spawn direction.
+   */
+  onSpawn: (direction: TerminalSpawnDirection) => void;
 };
 
 /**
  * Creates a terminal input instance.
- * @param els Terminal elements.
+ * @param elements Terminal elements.
  * @param options Input options.
  * @returns Terminal input instance.
  */
 export const createTerminalInput = (
-  els: TerminalElements,
+  elements: TerminalElements,
   options: TerminalInputOptions,
 ): TerminalInput => {
-  const get = () => els.input.value;
+  const get = () => elements.input.value;
 
   const set = (value: string) => {
-    els.input.value = value;
+    elements.input.value = value;
     resize();
   };
 
@@ -97,10 +104,11 @@ export const createTerminalInput = (
   };
 
   const resize = () => {
-    els.input.style.width = `${get().length}ch`;
+    elements.input.style.width = `${get().length}ch`;
   };
 
-  const repositionCursor = () => cursor.setPosition(get().length - (els.input.selectionEnd ?? 0));
+  const repositionCursor = () =>
+    cursor.setPosition(get().length - (elements.input.selectionEnd ?? 0));
 
   const listeners = {
     input: () => {
@@ -111,56 +119,72 @@ export const createTerminalInput = (
     },
 
     keydown: (ev: KeyboardEvent) => {
-      switch (ev.key) {
-        case 'Tab': {
-          ev.preventDefault();
+      if (ev.key === 'Delete') {
+        requestAnimationFrame(repositionCursor);
+        return;
+      }
 
-          if (ev.shiftKey) {
-            options.onShiftTab();
-          } else {
-            options.onTab();
-          }
+      if (ev.ctrlKey && ev.key === 'c') {
+        const selection = getSelection();
 
+        if (
+          selection?.toString() &&
+          (selection.anchorNode?.contains(elements.input) ||
+            selection.focusNode?.contains(elements.input))
+        ) {
           return;
         }
 
-        case 'ArrowUp': {
-          ev.preventDefault();
-          options.onUp();
+        ev.preventDefault();
+        const value = get();
+        clear();
+        options.onCancel(value);
+        return;
+      }
+
+      if (ev.key === 'Tab') {
+        ev.preventDefault();
+
+        if (ev.shiftKey) {
+          options.onShiftTab();
+        } else {
+          options.onTab();
+        }
+
+        return;
+      }
+
+      if (ev.key === 'ArrowUp') {
+        ev.preventDefault();
+        options.onUp();
+        return;
+      }
+
+      if (ev.key === 'ArrowDown') {
+        ev.preventDefault();
+        options.onDown();
+        return;
+      }
+
+      if (ev.ctrlKey && ev.altKey) {
+        ev.preventDefault();
+
+        let direction: TerminalSpawnDirection;
+
+        if (ev.key === 'ArrowRight' || ev.key === 'd') {
+          direction = TerminalSpawnDirection.East;
+        } else if (ev.key === 'ArrowLeft' || ev.key === 'a') {
+          direction = TerminalSpawnDirection.West;
+        } else if (ev.key === 'ArrowUp' || ev.key === 'w') {
+          direction = TerminalSpawnDirection.North;
+        } else if (ev.key === 'ArrowDown' || ev.key === 's') {
+          direction = TerminalSpawnDirection.South;
+        } else {
           return;
         }
 
-        case 'ArrowDown': {
-          ev.preventDefault();
-          options.onDown();
-          return;
-        }
-
-        case 'c': {
-          if (!ev.ctrlKey) {
-            return;
-          }
-
-          const selection = getSelection();
-
-          if (
-            selection?.toString() &&
-            (selection.anchorNode?.contains(els.input) || selection.focusNode?.contains(els.input))
-          ) {
-            return;
-          }
-
-          ev.preventDefault();
-          const value = get();
-          clear();
-          options.onCancel(value);
-          return;
-        }
-
-        case 'Delete': {
-          requestAnimationFrame(repositionCursor);
-          return;
-        }
+        options.onSpawn(direction);
+        return;
       }
     },
 
@@ -177,7 +201,7 @@ export const createTerminalInput = (
         return;
       }
 
-      els.input.focus();
+      elements.input.focus();
     },
 
     submit: (ev: SubmitEvent) => {
@@ -190,31 +214,31 @@ export const createTerminalInput = (
   };
 
   const listen = () => {
-    els.input.addEventListener('focus', cursor.show);
-    els.input.addEventListener('blur', cursor.hide);
-    els.input.addEventListener('input', listeners.input);
-    els.input.addEventListener('keydown', listeners.keydown);
-    els.input.addEventListener('selectionchange', listeners.selectionchange);
-    els.main.addEventListener('click', listeners.click);
-    els.prompt.addEventListener('submit', listeners.submit);
+    elements.input.addEventListener('focus', cursor.show);
+    elements.input.addEventListener('blur', cursor.hide);
+    elements.input.addEventListener('input', listeners.input);
+    elements.input.addEventListener('keydown', listeners.keydown);
+    elements.input.addEventListener('selectionchange', listeners.selectionchange);
+    elements.main.addEventListener('click', listeners.click);
+    elements.prompt.addEventListener('submit', listeners.submit);
   };
 
   const ignore = () => {
-    els.input.removeEventListener('focus', cursor.show);
-    els.input.removeEventListener('blur', cursor.hide);
-    els.input.removeEventListener('input', listeners.input);
-    els.input.removeEventListener('selectionchange', listeners.selectionchange);
-    els.main.removeEventListener('click', listeners.click);
-    els.prompt.removeEventListener('submit', listeners.submit);
+    elements.input.removeEventListener('focus', cursor.show);
+    elements.input.removeEventListener('blur', cursor.hide);
+    elements.input.removeEventListener('input', listeners.input);
+    elements.input.removeEventListener('selectionchange', listeners.selectionchange);
+    elements.main.removeEventListener('click', listeners.click);
+    elements.prompt.removeEventListener('submit', listeners.submit);
   };
 
   const cursor = createCursor();
 
-  cursor.attach(els.input);
+  cursor.attach(elements.input);
   cursor.hide();
 
   requestAnimationFrame(() => {
-    els.input.focus();
+    elements.input.focus();
   });
   resize();
   listen();

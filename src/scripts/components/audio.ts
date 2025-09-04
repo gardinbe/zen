@@ -1,5 +1,15 @@
+import { asset } from '../utils/asset';
+
 export type AudioPlayerElements = {
   main: HTMLAudioElement;
+};
+
+export const createAudioPlayerElements = (): AudioPlayerElements => {
+  const main = document.createElement('audio');
+
+  return {
+    main,
+  };
 };
 
 export type AudioPlayer = {
@@ -19,9 +29,17 @@ export type AudioPlayer = {
  * @param els Audio player elements.
  * @returns Audio player instance.
  */
-export const createAudioPlayer = (els: AudioPlayerElements): AudioPlayer => {
-  const play = () => els.main.play();
-  const pause = () => els.main.pause();
+export const createAudioPlayer = (elements: AudioPlayerElements): AudioPlayer => {
+  const init = () => {
+    elements.main.src = asset('/audio/background.mp3');
+    elements.main.loop = true;
+    elements.main.hidden = true;
+  };
+
+  const play = () => elements.main.play();
+  const pause = () => elements.main.pause();
+
+  init();
 
   return {
     play,

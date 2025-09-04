@@ -1,7 +1,7 @@
 import { type TerminalElements } from '.';
+import { type Typer, createTyper } from '../typer';
 import { type Enum } from '../../utils/enum';
 import { isTruthy } from '../../utils/predicates';
-import { type Typer, createTyper } from '../typer';
 
 export type TerminalLogger = {
   /**
@@ -85,9 +85,14 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
 
   const clear = () => typer.clear();
 
-  const typer = createTyper({
-    main: els.output,
-  });
+  const typer = createTyper(
+    {
+      main: els.output,
+    },
+    {
+      scrollable: true,
+    },
+  );
 
   return {
     typer,

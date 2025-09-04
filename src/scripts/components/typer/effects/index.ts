@@ -1,4 +1,3 @@
-import { type Enum } from '../../../utils/enum';
 import { type Cursor } from '../../cursor';
 import { DelayEffect } from './delay';
 import { InsertEffect } from './insert';
@@ -6,6 +5,7 @@ import { NullEffect } from './null';
 import { RemoveEffect } from './remove';
 import { TypeEffect } from './type';
 import { UndoEffect } from './undo';
+import { type Enum } from '../../../utils/enum';
 
 /**
  * Array of available effect constructors.

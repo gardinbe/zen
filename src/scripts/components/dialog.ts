@@ -1,6 +1,29 @@
 export type DialogElements = {
   main: HTMLFormElement;
-  closeBtn: HTMLElement;
+  inner: HTMLElement;
+  heading: HTMLElement;
+  actions: HTMLElement;
+  closeBtn: HTMLButtonElement;
+};
+
+export const createDialogElements = (): DialogElements => {
+  const main = document.createElement('form');
+  const inner = document.createElement('div');
+  const heading = document.createElement('div');
+  const actions = document.createElement('div');
+  const closeBtn = document.createElement('button');
+
+  actions.append(closeBtn);
+  inner.append(heading, actions);
+  main.append(inner);
+
+  return {
+    main,
+    inner,
+    heading,
+    actions,
+    closeBtn,
+  };
 };
 
 export type Dialog = {
@@ -26,6 +49,9 @@ export type Dialog = {
 };
 
 export type DialogOptions = {
+  /**
+   * Invoked when the dialog is closed.
+   */
   onClose: (alt: boolean) => void;
 };
 
@@ -35,37 +61,46 @@ export type DialogOptions = {
  * @param options Dialog options.
  * @returns Dialog instance.
  */
-export const createDialog = (els: DialogElements, options: DialogOptions): Dialog => {
+export const createDialog = (elements: DialogElements, options: DialogOptions): Dialog => {
+  const init = () => {
+    elements.main.classList.add('zen-dialog');
+    elements.inner.classList.add('zen-dialog-inner');
+    elements.heading.classList.add('zen-dialog-heading');
+    elements.actions.classList.add('zen-dialog-actions');
+    elements.closeBtn.classList.add('zen-dialog-btn', 'u-zen-btn');
+    elements.closeBtn.type = 'submit';
+  };
+
   const open = () => {
-    els.main.hidden = false;
+    elements.main.hidden = false;
   };
 
   const close = () => {
-    els.main.hidden = true;
+    elements.main.hidden = true;
     options.onClose(isAlternate);
   };
 
   const useOriginal = () => {
     isAlternate = false;
-    els.closeBtn.textContent = originalBtnText;
+    elements.closeBtn.innerHTML = originalBtnText ?? '';
   };
 
   const useAlternate = () => {
     isAlternate = true;
-    els.closeBtn.textContent = els.closeBtn.dataset.alt || originalBtnText;
+    elements.closeBtn.innerHTML = (elements.closeBtn.dataset.alt || originalBtnText) ?? '';
   };
 
   const listeners = {
     touchstart: () => {
       isTouching = true;
-      els.closeBtn.removeEventListener('touchstart', listeners.touchstart);
-      els.closeBtn.addEventListener('touchend', listeners.touchend);
+      elements.closeBtn.removeEventListener('touchstart', listeners.touchstart);
+      elements.closeBtn.addEventListener('touchend', listeners.touchend);
     },
 
     touchend: () => {
       isTouching = false;
-      els.closeBtn.removeEventListener('touchend', listeners.touchstart);
-      els.closeBtn.addEventListener('touchstart', listeners.touchend, {
+      elements.closeBtn.removeEventListener('touchend', listeners.touchstart);
+      elements.closeBtn.addEventListener('touchstart', listeners.touchend, {
         passive: true,
       });
     },
@@ -104,27 +139,29 @@ export const createDialog = (els: DialogElements, options: DialogOptions): Dialo
   };
 
   const listen = () => {
-    els.closeBtn.addEventListener('touchstart', listeners.touchstart, {
+    elements.closeBtn.addEventListener('touchstart', listeners.touchstart, {
       passive: true,
     });
     addEventListener('devicemotion', listeners.devicemotion);
     addEventListener('keydown', listeners.keydown);
-    els.main.addEventListener('submit', listeners.submit);
+    elements.main.addEventListener('submit', listeners.submit);
   };
 
   const ignore = () => {
-    els.closeBtn.removeEventListener('touchstart', listeners.touchstart);
-    els.closeBtn.removeEventListener('touchend', listeners.touchend);
+    elements.closeBtn.removeEventListener('touchstart', listeners.touchstart);
+    elements.closeBtn.removeEventListener('touchend', listeners.touchend);
     removeEventListener('devicemotion', listeners.devicemotion);
     removeEventListener('keydown', listeners.keydown);
     removeEventListener('keyup', listeners.keyup);
-    els.main.removeEventListener('submit', listeners.submit);
+    elements.main.removeEventListener('submit', listeners.submit);
   };
 
-  const originalBtnText = els.closeBtn.textContent;
+  const originalBtnText = elements.closeBtn.textContent;
   let isAlternate = false;
   let isTouching = false;
   let isCtrl = false;
+
+  init();
   listen();
 
   return {

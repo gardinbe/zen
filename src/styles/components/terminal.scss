@@ -30,7 +30,9 @@
     white-space: pre;
   }
 
-  .zen-terminal-prefix {
+  .zen-terminal-prefix,
+  .zen-terminal-input-container {
+    display: inline-flex;
   }
 
   .zen-terminal-input-container {

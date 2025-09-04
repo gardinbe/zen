@@ -12,6 +12,14 @@ export type TyperElements = {
   main: HTMLElement;
 };
 
+export const createTyperElements = (): TyperElements => {
+  const main = document.createElement('div');
+
+  return {
+    main,
+  };
+};
+
 export type Typer = {
   /**
    * Cursor instance.
@@ -47,21 +55,37 @@ export type Typer = {
   clear: () => Promise<void>;
 };
 
+export type TyperOptions = {
+  /**
+   * Whether the typer should be scrollable.
+   * REFAC: make optional
+   */
+  scrollable: boolean;
+};
+
 /**
  * Creates a new typer instance.
- * @param els Typer elements.
+ * @param els Typer elements. REFAC: fix docs
  * @returns Typer instance.
  */
-export const createTyper = (els: TyperElements): Typer => {
+export const createTyper = (elements: TyperElements, options: TyperOptions): Typer => {
+  const init = () => {
+    elements.main.classList.add('zen-typer', 'u-zen-crt-text');
+
+    if (options.scrollable) {
+      elements.main.classList.add('zen-typer--scrollable');
+    }
+  };
+
   const createScroller = (): TyperScroller => {
     const tick: FrameRequestCallback = () => {
-      if (els.main.scrollTop + LoggerScrollRegion <= prevScrollTop) {
+      if (elements.main.scrollTop + LoggerScrollRegion <= prevScrollTop) {
         requestAnimationFrame(tick);
         return;
       }
 
-      els.main.scrollTop = els.main.scrollHeight;
-      prevScrollTop = els.main.scrollTop;
+      elements.main.scrollTop = elements.main.scrollHeight;
+      prevScrollTop = elements.main.scrollTop;
 
       if (!isRunning) {
         cancelAnimationFrame(id);
@@ -104,7 +128,7 @@ export const createTyper = (els: TyperElements): Typer => {
     // todo: top level parent not getting right state (complete when it shouldn't be)
 
     const applyState = (element: HTMLElement, newState: EffectNodeState) => {
-      if (element === els.main) {
+      if (element === elements.main) {
         return;
       }
 
@@ -212,7 +236,7 @@ export const createTyper = (els: TyperElements): Typer => {
   const insert = (html: string) => {
     const scroller = createScroller();
     scroller.start();
-    els.main.insertAdjacentHTML('beforeend', html);
+    elements.main.insertAdjacentHTML('beforeend', html);
     scroller.stop();
   };
 
@@ -220,7 +244,7 @@ export const createTyper = (els: TyperElements): Typer => {
     const tpl = document.createElement('template');
     tpl.innerHTML = html;
     const nodes = Array.from(tpl.content.childNodes);
-    els.main.append(...nodes);
+    elements.main.append(...nodes);
 
     const scroller = createScroller();
 
@@ -243,14 +267,14 @@ export const createTyper = (els: TyperElements): Typer => {
 
   const clear = async () => {
     await stop();
-    els.main.innerHTML = '';
+    elements.main.innerHTML = '';
   };
 
   let activeNode: Node | null = null;
-
   const cursor = createCursor();
-
   const queue = createTyperQueue();
+
+  init();
 
   return {
     cursor,
