@@ -1,4 +1,6 @@
 import { type TerminalElements } from '.';
+import { type Enum } from '../../utils/enum';
+import { isTruthy } from '../../utils/predicates';
 import { type Typer, createTyper } from '../typer';
 
 export type TerminalLogger = {
@@ -17,7 +19,7 @@ export type TerminalLogger = {
    * Logs a standard output to the terminal.
    * @param output Output to log.
    */
-  stdout: (output: string, options?: Partial<LoggerWriteOptions>) => void;
+  stdout: (output: string, options?: Partial<LogOptions>) => void;
 
   /**
    * Logs a standard error to the terminal.
@@ -37,50 +39,49 @@ export type TerminalLogger = {
  * @returns Terminal logger instance.
  */
 export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
-  const write = (text: string) => {
-    let prevScrollTop = 0;
-    let isRunning = true;
+  const createLogHtml = (html: string) => `<div class='zen-terminal-log'>${html}</div>`;
 
-    const tick = () => {
-      if (els.output.scrollTop + LoggerScrollRegion <= prevScrollTop) {
-        requestAnimationFrame(tick);
-        return;
-      }
+  const write = (html: string, options?: Partial<LogOptions>) => {
+    const classes = [
+      options?.collapse && 'zen-terminal-log-unformatted',
+      options?.printout && 'zen-terminal-log-printout',
+    ].filter(isTruthy);
 
-      els.output.scrollTop = els.output.scrollHeight;
-      prevScrollTop = els.output.scrollTop;
+    const containedHtml = classes.length ? `<div class='${classes.join(' ')}'>${html}</div>` : html;
+    const logHtml = createLogHtml(containedHtml);
 
-      if (!isRunning) {
-        cancelAnimationFrame(frameRequestId);
-        return;
-      }
+    if (options?.printout) {
+      typer.insert(createLogHtml('\n'));
+    }
 
-      frameRequestId = requestAnimationFrame(tick);
-    };
+    if (options?.method === LogMethod.Insert) {
+      typer.insert(logHtml);
+      return;
+    }
 
-    let frameRequestId = requestAnimationFrame(tick);
-
-    typer.type(text, {
+    typer.type(logHtml, {
       onStart: () => {
         typer.cursor.show();
       },
       onFinish: () => {
         typer.cursor.hide();
-        isRunning = false;
       },
     });
   };
 
-  // todo: if a user types or program errors with [[]] it fucks with this
+  const stdin = (input: string) =>
+    // todo: dodgy
+    write(`${els.output.innerHTML ? '\n' : ''}> ${input}`, {
+      method: LogMethod.Insert,
+    });
 
-  const stdin = (input: string) => write(`[[insert:\n> ${input}\n]]`);
-
-  const stdout = (output: string, options?: Partial<LoggerWriteOptions>) =>
-    write(options?.noNewlines ? output : `[[insert:\n]]${output}[[insert:\n]]`);
+  const stdout = (output: string, options?: Partial<LogOptions>) => write(output, options);
 
   const stderr = (error: unknown) =>
     // todo: use Error.isError when available
-    write(`[[insert:ERROR: ${error instanceof Error ? error.message : error}\n]]`);
+    write(`ERROR: ${error instanceof Error ? error.message : error}`, {
+      method: LogMethod.Insert,
+    });
 
   const clear = () => typer.clear();
 
@@ -97,15 +98,28 @@ export const createTerminalLogger = (els: TerminalElements): TerminalLogger => {
   };
 };
 
-export type LoggerWriteOptions = {
+export type LogMethod = Enum<typeof LogMethod>;
+export const LogMethod = {
+  Type: 0,
+  Insert: 1,
+} as const;
+
+export type LogOptions = {
   /**
-   * Whether to prevent adding newlines before/after the output.
+   * Output method.
+   * @default LogMethod.Type
+   */
+  method: LogMethod;
+
+  /**
+   * Whether whitespace should be collapsed.
    * @default false
    */
-  noNewlines?: boolean;
-};
+  collapse: boolean;
 
-/**
- * Region in which the logger will scroll to the bottom.
- */
-const LoggerScrollRegion = 5;
+  /**
+   * Whether the output should be wrapped in a printout container.
+   * @default false
+   */
+  printout: boolean;
+};

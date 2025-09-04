@@ -85,13 +85,12 @@ export type EffectContext = Readonly<{
   setNodeState: (node: Node, state: EffectNodeState) => void;
 }>;
 
+export type EffectNodeState = Enum<typeof EffectNodeState>;
 export const EffectNodeState = {
   Incomplete: 'incomplete',
   Active: 'active',
   Complete: 'complete',
 } as const;
-
-export type EffectNodeState = Enum<typeof EffectNodeState>;
 
 export const WhitespaceRegex = /\s/;
 

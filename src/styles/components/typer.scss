@@ -2,9 +2,6 @@
   .zen-typer {
     position: relative;
     font-size: 1.2rem;
-    white-space: pre-wrap;
-    word-break: break-word;
-    tab-size: 2;
 
     [data-typer-state='incomplete'] {
       display: none;
@@ -47,31 +44,10 @@
       }
     }
 
-    &--scroll {
+    &--scrollable {
       overflow-y: auto;
       scrollbar-gutter: stable;
       padding-right: 1rem;
-
-      @media (pointer: coarse) {
-        padding-left: 8px;
-        padding-right: 8px;
-      }
-    }
-
-    &--no-wrap {
-      white-space: pre;
-    }
-  }
-
-  .zen-typer-html {
-    margin: 1rem 0;
-    padding: 1rem;
-    border: var(--bo);
-    font: normal normal var(--f-size-base) / normal var(--f-base);
-    white-space: normal;
-
-    hr {
-      margin: 2rem 0;
     }
   }
 }

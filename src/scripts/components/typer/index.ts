@@ -1,5 +1,4 @@
 import { type Cursor, createCursor } from '../cursor';
-import { type EffectContext, EffectNodeState, createEffects } from './effects';
 import {
   type EffectBatch,
   type EffectBatchCallbacks,
@@ -7,6 +6,7 @@ import {
   type TyperQueue,
   createTyperQueue,
 } from './queue';
+import { type EffectContext, EffectNodeState, createEffects } from './effects';
 
 export type TyperElements = {
   main: HTMLElement;
@@ -24,11 +24,17 @@ export type Typer = {
   queue: TyperQueue;
 
   /**
+   * Appends HTML to the main element.
+   * @param html HTML to append.
+   */
+  insert: (html: string) => void;
+
+  /**
    * Appends HTML to the main element and types it.
-   * @param text Text to type.
+   * @param html HTML to type.
    * @param callbacks Callbacks.
    */
-  type: (text: string, callbacks?: Partial<EffectBatchCallbacks>) => void;
+  type: (html: string, callbacks?: Partial<EffectBatchCallbacks>) => void;
 
   /**
    * Stops the typer.
@@ -47,6 +53,43 @@ export type Typer = {
  * @returns Typer instance.
  */
 export const createTyper = (els: TyperElements): Typer => {
+  const createScroller = (): TyperScroller => {
+    const tick: FrameRequestCallback = () => {
+      if (els.main.scrollTop + LoggerScrollRegion <= prevScrollTop) {
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      els.main.scrollTop = els.main.scrollHeight;
+      prevScrollTop = els.main.scrollTop;
+
+      if (!isRunning) {
+        cancelAnimationFrame(id);
+        return;
+      }
+
+      id = requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+      isRunning = true;
+      id = requestAnimationFrame(tick);
+    };
+
+    const stop = () => {
+      isRunning = false;
+    };
+
+    let prevScrollTop = 0;
+    let isRunning = true;
+    let id = 0;
+
+    return {
+      start,
+      stop,
+    };
+  };
+
   const setActiveNode = (node: Node) => {
     activeNode = node;
 
@@ -58,6 +101,8 @@ export const createTyper = (els: TyperElements): Typer => {
   };
 
   const setNodeState = (node: Node, state: EffectNodeState) => {
+    // todo: top level parent not getting right state (complete when it shouldn't be)
+
     const applyState = (element: HTMLElement, newState: EffectNodeState) => {
       if (element === els.main) {
         return;
@@ -164,13 +209,33 @@ export const createTyper = (els: TyperElements): Typer => {
     return executors;
   };
 
-  const type = (text: string, callbacks?: Partial<EffectBatchCallbacks>) => {
+  const insert = (html: string) => {
+    const scroller = createScroller();
+    scroller.start();
+    els.main.insertAdjacentHTML('beforeend', html);
+    scroller.stop();
+  };
+
+  const type = (html: string, callbacks?: Partial<EffectBatchCallbacks>) => {
     const tpl = document.createElement('template');
-    tpl.innerHTML = text;
+    tpl.innerHTML = html;
     const nodes = Array.from(tpl.content.childNodes);
     els.main.append(...nodes);
 
-    const batch = createBatch(nodes, callbacks);
+    const scroller = createScroller();
+
+    const batch = createBatch(nodes, {
+      ...callbacks,
+      onStart: () => {
+        scroller.start();
+        callbacks?.onStart?.();
+      },
+      onFinish: () => {
+        scroller.stop();
+        callbacks?.onFinish?.();
+      },
+    });
+
     queue.push(batch);
   };
 
@@ -190,11 +255,29 @@ export const createTyper = (els: TyperElements): Typer => {
   return {
     cursor,
     queue,
+    insert,
     type,
     stop,
     clear,
   };
 };
+
+type TyperScroller = {
+  /**
+   * Starts the scroller.
+   */
+  start: () => void;
+
+  /**
+   * Stops the scroller.
+   */
+  stop: () => void;
+};
+
+/**
+ * Region in which the logger will scroll to the bottom.
+ */
+const LoggerScrollRegion = 5;
 
 type LeafNode<T extends Node = Node> = {
   node: T;
@@ -214,7 +297,7 @@ const getLeafNodesDeep = (...nodes: Node[]): Node[] =>
 /**
  * Checks if the node is a preformatted node.
  *
- * todo: there is a super annoying edge case that is not handled.
+ * todo: there is a super annoying edge case that is not handled:
  *
  * although i think its an 'intended' behavior
  *

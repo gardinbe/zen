@@ -42,8 +42,9 @@ export const PrintProgram: ProgramConstructor = {
         return 1;
       }
 
-      ctx.logger.stdout(`<div class="zen-typer-html">${html}</div>`, {
-        noNewlines: true,
+      ctx.logger.stdout(html, {
+        collapse: true,
+        printout: true,
       });
 
       return 0;

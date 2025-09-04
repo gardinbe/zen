@@ -65,7 +65,9 @@ export const createDialog = (els: DialogElements, options: DialogOptions): Dialo
     touchend: () => {
       isTouching = false;
       els.closeBtn.removeEventListener('touchend', listeners.touchstart);
-      els.closeBtn.addEventListener('touchstart', listeners.touchend);
+      els.closeBtn.addEventListener('touchstart', listeners.touchend, {
+        passive: true,
+      });
     },
 
     devicemotion: (ev: DeviceMotionEvent) => {
@@ -102,7 +104,9 @@ export const createDialog = (els: DialogElements, options: DialogOptions): Dialo
   };
 
   const listen = () => {
-    els.closeBtn.addEventListener('touchstart', listeners.touchstart);
+    els.closeBtn.addEventListener('touchstart', listeners.touchstart, {
+      passive: true,
+    });
     addEventListener('devicemotion', listeners.devicemotion);
     addEventListener('keydown', listeners.keydown);
     els.main.addEventListener('submit', listeners.submit);

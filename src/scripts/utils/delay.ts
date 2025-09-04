@@ -9,7 +9,7 @@ import { withAbortable } from './abortable';
  * @returns Promise that resolves to `true` if completed successfully, and `false` if aborted.
  */
 export const delay = async (ms: number, signal: AbortSignal | null): Promise<boolean> => {
-  let frameRequestId = 0;
+  let id = 0;
 
   const promise = withAbortable(
     signal,
@@ -20,18 +20,18 @@ export const delay = async (ms: number, signal: AbortSignal | null): Promise<boo
       return new Promise<boolean>((resolve) => {
         const tick: FrameRequestCallback = (now) => {
           if (now < end) {
-            frameRequestId = requestAnimationFrame(tick);
+            id = requestAnimationFrame(tick);
             return;
           }
 
-          cancelAnimationFrame(frameRequestId);
+          cancelAnimationFrame(id);
           resolve(true);
         };
 
-        frameRequestId = requestAnimationFrame(tick);
+        id = requestAnimationFrame(tick);
       });
     },
-    () => cancelAnimationFrame(frameRequestId),
+    () => cancelAnimationFrame(id),
   );
 
   try {

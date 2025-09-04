@@ -1,22 +1,18 @@
 @use 'vars';
-@use 'fonts/dos';
 @use 'keyframes';
 @use 'base';
 @use 'utils';
 @use 'components/container';
 @use 'components/cursor';
 @use 'components/dialog';
+@use 'components/os-boot';
 @use 'components/terminal';
 @use 'components/typer';
 @use 'components/view';
-@use 'views/os-boot-view';
-@use 'views/start-view';
-@use 'views/terminal-view';
 
 @layer vars,
   fonts,
   keyframes,
   base,
   utils,
-  components,
-  views;
+  components;

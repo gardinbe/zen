@@ -25,7 +25,8 @@
 
     color: var(--c-primary);
     font: normal normal var(--f-size-base) / normal var(--f-base);
-
+    word-break: break-word;
+    tab-size: 2;
     scrollbar-color: rgb(var(--c-primary-rgb) / 0.5) transparent;
     scrollbar-width: thin;
   }
@@ -207,7 +208,7 @@
     overflow: auto;
   }
 
-  pre:has(code) {
+  pre:has(> code) {
     padding: 2rem;
     background: var(--c-background-secondary);
     box-shadow: 6px 6px 4px -2px #000;

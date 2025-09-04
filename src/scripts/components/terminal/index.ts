@@ -1,5 +1,5 @@
 import { type TerminalController, createTerminalController } from './controller';
-import { type TerminalLogger, createTerminalLogger } from './logger';
+import { type TerminalLogger, createTerminalLogger, LogMethod } from './logger';
 import { type TerminalInput, createTerminalInput } from './input';
 import { type TerminalHistory, createTerminalHistory } from './history';
 import { type TerminalSuggester, createTerminalSuggester } from './suggester';
@@ -61,7 +61,10 @@ export const createTerminal = (els: TerminalElements): Terminal => {
       return;
     }
 
-    logger.stdout(html);
+    logger.stdout(html, {
+      method: LogMethod.Insert,
+      collapse: true,
+    });
   };
 
   const controller = createTerminalController({
@@ -105,7 +108,9 @@ export const createTerminal = (els: TerminalElements): Terminal => {
         return;
       }
 
-      logger.stdout(`Program exited with code: ${code}`);
+      logger.stdout(`Program exited with code: ${code}`, {
+        method: LogMethod.Insert,
+      });
     },
     onCancel: async (value) => {
       history.reset();

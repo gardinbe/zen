@@ -3,17 +3,31 @@
     display: flex;
     flex-flow: column;
     height: 100%;
+
+    &:not(:has(> .zen-terminal-output > *)) {
+      .zen-terminal-output {
+        display: none;
+      }
+    }
+
+    &:has(> .zen-terminal-output > *) {
+      .zen-terminal-output {
+        padding-bottom: 0.5lh;
+      }
+
+      .zen-terminal-prompt {
+        padding-top: 0.5lh;
+      }
+    }
   }
 
   .zen-terminal-output {
-    padding-bottom: 0;
-    padding-bottom: 0.75rem;
   }
 
   .zen-terminal-prompt {
-    padding-top: 0.5rem;
     display: inline-flex;
     background: rgb(25 25 30);
+    white-space: pre;
   }
 
   .zen-terminal-prefix {
@@ -23,6 +37,7 @@
     position: relative;
     flex: 1;
     overflow-x: auto;
+    padding-right: 1ch;
   }
 
   .zen-terminal-input {
@@ -33,5 +48,22 @@
     font: inherit;
     text-shadow: inherit;
     min-width: 1px;
+  }
+
+  .zen-terminal-log {
+    white-space: pre-wrap;
+  }
+
+  .zen-terminal-log-unformatted {
+    white-space: normal;
+  }
+
+  .zen-terminal-log-printout {
+    padding: 1rem;
+    border: var(--bo);
+
+    hr {
+      margin: 2rem 0;
+    }
   }
 }

@@ -11,19 +11,15 @@ import { parseMarkdown } from './markdown';
  */
 export const Documents = ['bee-movie.md', 'example.md', 'volcanoes.md'];
 
-/**
- * Document types.
- */
+export type DocumentFormat = Enum<typeof DocumentFormat>;
 export const DocumentFormat = {
   Html: 0,
   Markdown: 1,
 } as const;
 
-export type DocumentFormat = Enum<typeof DocumentFormat>;
-
 export type GetDocumentOptions = {
   /**
-   * If true, returns the raw markdown content, instead of parsing as HTML.
+   * Document format.
    */
   format: DocumentFormat;
 };

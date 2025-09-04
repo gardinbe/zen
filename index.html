@@ -1,7 +1,22 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- preconnects -->
+
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+
+    <!-- metadata -->
+
     <meta charset="UTF-8" />
+    <title>ZenOS</title>
     <link
       rel="icon"
       type="image/svg+xml"
@@ -11,17 +26,28 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>ZenOS</title>
+
+    <!-- stylesheets -->
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cousine:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
     <link
       href="/src/styles/main.scss"
       rel="stylesheet"
     />
+
+    <!-- scripts -->
+
     <script
       type="module"
       src="/src/scripts/main.ts"
     ></script>
   </head>
   <body class="u-zen-crt-background">
+    <!-- background audio -->
+
     <audio
       class="js-background-audio"
       src="/audio/background.mp3"
@@ -29,6 +55,8 @@
       hidden
     ></audio>
     <div class="zen-container">
+      <!-- start view -->
+
       <div
         class="zen-view js-start-view"
         hidden
@@ -51,13 +79,15 @@
         </form>
       </div>
 
+      <!-- os boot view -->
+
       <div
         class="zen-view js-os-boot-view"
         hidden
       >
         <div class="zen-os-boot">
           <div
-            class="zen-os-boot-output zen-typer zen-typer--scroll u-zen-crt-text js-os-boot-typer"
+            class="zen-os-boot-output zen-typer zen-typer--scrollable u-zen-crt-text js-os-boot-typer"
           ></div>
           <button class="zen-os-boot-continue zen-dialog-button u-zen-btn js-os-boot-continue">
             Continue
@@ -65,17 +95,17 @@
         </div>
       </div>
 
+      <!-- terminal view -->
+
       <div
         class="zen-view js-terminal-view"
         hidden
       >
         <div class="zen-terminal js-terminal">
           <div
-            class="zen-terminal-output zen-typer zen-typer--scroll u-zen-crt-text js-terminal-output"
+            class="zen-terminal-output zen-typer zen-typer--scrollable u-zen-crt-text js-terminal-output"
           ></div>
-          <form
-            class="zen-terminal-prompt zen-typer zen-typer--no-wrap u-zen-crt-text js-terminal-prompt"
-          >
+          <form class="zen-terminal-prompt zen-typer u-zen-crt-text js-terminal-prompt">
             <span class="zen-terminal-prefix js-terminal-prefix">> </span
             ><span class="zen-terminal-input-container"
               ><input
